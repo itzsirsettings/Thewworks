@@ -1,3 +1,3 @@
-export const MyComposition = () => {
-  return null;
-};
+export {
+  BuyerWalkthroughVideo as MyComposition,
+} from "./videos/buyer-walkthrough/BuyerWalkthroughVideo";

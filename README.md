@@ -2,6 +2,8 @@
 
 A premium artisan handcrafted home goods e-commerce template with elegant animations, parallax effects, and a full shopping cart system. Features 11 configurable sections driven entirely by a single `config.ts` file.
 
+For a buyer-friendly overview of the product experience, see [CLIENT_WALKTHROUGH.md](./CLIENT_WALKTHROUGH.md).
+
 ## Features
 
 - Full-screen parallax hero with fade-in animations and dual CTA buttons

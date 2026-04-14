@@ -1,54 +1,46 @@
-# Remotion video
+# Buyer Walkthrough Video
 
-<p align="center">
-  <a href="https://github.com/remotion-dev/logo">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-dark.apng">
-      <img alt="Animated Remotion Logo" src="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-light.gif">
-    </picture>
-  </a>
-</p>
-
-Welcome to your Remotion project!
+This Remotion workspace contains the buyer-facing `BuyerWalkthrough` sales video for the app.
 
 ## Commands
 
-**Install Dependencies**
+Install dependencies:
 
 ```console
 npm i
 ```
 
-**Start Preview**
+Open Remotion Studio:
 
 ```console
-npm run dev
+npm run preview:buyer-walkthrough
 ```
 
-**Render video**
+Generate captions and the voiceover manifest:
 
 ```console
-npx remotion render
+npm run voiceover:buyer-walkthrough
 ```
 
-**Upgrade Remotion**
+If `ELEVENLABS_API_KEY` and `ELEVENLABS_VOICE_ID` are available, the script also generates scene MP3 files in `public/voiceover/buyer-walkthrough/`. Without those credentials it still refreshes caption JSON and fallback timing metadata so the composition remains renderable.
+
+Render the final video:
 
 ```console
-npx remotion upgrade
+npm run render:buyer-walkthrough
 ```
 
-## Docs
+## Output Structure
 
-Get started with Remotion by reading the [fundamentals page](https://www.remotion.dev/docs/the-fundamentals).
+- `src/videos/buyer-walkthrough/`: composition code, scene config, and generated timing manifest
+- `public/captions/buyer-walkthrough/`: timed caption JSON per scene
+- `public/voiceover/buyer-walkthrough/`: generated MP3 voiceover files
 
-## Help
+## Environment
 
-We provide help on our [Discord server](https://discord.gg/6VzzNDwUwV).
+Optional voiceover generation variables:
 
-## Issues
-
-Found an issue with Remotion? [File an issue here](https://github.com/remotion-dev/remotion/issues/new).
-
-## License
-
-Note that for some entities a company license is needed. [Read the terms here](https://github.com/remotion-dev/remotion/blob/main/LICENSE.md).
+```console
+ELEVENLABS_API_KEY=your_elevenlabs_api_key
+ELEVENLABS_VOICE_ID=your_elevenlabs_voice_id
+```
