@@ -1,0 +1,671 @@
+export interface StoreProduct {
+  id: number;
+  name: string;
+  price: number;
+  category: string;
+  image: string;
+  gallery: StoreProductGallerySlide[];
+  supplier: string;
+  origin: string;
+  moq: string;
+  leadTime: string;
+  rating: number;
+  orders: string;
+  badge: string;
+  summary: string;
+  tags: string[];
+}
+
+export interface StoreProductGallerySlide {
+  id: string;
+  image: string;
+  title: string;
+  caption: string;
+  objectPosition: string;
+  imageTransform: string;
+}
+
+export interface MarketplaceCategory {
+  name: string;
+  caption: string;
+  skuCount: string;
+  icon: 'sofa' | 'bed' | 'appliance' | 'office' | 'decor' | 'project';
+}
+
+export interface DashboardMetric {
+  label: string;
+  value: string;
+  delta: string;
+  detail: string;
+}
+
+interface StoreProductSeed {
+  id: number;
+  name: string;
+  price: number;
+  category: string;
+  image: string;
+  supplier: string;
+  origin: string;
+  moq: string;
+  leadTime: string;
+  rating: number;
+  orders: string;
+  badge: string;
+  summary: string;
+  tags: string[];
+}
+
+const galleryBlueprints: Record<
+  string,
+  Array<{
+    title: string;
+    caption: string;
+    objectPosition: string;
+    imageTransform: string;
+  }>
+> = {
+  'Living Room': [
+    {
+      title: 'Hero angle',
+      caption: 'Full silhouette framing for the main furniture presence.',
+      objectPosition: 'center center',
+      imageTransform: 'scale(1.04)',
+    },
+    {
+      title: 'Texture angle',
+      caption: 'Closer framing around arms, cushions and material finish.',
+      objectPosition: '28% center',
+      imageTransform: 'scale(1.14)',
+    },
+    {
+      title: 'Room angle',
+      caption: 'Pulled composition that reads how the piece sits in space.',
+      objectPosition: '72% center',
+      imageTransform: 'scale(1.08)',
+    },
+  ],
+  Bedroom: [
+    {
+      title: 'Headboard angle',
+      caption: 'Front framing focused on the full bed profile and scale.',
+      objectPosition: 'center center',
+      imageTransform: 'scale(1.05)',
+    },
+    {
+      title: 'Finish angle',
+      caption: 'Closer crop around upholstery, woodwork and trim detail.',
+      objectPosition: '34% center',
+      imageTransform: 'scale(1.15)',
+    },
+    {
+      title: 'Foot angle',
+      caption: 'Wider framing that shows the bed footprint in the room.',
+      objectPosition: '68% center',
+      imageTransform: 'scale(1.1)',
+    },
+  ],
+  Office: [
+    {
+      title: 'Desk-side angle',
+      caption: 'Main profile view for posture, form and workspace fit.',
+      objectPosition: 'center center',
+      imageTransform: 'scale(1.04)',
+    },
+    {
+      title: 'Support angle',
+      caption: 'Closer crop on support surfaces, frame and material joints.',
+      objectPosition: '42% center',
+      imageTransform: 'scale(1.14)',
+    },
+    {
+      title: 'Workspace angle',
+      caption: 'Broader view that shows how it lands in a working setup.',
+      objectPosition: '64% center',
+      imageTransform: 'scale(1.08)',
+    },
+  ],
+  Appliances: [
+    {
+      title: 'Front angle',
+      caption: 'Clean full view for controls, size and finish.',
+      objectPosition: 'center center',
+      imageTransform: 'scale(1.02)',
+    },
+    {
+      title: 'Detail angle',
+      caption: 'Closer crop highlighting panel layout and product finish.',
+      objectPosition: '38% center',
+      imageTransform: 'scale(1.13)',
+    },
+    {
+      title: 'Placement angle',
+      caption: 'Context framing for how the unit sits in a furnished space.',
+      objectPosition: '66% center',
+      imageTransform: 'scale(1.07)',
+    },
+  ],
+  Decor: [
+    {
+      title: 'Styled angle',
+      caption: 'Primary styled frame that shows the full decor silhouette.',
+      objectPosition: 'center center',
+      imageTransform: 'scale(1.05)',
+    },
+    {
+      title: 'Craft angle',
+      caption: 'Closer crop around finish, texture and edge detail.',
+      objectPosition: '30% center',
+      imageTransform: 'scale(1.16)',
+    },
+    {
+      title: 'Ambient angle',
+      caption: 'Wider framing to read mood, scale and room fit.',
+      objectPosition: '70% center',
+      imageTransform: 'scale(1.1)',
+    },
+  ],
+};
+
+function createGallerySlides(seed: StoreProductSeed): StoreProductGallerySlide[] {
+  const blueprint = galleryBlueprints[seed.category] || galleryBlueprints.Decor;
+
+  return blueprint.map((slide, index) => ({
+    id: `${seed.id}-slide-${index + 1}`,
+    image: seed.image,
+    title: slide.title,
+    caption: slide.caption,
+    objectPosition: slide.objectPosition,
+    imageTransform: slide.imageTransform,
+  }));
+}
+
+function createStoreProduct(seed: StoreProductSeed): StoreProduct {
+  return {
+    ...seed,
+    gallery: createGallerySlides(seed),
+  };
+}
+
+export const marketplaceCategories: MarketplaceCategory[] = [
+  {
+    name: 'All',
+    caption: 'Complete wholesale catalog',
+    skuCount: '420+ SKUs',
+    icon: 'project',
+  },
+  {
+    name: 'Living Room',
+    caption: 'Statement sofas and lounge systems',
+    skuCount: '96 SKUs',
+    icon: 'sofa',
+  },
+  {
+    name: 'Bedroom',
+    caption: 'Beds, headboards and hospitality sets',
+    skuCount: '82 SKUs',
+    icon: 'bed',
+  },
+  {
+    name: 'Appliances',
+    caption: 'Consumer electronics and white goods',
+    skuCount: '74 SKUs',
+    icon: 'appliance',
+  },
+  {
+    name: 'Office',
+    caption: 'Executive desks, chairs and meeting rooms',
+    skuCount: '68 SKUs',
+    icon: 'office',
+  },
+  {
+    name: 'Decor',
+    caption: 'Dining, rugs, mirrors and finishing touches',
+    skuCount: '51 SKUs',
+    icon: 'decor',
+  },
+  {
+    name: 'Projects',
+    caption: 'Bulk custom sourcing and fit-out contracts',
+    skuCount: '49 briefs',
+    icon: 'project',
+  },
+];
+
+export const heroSignals = [
+  'Bulk hotel furnishing',
+  'Bedroom furniture',
+  'Executive office setups',
+  'Fast delivery in Delta State',
+  'Custom sofa colors',
+];
+
+export const sourcingAdvantages = [
+  {
+    title: 'RFQ concierge',
+    body: 'Send one brief and get curated supplier recommendations for retail, hospitality or office projects.',
+  },
+  {
+    title: 'Project pricing',
+    body: 'Use quote bundles for apartments, showrooms, churches, hotels and co-working spaces.',
+  },
+  {
+    title: 'Protected checkout',
+    body: 'Secure payment flow with order verification, confirmation email and SMS notification.',
+  },
+];
+
+export const supplierHighlights = [
+  {
+    name: 'Stankings Contract Studio',
+    specialty: 'Hotels, serviced apartments, executive residences',
+    score: '4.9/5',
+    fulfillment: '97% on-time',
+    markets: 'Asaba, Benin, Port Harcourt',
+  },
+  {
+    name: 'Delta Appliance Depot',
+    specialty: 'TVs, cooling systems, kitchen and white goods',
+    score: '4.8/5',
+    fulfillment: '41 verified runs',
+    markets: 'Delta, Edo, Anambra',
+  },
+  {
+    name: 'Turkish Sofa Collective',
+    specialty: 'Imported sofa suites, premium upholstery, custom finishes',
+    score: '4.9/5',
+    fulfillment: '22 day lead',
+    markets: 'Nigeria South-South',
+  },
+];
+
+export const marketplaceProducts: StoreProduct[] = [
+  createStoreProduct({
+    id: 1,
+    name: 'Turkish Presidential Sofa Suite',
+    price: 450000,
+    category: 'Living Room',
+    image: 'https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/product-1.jpg',
+    supplier: 'Turkish Sofa Collective',
+    origin: 'Asaba showroom stock',
+    moq: '2 sets',
+    leadTime: '7-10 days',
+    rating: 4.9,
+    orders: '148 closed orders',
+    badge: 'Fast customization',
+    summary: 'High-density seating with carved trim, velvet blend upholstery and lobby-grade presence.',
+    tags: ['Hot this week', 'Custom fabrics', 'Hotel-ready'],
+  }),
+  createStoreProduct({
+    id: 2,
+    name: 'Modern Platform Bed Frame',
+    price: 280000,
+    category: 'Bedroom',
+    image: 'https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/product-2.jpg',
+    supplier: 'Stankings Contract Studio',
+    origin: 'Delta production lane',
+    moq: '3 frames',
+    leadTime: '5-8 days',
+    rating: 4.8,
+    orders: '83 hospitality orders',
+    badge: 'Ready for hotels',
+    summary: 'Clean-lined upholstered bed frame for short-let apartments and premium bedrooms.',
+    tags: ['Bulk headboards', 'Airbnb fit-out', 'Wood core'],
+  }),
+  createStoreProduct({
+    id: 3,
+    name: 'Executive Task Chair',
+    price: 85000,
+    category: 'Office',
+    image: 'https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/product-3.jpg',
+    supplier: 'Boardroom Works',
+    origin: 'Lagos partner warehouse',
+    moq: '6 chairs',
+    leadTime: '4-6 days',
+    rating: 4.7,
+    orders: '210 office seats moved',
+    badge: 'Top ranking',
+    summary: 'Mesh-backed ergonomic chair with procurement-friendly pricing for teams and training rooms.',
+    tags: ['B2B bestseller', 'Quick ship', 'Warranty'],
+  }),
+  createStoreProduct({
+    id: 4,
+    name: 'Cloud L-Shape Lounge Sofa',
+    price: 380000,
+    category: 'Living Room',
+    image: 'https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/product-4.jpg',
+    supplier: 'Turkish Sofa Collective',
+    origin: 'Imported on request',
+    moq: '1 suite',
+    leadTime: '14 days',
+    rating: 4.9,
+    orders: '67 signed projects',
+    badge: 'Premium finish',
+    summary: 'Soft-profile sectional sofa favored for family lounges and executive waiting areas.',
+    tags: ['Statement piece', 'Lounge zones', 'Color matching'],
+  }),
+  createStoreProduct({
+    id: 5,
+    name: 'Samsung Smart TV 55"',
+    price: 320000,
+    category: 'Appliances',
+    image: 'https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/product-5.jpg',
+    supplier: 'Delta Appliance Depot',
+    origin: 'Regional stock',
+    moq: '2 units',
+    leadTime: '48 hours',
+    rating: 4.8,
+    orders: '91 corporate installs',
+    badge: 'Ready to dispatch',
+    summary: 'Popular hospitality and home-upgrade TV package with wall-mount sourcing support.',
+    tags: ['Fast moving', 'Hospitality AV', 'Warranty'],
+  }),
+  createStoreProduct({
+    id: 6,
+    name: 'Persian Heritage Rug',
+    price: 65000,
+    category: 'Decor',
+    image: 'https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/product-6.jpg',
+    supplier: 'Interior Finish House',
+    origin: 'Curated decor floor',
+    moq: '4 pieces',
+    leadTime: '3-5 days',
+    rating: 4.6,
+    orders: '173 decor bundles',
+    badge: 'Buyer favorite',
+    summary: 'Accent rug line for lounges, reception areas and furnished apartments.',
+    tags: ['Entry bundle', 'Soft landing', 'Easy upsell'],
+  }),
+  createStoreProduct({
+    id: 7,
+    name: 'Glass Dining Collection',
+    price: 195000,
+    category: 'Decor',
+    image: 'https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/product-7.jpg',
+    supplier: 'Stankings Dining Atelier',
+    origin: 'Asaba display floor',
+    moq: '2 sets',
+    leadTime: '6-9 days',
+    rating: 4.7,
+    orders: '58 dining projects',
+    badge: 'Seasonal demand',
+    summary: 'Compact modern dining package for urban homes, restaurants and serviced units.',
+    tags: ['Dining rooms', 'Restaurant fit-out', 'Compact footprint'],
+  }),
+  createStoreProduct({
+    id: 8,
+    name: 'Hisense Inverter Refrigerator',
+    price: 245000,
+    category: 'Appliances',
+    image: 'https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/product-8.jpg',
+    supplier: 'Delta Appliance Depot',
+    origin: 'On-hand stock',
+    moq: '2 units',
+    leadTime: '48 hours',
+    rating: 4.8,
+    orders: '113 fulfilled appliance orders',
+    badge: 'Logistics priority',
+    summary: 'Reliable fridge line for furnished apartments, stores and kitchen upgrades.',
+    tags: ['Energy saving', 'Fast delivery', 'Apartment bundle'],
+  }),
+  createStoreProduct({
+    id: 101,
+    name: 'Royal Velvet Hospitality Bed',
+    price: 580000,
+    category: 'Bedroom',
+    image: 'https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/bed-premium-1.jpg',
+    supplier: 'Stankings Contract Studio',
+    origin: 'Premium bed line',
+    moq: '2 frames',
+    leadTime: '10-12 days',
+    rating: 4.9,
+    orders: '39 suite installations',
+    badge: 'Luxury collection',
+    summary: 'Velvet bed for boutique suites and premium family bedrooms with strong resale appeal.',
+    tags: ['Hospitality suite', 'Tufted headboard', 'Luxury segment'],
+  }),
+  createStoreProduct({
+    id: 102,
+    name: 'Modern Leather Headboard Bed',
+    price: 420000,
+    category: 'Bedroom',
+    image: 'https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/bed-premium-2.jpg',
+    supplier: 'Bedroom Works',
+    origin: 'Special order lane',
+    moq: '2 frames',
+    leadTime: '8-10 days',
+    rating: 4.8,
+    orders: '54 repeat orders',
+    badge: 'Repeat buyer pick',
+    summary: 'Structured premium platform bed for developers furnishing repeated bedroom layouts.',
+    tags: ['Project repeat', 'Easy to standardize', 'Premium'],
+  }),
+  createStoreProduct({
+    id: 201,
+    name: 'Solid Mahogany Bed Base',
+    price: 185000,
+    category: 'Bedroom',
+    image: 'https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/bed-local-1.jpg',
+    supplier: 'Delta Timber Craft',
+    origin: 'Local artisan network',
+    moq: '4 frames',
+    leadTime: '5-7 days',
+    rating: 4.7,
+    orders: '127 local bed orders',
+    badge: 'Best value',
+    summary: 'Durable local bed frame favored by schools, family homes and starter apartment packages.',
+    tags: ['Local production', 'Budget project', 'Strong margin'],
+  }),
+  createStoreProduct({
+    id: 202,
+    name: 'Rattan Accent Headboard Bed',
+    price: 145000,
+    category: 'Bedroom',
+    image: 'https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/bed-local-2.jpg',
+    supplier: 'Delta Timber Craft',
+    origin: 'Asaba local craft lane',
+    moq: '4 frames',
+    leadTime: '5-7 days',
+    rating: 4.6,
+    orders: '88 design-led orders',
+    badge: 'Design-forward',
+    summary: 'Natural-texture bed frame for short-let apartments with airy, warm styling.',
+    tags: ['Natural materials', 'Short-let ready', 'Warm neutral'],
+  }),
+];
+
+export const buyerPulse = [
+  {
+    title: 'Open sourcing briefs',
+    value: '18',
+    delta: '+6 this week',
+    detail: 'Most requests are for 2-bedroom furnishing packages and electronics bundles.',
+  },
+  {
+    title: 'Average quote speed',
+    value: '42h',
+    delta: '-11%',
+    detail: 'Recent process changes helped the team respond faster to hotel and office buyers.',
+  },
+  {
+    title: 'Repeat buyer ratio',
+    value: '61%',
+    delta: '+8 pts',
+    detail: 'Re-orders are strongest in bedroom, appliances and office seating.',
+  },
+];
+
+export const stockSignals = [
+  {
+    name: 'Samsung 55" Smart TV',
+    status: 'Restock soon',
+    units: '14 units left',
+    value: 'High demand',
+    urgency: 'watch',
+  },
+  {
+    name: 'Turkish Presidential Sofa Suite',
+    status: 'Healthy',
+    units: '22 sets lined up',
+    value: 'Premium margin',
+    urgency: 'stable',
+  },
+  {
+    name: 'Solid Mahogany Bed Base',
+    status: 'Bulk ready',
+    units: '37 frames available',
+    value: 'Contract friendly',
+    urgency: 'good',
+  },
+  {
+    name: 'Executive Task Chair',
+    status: 'Restock soon',
+    units: '9 chairs left',
+    value: 'Quote magnet',
+    urgency: 'watch',
+  },
+];
+
+export const dashboardWindows = ['30D', '90D', 'YTD'] as const;
+export type DashboardWindow = (typeof dashboardWindows)[number];
+
+export const dashboardMetrics: Record<DashboardWindow, DashboardMetric[]> = {
+  '30D': [
+    {
+      label: 'Gross merchandise value',
+      value: 'NGN 18.4M',
+      delta: '+14.2%',
+      detail: 'Driven by bedroom bundles and appliance combos.',
+    },
+    {
+      label: 'Quote conversion',
+      value: '34%',
+      delta: '+5 pts',
+      detail: 'Faster RFQ replies are improving close rates.',
+    },
+    {
+      label: 'On-time delivery',
+      value: '95%',
+      delta: '+3 pts',
+      detail: 'Regional dispatch planning improved lead time reliability.',
+    },
+    {
+      label: 'Average order size',
+      value: 'NGN 412k',
+      delta: '+9.4%',
+      detail: 'Larger project orders have increased ticket size.',
+    },
+  ],
+  '90D': [
+    {
+      label: 'Gross merchandise value',
+      value: 'NGN 54.8M',
+      delta: '+22.6%',
+      detail: 'Momentum is strongest in premium bedroom and office categories.',
+    },
+    {
+      label: 'Quote conversion',
+      value: '38%',
+      delta: '+8 pts',
+      detail: 'Supplier curation is reducing buyer drop-off before payment.',
+    },
+    {
+      label: 'On-time delivery',
+      value: '94%',
+      delta: '+4 pts',
+      detail: 'Cross-state runs now batch high-volume buyers more efficiently.',
+    },
+    {
+      label: 'Average order size',
+      value: 'NGN 468k',
+      delta: '+12.1%',
+      detail: 'Apartment package orders are pushing up average spend.',
+    },
+  ],
+  YTD: [
+    {
+      label: 'Gross merchandise value',
+      value: 'NGN 96.1M',
+      delta: '+31.4%',
+      detail: 'Stankings is trending toward a stronger B2B and project-led mix.',
+    },
+    {
+      label: 'Quote conversion',
+      value: '41%',
+      delta: '+10 pts',
+      detail: 'Procurement flows now outperform the previous showroom-only model.',
+    },
+    {
+      label: 'On-time delivery',
+      value: '96%',
+      delta: '+5 pts',
+      detail: 'Fulfillment consistency remains one of the strongest trust signals.',
+    },
+    {
+      label: 'Average order size',
+      value: 'NGN 501k',
+      delta: '+16.3%',
+      detail: 'High-value beds, TVs and lounge suites are lifting basket quality.',
+    },
+  ],
+};
+
+export const revenueSeries: Record<
+  DashboardWindow,
+  { label: string; revenue: number; orders: number }[]
+> = {
+  '30D': [
+    { label: 'Week 1', revenue: 3.8, orders: 18 },
+    { label: 'Week 2', revenue: 4.1, orders: 20 },
+    { label: 'Week 3', revenue: 4.9, orders: 22 },
+    { label: 'Week 4', revenue: 5.6, orders: 27 },
+  ],
+  '90D': [
+    { label: 'Jan', revenue: 15.6, orders: 72 },
+    { label: 'Feb', revenue: 17.4, orders: 81 },
+    { label: 'Mar', revenue: 21.8, orders: 96 },
+  ],
+  YTD: [
+    { label: 'Q1', revenue: 28.4, orders: 126 },
+    { label: 'Q2', revenue: 31.1, orders: 142 },
+    { label: 'Q3', revenue: 36.6, orders: 158 },
+  ],
+};
+
+export const demandSeries: Record<
+  DashboardWindow,
+  { category: string; demand: number; conversion: number }[]
+> = {
+  '30D': [
+    { category: 'Bedroom', demand: 78, conversion: 42 },
+    { category: 'Appliances', demand: 66, conversion: 39 },
+    { category: 'Living Room', demand: 59, conversion: 34 },
+    { category: 'Office', demand: 45, conversion: 31 },
+  ],
+  '90D': [
+    { category: 'Bedroom', demand: 218, conversion: 44 },
+    { category: 'Appliances', demand: 191, conversion: 40 },
+    { category: 'Living Room', demand: 166, conversion: 36 },
+    { category: 'Office', demand: 129, conversion: 33 },
+  ],
+  YTD: [
+    { category: 'Bedroom', demand: 406, conversion: 47 },
+    { category: 'Appliances', demand: 371, conversion: 43 },
+    { category: 'Living Room', demand: 322, conversion: 39 },
+    { category: 'Office', demand: 258, conversion: 35 },
+  ],
+};
+
+export const regionSeries = [
+  { name: 'Delta & Asaba', value: 42, color: '#ff385c' },
+  { name: 'Edo Corridor', value: 21, color: '#460479' },
+  { name: 'Anambra', value: 16, color: '#222222' },
+  { name: 'Project contracts', value: 21, color: '#92174d' },
+];
+
+export const dashboardFunnel = [
+  { stage: 'RFQ', value: 182 },
+  { stage: 'Qualified', value: 121 },
+  { stage: 'Negotiation', value: 74 },
+  { stage: 'Paid', value: 46 },
+];
