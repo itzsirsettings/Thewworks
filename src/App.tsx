@@ -34,7 +34,6 @@ const AppLoadingState = ({ message }: { message: string }) => (
 function AppShell() {
   const { pathname } = useLocation();
   const isStoreRoute = useMemo(() => pathname.startsWith('/store'), [pathname]);
-  const isAdminRoute = useMemo(() => pathname === '/admin', [pathname]);
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
@@ -107,7 +106,7 @@ function AppShell() {
           path="/admin"
           element={(
             <Suspense fallback={<AppLoadingState message="Loading admin dashboard..." />}>
-              <SEO title="Admin Dashboard" description="Thewworks Admin Management System" />
+              <SEO title="Admin Dashboard" description="Thewworks Admin Management System" noIndex />
               <AdminDashboardPage />
             </Suspense>
           )}

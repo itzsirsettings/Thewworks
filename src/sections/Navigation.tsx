@@ -263,23 +263,24 @@ const Navigation = ({
               </div>
             </div>
 
-            {/* Social Links */}
-            <div className="flex items-center gap-6 mt-12">
-              {navigationConfig.socialLinks.map((social) => {
-                const IconComponent = iconMap[social.icon];
-                if (!IconComponent) return null;
-                return (
-                  <a
-                    key={social.label}
-                    href={social.href}
-                    className="text-[var(--chevron-muted)] hover:text-black transition-colors"
-                    aria-label={social.label}
-                  >
-                    <IconComponent size={20} strokeWidth={1.5} />
-                  </a>
-                );
-              })}
-            </div>
+            {navigationConfig.socialLinks.length > 0 ? (
+              <div className="mt-12 flex items-center gap-6">
+                {navigationConfig.socialLinks.map((social) => {
+                  const IconComponent = iconMap[social.icon];
+                  if (!IconComponent) return null;
+                  return (
+                    <a
+                      key={social.label}
+                      href={social.href}
+                      className="text-[var(--chevron-muted)] hover:text-black transition-colors"
+                      aria-label={social.label}
+                    >
+                      <IconComponent size={20} strokeWidth={1.5} />
+                    </a>
+                  );
+                })}
+              </div>
+            ) : null}
           </div>
 
           {/* Menu Background Image */}

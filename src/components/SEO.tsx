@@ -2,6 +2,11 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { siteConfig } from '../config';
 
+const SITE_ORIGIN = 'https://thewworksict.com';
+const SITE_NAME = 'Thewworks ICT & Prints';
+const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/images/thewworks-press-hero.png`;
+const DEFAULT_OG_IMAGE_ALT = 'Thewworks ICT & Prints production and branding showcase';
+
 interface SEOProps {
   title?: string;
   description?: string;
@@ -9,9 +14,10 @@ interface SEOProps {
   ogTitle?: string;
   ogDescription?: string;
   ogImage?: string;
+  ogImageAlt?: string;
   ogType?: string;
-  twitterHandle?: string;
   keywords?: string;
+  noIndex?: boolean;
 }
 
 const SEO = ({
@@ -20,32 +26,37 @@ const SEO = ({
   canonical,
   ogTitle,
   ogDescription,
-  ogImage,
+  ogImage = DEFAULT_OG_IMAGE,
+  ogImageAlt = DEFAULT_OG_IMAGE_ALT,
   ogType = 'website',
-  twitterHandle = '@thewworks',
   keywords,
+  noIndex = false,
 }: SEOProps) => {
-  const location = useLocation();
-  const currentUrl = `https://thewworksict.com${location.pathname}${location.search}`;
+  const { pathname } = useLocation();
+  const normalizedPath = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
+  const currentUrl = `${SITE_ORIGIN}${normalizedPath}`;
 
   useEffect(() => {
-    // Title
     const finalTitle = title ? `${title} | Thewworks` : siteConfig.title;
     document.title = finalTitle;
 
-    // Description
     const finalDescription = description || siteConfig.description;
-    updateMetaTag('name', 'description', finalDescription);
-    updateMetaTag('property', 'og:description', ogDescription || finalDescription);
-    updateMetaTag('name', 'twitter:description', ogDescription || finalDescription);
+    const finalCanonical = canonical || currentUrl;
+    const finalOgTitle = ogTitle || finalTitle;
+    const finalOgDescription = ogDescription || finalDescription;
+    const robotsContent = noIndex
+      ? 'noindex, nofollow'
+      : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
 
-    // Keywords
+    updateMetaTag('name', 'description', finalDescription);
+    updateMetaTag('name', 'robots', robotsContent);
+    updateMetaTag('property', 'og:description', finalOgDescription);
+    updateMetaTag('name', 'twitter:description', finalOgDescription);
+
     if (keywords) {
       updateMetaTag('name', 'keywords', keywords);
     }
 
-    // Canonical
-    const finalCanonical = canonical || currentUrl;
     let linkCanonical = document.querySelector('link[rel="canonical"]');
     if (linkCanonical) {
       linkCanonical.setAttribute('href', finalCanonical);
@@ -56,21 +67,18 @@ const SEO = ({
       document.head.appendChild(linkCanonical);
     }
 
-    // Open Graph
-    updateMetaTag('property', 'og:title', ogTitle || finalTitle);
+    updateMetaTag('property', 'og:title', finalOgTitle);
     updateMetaTag('property', 'og:url', finalCanonical);
     updateMetaTag('property', 'og:type', ogType);
-    if (ogImage) {
-      updateMetaTag('property', 'og:image', ogImage);
-    }
+    updateMetaTag('property', 'og:site_name', SITE_NAME);
+    updateMetaTag('property', 'og:image', ogImage);
+    updateMetaTag('property', 'og:image:alt', ogImageAlt);
 
-    // Twitter
-    updateMetaTag('name', 'twitter:title', ogTitle || finalTitle);
-    updateMetaTag('name', 'twitter:site', twitterHandle);
-    if (ogImage) {
-      updateMetaTag('name', 'twitter:image', ogImage);
-    }
-
+    updateMetaTag('name', 'twitter:card', 'summary_large_image');
+    updateMetaTag('name', 'twitter:title', finalOgTitle);
+    removeMetaTag('name', 'twitter:site');
+    updateMetaTag('name', 'twitter:image', ogImage);
+    updateMetaTag('name', 'twitter:image:alt', ogImageAlt);
   }, [
     title,
     description,
@@ -78,10 +86,10 @@ const SEO = ({
     ogTitle,
     ogDescription,
     ogImage,
+    ogImageAlt,
     ogType,
-    twitterHandle,
     keywords,
-    location,
+    noIndex,
     currentUrl,
   ]);
 
@@ -99,6 +107,10 @@ function updateMetaTag(attr: 'name' | 'property', key: string, content: string) 
     element.setAttribute('content', content);
     document.head.appendChild(element);
   }
+}
+
+function removeMetaTag(attr: 'name' | 'property', key: string) {
+  document.querySelector(`meta[${attr}="${key}"]`)?.remove();
 }
 
 export default SEO;

@@ -207,7 +207,8 @@ npm run start
 2. Run all database migrations in timestamp order
 3. Configure production environment variables, including `NODE_ENV=production`, `PUBLIC_SITE_URL`, `CSRF_SECRET`, `ORDER_TOKEN_SECRET`, `ORDER_STORE_ENCRYPTION_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`
 4. Configure Paystack webhook URL as `https://thewworksict.com/api/payments/paystack/webhook`; Paystack signs webhook payloads with the live secret key in `PAYSTACK_SECRET_KEY`
-5. Deploy to hosting provider (Vercel, Railway, etc.)
+5. Deploy to Railway. The repository includes `railway.json` with `npm run build`, `npm run start`, and `/api/health`.
+6. Attach `thewworksict.com` and `www.thewworksict.com` as Railway custom domains, then add the Railway DNS records at the registrar.
 
 See `docs/deployment.md` for detailed deployment instructions.
 
@@ -223,6 +224,17 @@ For branded discovery on Google Search and Google Maps, keep these live after de
 4. Keep the location details consistent everywhere:
    - `No. 5, Okelue Street, Opposite Wema Bank, by Nnebisi Road, Asaba, Delta State, Nigeria`
    - `08123986155`
+
+See `docs/seo.md` for the full SEO runbook and indexing checklist.
+
+Quick public checks after DNS is live:
+
+```bash
+Resolve-DnsName thewworksict.com
+curl -I https://thewworksict.com/
+curl -I https://www.thewworksict.com/
+curl https://thewworksict.com/sitemap.xml
+```
 
 ## License
 

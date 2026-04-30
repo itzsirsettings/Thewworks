@@ -6,7 +6,7 @@ This guide covers deploying Thewworks to production.
 
 1. **Supabase Project**: Created at https://supabase.com
 2. **Paystack Account**: For payment processing
-3. **Hosting Account**: Vercel, Railway, or similar
+3. **Railway Account**: Used for the full-stack public deployment
 
 ## Step 1: Database Setup
 
@@ -24,6 +24,7 @@ Run the SQL migrations in your Supabase SQL Editor:
 -- Run 20260412_seed_data.sql
 -- Run 20260425_product_storage_hardening.sql
 -- Run 20260428_security_hardening.sql
+-- Run 20260430_restore_is_admin_rpc.sql
 ```
 
 ### 1.3 Configure Storage
@@ -93,63 +94,80 @@ This creates:
 - `dist/` - Frontend build
 - `server-dist/` - Backend build
 
-## Step 4: Deployment Options
+## Step 4: Railway Deployment
 
-### Option A: Vercel (Recommended)
+This repository is configured for Railway through `railway.json`:
 
-1. Install Vercel CLI:
-   ```bash
-   npm i -g vercel
-   ```
+- Build command: `npm run build`
+- Start command: `npm run start`
+- Healthcheck path: `/api/health`
 
-2. Deploy:
-   ```bash
-   vercel --prod
-   ```
-
-3. Set environment variables in Vercel dashboard
-
-### Option B: Railway
+Railway config reference: https://docs.railway.com/reference/config-as-code
 
 1. Install Railway CLI:
+
    ```bash
    npm i -g @railway/cli
    ```
 
-2. Login:
+2. Login and link the project:
+
    ```bash
    railway login
-   ```
-
-3. Initialize:
-   ```bash
    railway init
    ```
 
-4. Deploy:
+3. Set production variables in Railway:
+
+   ```bash
+   railway variable set NODE_ENV=production
+   railway variable set PUBLIC_SITE_URL=https://thewworksict.com
+   railway variable set CORS_ALLOWED_ORIGINS=https://thewworksict.com
+   railway variable set VITE_SUPABASE_URL=https://your-project.supabase.co
+   railway variable set VITE_SUPABASE_ANON_KEY=your-anon-key
+   railway variable set SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   railway variable set PAYSTACK_SECRET_KEY=sk_live_xxx
+   railway variable set PAYSTACK_PUBLIC_KEY=pk_live_xxx
+   railway variable set ADMIN_EMAILS=admin@example.com
+   ```
+
+4. Generate and set fresh production secrets:
+
+   ```bash
+   npm run security:keys
+   railway variable set CSRF_SECRET=...
+   railway variable set ORDER_TOKEN_SECRET=...
+   railway variable set ORDER_STORE_ENCRYPTION_KEY=...
+   ```
+
+5. Deploy:
+
    ```bash
    railway up
    ```
 
-5. Set environment variables:
+6. Attach custom domains in Railway:
+   - `thewworksict.com`
+   - `www.thewworksict.com`
+
+7. Add the Railway-provided DNS records at the domain registrar. The app redirects `www.thewworksict.com` to `https://thewworksict.com`.
+8. Confirm the domain is registered and publicly reachable:
+
    ```bash
-   railway variable set VITE_SUPABASE_URL=xxx
-   # ... set other variables
+   npm run seo:dns:check
    ```
 
-### Option C: Traditional Server
+### Traditional Server Fallback
 
-1. Build the app:
+If Railway is unavailable, deploy the same artifact on a Node server:
+
    ```bash
    npm run build
-   ```
-
-2. Start the server:
-   ```bash
    npm run start
    ```
 
-3. Use PM2 for process management:
+Use PM2 or another process manager:
+
    ```bash
    pm2 start server-dist/index.js --name thewworks
    ```
@@ -175,10 +193,19 @@ This creates:
 3. Test admin login
 4. Verify email notifications work
 5. Run `npm run security:supabase:check` to confirm admin metadata and the `public.is_admin` RPC exist on the connected Supabase project
+6. Verify public SEO endpoints:
+   ```bash
+   curl -I https://thewworksict.com/
+   curl -I https://thewworksict.com/store
+   curl https://thewworksict.com/robots.txt
+   curl https://thewworksict.com/sitemap.xml
+   ```
 
 ## Production Checklist
 
 - [ ] HTTPS enabled
+- [ ] Railway custom domains attached for apex and `www`
+- [ ] Registrar DNS records match Railway's domain instructions
 - [ ] Environment variables set
 - [ ] `NODE_ENV=production`, `PUBLIC_SITE_URL`, and `CORS_ALLOWED_ORIGINS` are production-only values
 - [ ] If `DATABASE_URL` is set for legacy direct Postgres access, it resolves and uses SSL
@@ -190,6 +217,9 @@ This creates:
 - [ ] ADMIN_EMAILS configured
 - [ ] Admin roles use Supabase `app_metadata`, not user-editable `user_metadata`
 - [ ] `npm run lint`, `npm run test:run`, and `npm run build` pass
+- [ ] `curl -I https://thewworksict.com/` returns `200`
+- [ ] `curl -I https://www.thewworksict.com/` returns a `301` to `https://thewworksict.com/`
+- [ ] `https://thewworksict.com/sitemap.xml` is reachable
 - [ ] Error monitoring set up
 - [ ] Logging configured
 
@@ -226,12 +256,4 @@ app.get(/^(?!\/api).*/, async (_request, response) => {
 
 To rollback to a previous version:
 
-1. Find the previous deployment:
-   ```bash
-   vercel list
-   ```
-
-2. Rollback:
-   ```bash
-   vercel rollback [deployment-id]
-   ```
+Use the Railway dashboard deployment history to redeploy the previous known-good deployment.

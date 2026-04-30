@@ -55,7 +55,12 @@ async function main() {
   const { data: rpcResult, error: rpcError } = await supabase.rpc('is_admin');
 
   if (rpcError) {
-    throw new Error(`Missing or broken public.is_admin RPC: ${rpcError.message}`);
+    throw new Error(
+      [
+        `Missing or broken public.is_admin RPC: ${rpcError.message}`,
+        'Apply supabase/migrations/20260430_restore_is_admin_rpc.sql to the connected Supabase project, then rerun this check.',
+      ].join('\n'),
+    );
   }
 
   checks.push(`Verified public.is_admin RPC exists (returned ${String(rpcResult)})`);

@@ -23,6 +23,7 @@
     "security:env:check:production": "npx tsx scripts/check-env.ts --production",
     "security:keys": "tsx scripts/generate-keys.ts",
     "security:supabase:check": "npx tsx scripts/check-supabase-readiness.ts",
+    "seo:dns:check": "tsx scripts/check-public-dns.ts",
     "prd:update": "tsx scripts/update-prd.ts",
     "prd:generate": "tsx scripts/generate-prd.ts"
   },

@@ -1,13 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd
+        http://www.google.com/schemas/sitemap-image/1.1
+        http://www.google.com/schemas/sitemap-image/1.1/sitemap-image.xsd">
   <url>
     <loc>https://thewworksict.com/</loc>
     <lastmod>2026-04-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://thewworksict.com/images/thewworks-press-hero.png</image:loc>
+      <image:caption>Thewworks Premium Printing Press in Asaba</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://thewworksict.com/images/thewworks-logo.png</image:loc>
+      <image:caption>Thewworks ICT &amp; Prints Logo</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://thewworksict.com/store</loc>

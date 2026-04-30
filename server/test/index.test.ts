@@ -1,9 +1,6 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, vi } from 'vitest';
-import type { SuperTest, Test } from 'supertest';
-import express from 'express';
+// @vitest-environment node
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import supertest from 'supertest';
-
-import { vi } from 'vitest';
 
 process.env.NODE_ENV = 'test';
 process.env.SERVER_PORT = '3002';

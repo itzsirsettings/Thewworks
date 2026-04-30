@@ -9,6 +9,11 @@ import { fileURLToPath } from 'node:url';
 import type { User } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { sendOrderNotifications } from './lib/notifications.js';
+import {
+  getApexRedirectUrl,
+  injectRouteSeo,
+  shouldNoIndexRequest,
+} from './lib/seo.js';
 import { getAdminDashboardStats } from './lib/stats.js';
 import { supabaseAdmin } from './lib/supabase-admin.js';
 import {
@@ -162,6 +167,25 @@ const distDirectory = path.resolve(projectRoot, 'dist');
 
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
+
+app.use((request, response, next) => {
+  const redirectUrl = getApexRedirectUrl(request.header('host'), request.originalUrl);
+
+  if (redirectUrl) {
+    response.redirect(301, redirectUrl);
+    return;
+  }
+
+  next();
+});
+
+app.use((request, response, next) => {
+  if (shouldNoIndexRequest(request.originalUrl)) {
+    response.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  }
+
+  next();
+});
 
 function createOrderReference() {
   return `STK-${Date.now()}-${randomBytes(10).toString('hex').toUpperCase()}`;
@@ -905,12 +929,12 @@ app.use('/api', (_request, response) => {
   response.status(404).json({ message: 'API endpoint not found.' });
 });
 
-app.use(express.static(distDirectory));
+app.use(express.static(distDirectory, { index: false }));
 
-app.get(/^(?!\/api).*/, async (_request, response) => {
+app.get(/^(?!\/api).*/, async (request, response) => {
   try {
-    await fs.access(path.join(distDirectory, 'index.html'));
-    response.sendFile(path.join(distDirectory, 'index.html'));
+    const indexHtml = await fs.readFile(path.join(distDirectory, 'index.html'), 'utf8');
+    response.type('html').send(injectRouteSeo(indexHtml, request.originalUrl));
   } catch {
     response.status(404).json({
       message: 'Frontend build not found. Run "npm run build" before "npm run start".',

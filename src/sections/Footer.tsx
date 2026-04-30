@@ -2,9 +2,9 @@ import { Instagram, Facebook, Twitter, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import BrandLogo from '../components/BrandLogo';
-import { openCookieSettings } from '../components/CookieConsentBanner';
 import { contactConfig, footerConfig } from '../config';
 import { openMailto } from '../lib/browser-actions';
+import { openCookieSettings } from '../lib/cookie-consent';
 
 const iconMap: Record<string, React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>> = {
   Instagram,
@@ -72,22 +72,24 @@ const Footer = () => {
             <p className="text-[var(--chevron-muted)] text-sm leading-relaxed mb-6">
               {footerConfig.brandDescription}
             </p>
-            <div className="flex items-center gap-4">
-              {footerConfig.socialLinks.map((social) => {
-                const IconComponent = iconMap[social.icon];
-                if (!IconComponent) return null;
-                return (
-                  <a
-                    key={social.label}
-                    href={social.href}
-                    className="text-[var(--chevron-muted)] hover:text-black transition-colors"
-                    aria-label={social.label}
-                  >
-                    <IconComponent size={20} strokeWidth={1.5} />
-                  </a>
-                );
-              })}
-            </div>
+            {footerConfig.socialLinks.length > 0 ? (
+              <div className="flex items-center gap-4">
+                {footerConfig.socialLinks.map((social) => {
+                  const IconComponent = iconMap[social.icon];
+                  if (!IconComponent) return null;
+                  return (
+                    <a
+                      key={social.label}
+                      href={social.href}
+                      className="text-[var(--chevron-muted)] hover:text-black transition-colors"
+                      aria-label={social.label}
+                    >
+                      <IconComponent size={20} strokeWidth={1.5} />
+                    </a>
+                  );
+                })}
+              </div>
+            ) : null}
           </div>
 
           {/* Link Groups */}
