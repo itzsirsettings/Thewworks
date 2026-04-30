@@ -11,5 +11,12 @@ server-dist/
 remotion/build/
 .claude/
 .cursor/
+.codex-runtime/
+.agents/
+.goose/
+.venv/
+.venv-1/
 debug.log
 *.log
+test-results/
+playwright-report/
