@@ -3,7 +3,7 @@ import BrandLogo from '@/components/BrandLogo';
 import LeafletMap from '@/components/ui/leaflet-map';
 import Footer from '@/sections/Footer';
 import Hero from '@/sections/Hero';
-import SEO from './SEO';
+import SEO from '@/components/SEO';
 import { HeroWithGreeting } from './ui/hero-with-greeting';
 import { HoverSliderDemo } from './ui/animated-slideshow-demo';
 import { siteConfig } from '../config';
