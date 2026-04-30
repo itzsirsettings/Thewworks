@@ -100,6 +100,14 @@ const LandingPage = () => {
     'Hello, I would like to start a printing project with Thewworks ICT & Prints.',
   );
 
+  const scrollToContact = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const element = document.querySelector('#contact');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#f7f1e7] text-[#171717]" lang={siteConfig.language || undefined}>
       <a
@@ -124,14 +132,15 @@ const LandingPage = () => {
             <a href="#process" className="hover:text-white">Process</a>
             <a href="#finishes" className="hover:text-white">Finishes</a>
             <a href="#faq" className="hover:text-white">FAQ</a>
-            <a href="#contact" className="hover:text-white">Contact</a>
+            <a href="#contact" className="hover:text-white" onClick={scrollToContact}>Contact</a>
           </nav>
 
           <a
-            href="/store"
+            href="#contact"
+            onClick={scrollToContact}
             className="inline-flex items-center gap-2 bg-white px-4 py-2.5 text-sm font-semibold text-[#171717] hover:-translate-y-0.5"
           >
-            Quote desk
+            Get a Quote
             <ArrowRight size={16} />
           </a>
         </div>
@@ -321,12 +330,17 @@ const LandingPage = () => {
               title="Ready to print?"
               subtitle="Send your print brief. We will help shape the run."
               description="Tell us what you need, quantity, size, deadline and whether you already have artwork. We will respond with production guidance and a quote path."
-              buttonText="Open the quote desk"
+              buttonText="Request a Quote"
               secondaryButtonText="Chat on WhatsApp"
               secondaryButtonHref={projectWhatsAppUrl}
               imageSrc="/images/Mathias.png"
               imageAlt="Mathias"
-              onButtonClick={() => window.location.href = '/store'}
+              onButtonClick={() => {
+                 const contactSection = document.querySelector('#contact');
+                 if (contactSection) {
+                   contactSection.scrollIntoView({ behavior: 'smooth' });
+                 }
+              }}
               className="bg-white text-[#171717]"
             />
           </div>

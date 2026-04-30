@@ -31,9 +31,6 @@ export interface NavigationConfig {
   menuLinks: MenuLink[];
   socialLinks: SocialLink[];
   searchPlaceholder: string;
-  cartEmptyText: string;
-  cartCheckoutText: string;
-  continueShoppingText: string;
   menuBackgroundImage: string;
 }
 
@@ -49,9 +46,6 @@ export const navigationConfig: NavigationConfig = {
   ],
   socialLinks: [],
   searchPlaceholder: "Search services...",
-  cartEmptyText: "Your cart is empty",
-  cartCheckoutText: "Proceed to Checkout",
-  continueShoppingText: "Continue Shopping",
   menuBackgroundImage: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&q=80",
 };
 
@@ -594,12 +588,11 @@ export const footerConfig: FooterConfig = {
         { label: "FAQ", href: "#faq" },
         { label: "File Guidelines", href: "#faq" },
         { label: "Turnaround Times", href: "#faq" },
-        { label: "Track Order", href: "#contact" },
+        { label: "Request Quote", href: "#contact" },
       ],
     },
   ],
   legalLinks: [
-    { label: "Admin Entrance", href: "/admin" },
     { label: "Privacy Policy", href: `mailto:${contactConfig.email}?subject=Privacy%20Policy%20Request` },
     { label: "Terms of Service", href: `mailto:${contactConfig.email}?subject=Terms%20of%20Service%20Request` },
     { label: "Cookie Settings", href: "#cookies" },

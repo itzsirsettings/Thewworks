@@ -1,25 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { ShoppingCart, Check } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { bedsConfig } from '../config';
-import type { Product } from '../config';
-import { formatCurrency } from '../lib/currency';
 
-interface BedsProps {
-  onAddToCart?: (product: Product) => void;
-  mode?: 'store' | 'showcase';
-  storeHref?: string;
-}
-
-const Beds = ({
-  onAddToCart,
-  mode = 'store',
-  storeHref = '/store',
-}: BedsProps) => {
+const Beds = () => {
   const [activeCategory, setActiveCategory] = useState('All');
-  const [addedProducts, setAddedProducts] = useState<number[]>([]);
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
-  const isShowcase = mode === 'showcase';
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -43,20 +29,11 @@ const Beds = ({
     ? bedsConfig.products
     : bedsConfig.products.filter(product => product.category === activeCategory);
 
-  const handleAddToCart = (product: typeof bedsConfig.products[0]) => {
-    if (!onAddToCart) return;
-    onAddToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      category: product.category,
-      image: product.image,
-    });
-    
-    setAddedProducts(prev => [...prev, product.id]);
-    setTimeout(() => {
-      setAddedProducts(prev => prev.filter(id => id !== product.id));
-    }, 2000);
+  const scrollToContact = () => {
+    const element = document.querySelector('#contact');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
@@ -127,29 +104,14 @@ const Beds = ({
                     {product.category}
                   </span>
                 </div>
-                {isShowcase ? (
-                  <a
-                    href={storeHref}
-                    className="absolute bottom-4 right-4 inline-flex items-center justify-center rounded-full bg-white p-3 text-black transition-all duration-300 hover:bg-[var(--chevron-blue)] hover:text-white"
-                  >
-                    <ShoppingCart size={18} />
-                  </a>
-                ) : (
-                  <button
-                    onClick={() => handleAddToCart(product)}
-                    className={`absolute bottom-4 right-4 w-10 h-10 flex items-center justify-center transition-all duration-300 ${
-                      addedProducts.includes(product.id)
-                        ? 'bg-green-600 text-white'
-                        : 'bg-white text-black hover:bg-[#5a1a2a] hover:text-white'
-                    }`}
-                  >
-                    {addedProducts.includes(product.id) ? (
-                      <Check size={18} />
-                    ) : (
-                      <ShoppingCart size={18} />
-                    )}
-                  </button>
-                )}
+                
+                <button
+                  onClick={scrollToContact}
+                  className="absolute bottom-4 right-4 w-10 h-10 flex items-center justify-center bg-white text-black hover:bg-[var(--chevron-blue)] hover:text-white transition-all duration-300"
+                  aria-label="Request Quote"
+                >
+                  <Mail size={18} />
+                </button>
               </div>
 
               <div className="p-5">
@@ -158,9 +120,6 @@ const Beds = ({
                 </h3>
                 <p className="text-sm text-gray-500 mb-3 line-clamp-2">
                   {product.description}
-                </p>
-                <p className="text-lg font-light text-[#5a1a2a]">
-                  {formatCurrency(product.price)}
                 </p>
               </div>
             </div>
