@@ -15,6 +15,7 @@ import { useStore } from './lib/store';
 import BrandLogo from './components/BrandLogo';
 import CookieConsentBanner from './components/CookieConsentBanner';
 import SEO from './components/SEO';
+import { Analytics } from '@vercel/analytics/react';
 
 const AdminDashboardPage = lazy(() => import('./components/admin/AdminDashboardPage'));
 const CheckoutModal = lazy(() => import('./components/CheckoutModal'));
@@ -34,7 +35,6 @@ const AppLoadingState = ({ message }: { message: string }) => (
 function AppShell() {
   const { pathname } = useLocation();
   const isStoreRoute = useMemo(() => pathname.startsWith('/store'), [pathname]);
-  const isAdminRoute = useMemo(() => pathname === '/admin', [pathname]);
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
@@ -173,6 +173,7 @@ function App() {
   return (
     <Router>
       <AppShell />
+      <Analytics />
     </Router>
   );
 }
