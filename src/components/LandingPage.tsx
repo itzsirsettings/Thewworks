@@ -3,6 +3,7 @@ import BrandLogo from '@/components/BrandLogo';
 import LeafletMap from '@/components/ui/leaflet-map';
 import Footer from '@/sections/Footer';
 import Hero from '@/sections/Hero';
+import SEO from './SEO';
 import { HeroWithGreeting } from './ui/hero-with-greeting';
 import { HoverSliderDemo } from './ui/animated-slideshow-demo';
 import { siteConfig } from '../config';
@@ -136,6 +137,11 @@ const LandingPage = () => {
         </div>
       </header>
 
+      <SEO 
+        title="Premium Printing & Design Studio in Asaba" 
+        description="Thewworks ICT & Prints: Your premier printing press in Asaba. High-quality business cards, custom packaging, branded apparel, and design services."
+        keywords="thewworks, printing press asaba, print shop delta state, custom packaging nigeria, business branding asaba"
+      />
       <main id="main-content">
         <Hero />
 

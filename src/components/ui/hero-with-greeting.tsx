@@ -42,9 +42,9 @@ export function HeroWithGreeting({
         </BlurFade>
 
         <BlurFade delay={0.1} duration={0.5}>
-          <h1 className="mb-6 text-4xl font-bold tracking-tight text-[#1a1a1a] md:text-6xl lg:text-7xl">
+          <h2 className="mb-6 text-4xl font-bold tracking-tight text-[#1a1a1a] md:text-6xl lg:text-7xl">
             {title}
-          </h1>
+          </h2>
         </BlurFade>
 
         {subtitle && (

@@ -1,0 +1,22 @@
+{
+  "name": "Thewworks ICT & Prints",
+  "short_name": "Thewworks",
+  "description": "Premium Printing & Design Studio in Asaba",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf6ef",
+  "theme_color": "#f97316",
+  "icons": [
+    {
+      "src": "/images/thewworks-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/thewworks-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

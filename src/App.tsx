@@ -14,6 +14,7 @@ import {
 import { useStore } from './lib/store';
 import BrandLogo from './components/BrandLogo';
 import CookieConsentBanner from './components/CookieConsentBanner';
+import SEO from './components/SEO';
 
 const AdminDashboardPage = lazy(() => import('./components/admin/AdminDashboardPage'));
 const CheckoutModal = lazy(() => import('./components/CheckoutModal'));
@@ -41,13 +42,6 @@ function AppShell() {
   const [paymentErrorMessage, setPaymentErrorMessage] = useState('');
   const [verifiedOrder, setVerifiedOrder] = useState<VerifiedOrder | null>(null);
 
-  useEffect(() => {
-    document.title = isAdminRoute
-      ? 'Thewworks Admin | Dashboard'
-      : isStoreRoute
-        ? 'Thewworks | Order'
-        : 'Thewworks | Premium Printing & Design';
-  }, [isAdminRoute, isStoreRoute]);
 
   const verifyPaymentReference = useCallback(async (reference: string) => {
     try {
@@ -113,6 +107,7 @@ function AppShell() {
           path="/admin"
           element={(
             <Suspense fallback={<AppLoadingState message="Loading admin dashboard..." />}>
+              <SEO title="Admin Dashboard" description="Thewworks Admin Management System" />
               <AdminDashboardPage />
             </Suspense>
           )}
@@ -129,6 +124,7 @@ function AppShell() {
           path="/store"
           element={(
             <Suspense fallback={<AppLoadingState message="Loading storefront..." />}>
+              <SEO title="Store & Quoting" description="Request a quote for business cards, packaging, and custom prints." />
               <ThewworksICTMarketplace onCheckoutRequested={() => setIsCheckoutOpen(true)} />
             </Suspense>
           )}

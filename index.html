@@ -3,49 +3,75 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f97316" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
-    <title>Thewworks | Thewworks ICT & Prints in Asaba, Delta State</title>
-    <meta name="description" content="Thewworks, also known as Thewworks ICT & Prints, is a printing press in Asaba, Delta State, Nigeria. Get business cards, brochures, packaging, labels, banners, books, apparel printing and branded materials." />
-    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+    
+    <title>Thewworks | Premium Printing & Design Studio in Asaba</title>
+    <meta name="description" content="Thewworks ICT & Prints is Asaba's premier printing press. We deliver high-quality business cards, custom packaging, branded apparel, and large format prints across Delta State and Nigeria." />
+    <meta name="keywords" content="thewworks, printing press asaba, business cards asaba, custom packaging nigeria, branded apparel delta state, large format printing, thewworks ict, thewworks prints" />
+    <meta name="author" content="Thewworks ICT & Prints" />
+    
+    <!-- Crawl & Indexing -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <link rel="canonical" href="https://thewworksict.com/" />
 
     <!-- Open Graph / Social Sharing -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Thewworks ICT & Prints" />
     <meta property="og:locale" content="en_NG" />
-    <meta property="og:title" content="Thewworks | Thewworks ICT & Prints in Asaba, Delta State" />
-    <meta property="og:description" content="Thewworks, also known as Thewworks ICT & Prints, offers print production, packaging, signage, books and brand collateral in Asaba, Delta State." />
+    <meta property="og:title" content="Thewworks | Premium Printing & Design Studio in Asaba" />
+    <meta property="og:description" content="Elevate your brand with premium print production, custom packaging, and design services from Asaba's most trusted print partner." />
     <meta property="og:image" content="https://thewworksict.com/images/thewworks-press-hero.png" />
     <meta property="og:url" content="https://thewworksict.com/" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Thewworks | Thewworks ICT & Prints in Asaba, Delta State" />
-    <meta name="twitter:description" content="Printing press, packaging, books, signage and branded collateral from Thewworks ICT & Prints in Asaba, Nigeria." />
+    <meta name="twitter:site" content="@thewworks" />
+    <meta name="twitter:title" content="Thewworks | Premium Printing & Design Studio in Asaba" />
+    <meta name="twitter:description" content="Premium print production, custom packaging, and design services from Thewworks ICT & Prints in Asaba, Nigeria." />
     <meta name="twitter:image" content="https://thewworksict.com/images/thewworks-press-hero.png" />
     <meta name="twitter:image:alt" content="Thewworks ICT & Prints print production showcase" />
 
-    <!-- Favicon -->
+    <!-- Favicon & PWA Assets -->
     <link rel="icon" type="image/png" href="/images/thewworks-logo.png" />
     <link rel="apple-touch-icon" href="/images/thewworks-logo.png" />
+    <link rel="manifest" href="/manifest.json" />
     <link rel="preload" as="image" href="/images/thewworks-logo.png" />
 
-    <!-- Preconnect to Google Fonts -->
+    <!-- Performance Optimizations -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://unpkg.com" />
 
-    <!-- Schema.org JSON-LD for LocalBusiness / Print Shop -->
+    <!-- Schema.org JSON-LD for LocalBusiness -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@graph": [
         {
+          "@type": "Organization",
+          "@id": "https://thewworksict.com/#organization",
+          "name": "Thewworks ICT & Prints",
+          "url": "https://thewworksict.com/",
+          "logo": {
+            "@type": "ImageObject",
+            "@id": "https://thewworksict.com/#logo",
+            "url": "https://thewworksict.com/images/thewworks-logo.png",
+            "contentUrl": "https://thewworksict.com/images/thewworks-logo.png",
+            "caption": "Thewworks ICT & Prints Logo",
+            "inLanguage": "en-NG",
+            "width": 1024,
+            "height": 1024
+          }
+        },
+        {
           "@type": "WebSite",
           "@id": "https://thewworksict.com/#website",
           "url": "https://thewworksict.com/",
           "name": "Thewworks ICT & Prints",
-          "alternateName": "Thewworks",
-          "description": "Thewworks, also known as Thewworks ICT & Prints, is a printing press in Asaba, Delta State, Nigeria."
+          "publisher": { "@id": "https://thewworksict.com/#organization" },
+          "alternateName": ["Thewworks", "Thewworks ICT", "Thewworks Prints"],
+          "description": "Asaba's premier printing and branding studio."
         },
         {
           "@type": ["LocalBusiness", "ProfessionalService"],
@@ -53,10 +79,10 @@
           "name": "Thewworks ICT & Prints",
           "alternateName": "Thewworks",
           "url": "https://thewworksict.com/",
-          "mainEntityOfPage": "https://thewworksict.com/",
+          "mainEntityOfPage": { "@id": "https://thewworksict.com/#website" },
           "image": "https://thewworksict.com/images/thewworks-press-hero.png",
           "logo": "https://thewworksict.com/images/thewworks-logo.png",
-          "description": "Printing press and branded collateral business in Asaba, Delta State, Nigeria.",
+          "description": "Premium printing press and branding studio in Asaba, Delta State, Nigeria specializing in business cards, packaging, and branded collateral.",
           "telephone": "+2348123986155",
           "email": "info@thewworks.com",
           "priceRange": "$$$",
@@ -72,29 +98,34 @@
             "latitude": 6.209122,
             "longitude": 6.715226
           },
-          "hasMap": "https://www.google.com/maps/search/?api=1&query=Thewworks%20ICT%20%26%20Prints%2C%20No.%205%2C%20Okelue%20Street%2C%20Opposite%20Wema%20Bank%2C%20by%20Nnebisi%20Road%2C%20Asaba%2C%20Delta%20State%2C%20Nigeria",
-          "areaServed": [
+          "openingHoursSpecification": [
             {
-              "@type": "City",
-              "name": "Asaba"
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+              "opens": "08:00",
+              "closes": "18:00"
             },
             {
-              "@type": "State",
-              "name": "Delta State"
-            },
-            {
-              "@type": "Country",
-              "name": "Nigeria"
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": "Saturday",
+              "opens": "09:00",
+              "closes": "16:00"
             }
           ],
+          "sameAs": [
+            "https://facebook.com/thewworks",
+            "https://instagram.com/thewworks",
+            "https://twitter.com/thewworks"
+          ],
+          "hasMap": "https://www.google.com/maps/search/?api=1&query=Thewworks%20ICT%20%26%20Prints%20Asaba",
           "knowsAbout": [
-            "Business cards",
-            "Brochures",
-            "Packaging",
-            "Labels",
-            "Banners",
-            "Books",
-            "Apparel printing"
+            "Business Card Printing",
+            "Product Packaging Design",
+            "Custom Labels",
+            "Large Format Banners",
+            "Book Binding",
+            "Corporate Apparel Printing",
+            "Brand Identity Design"
           ]
         }
       ]

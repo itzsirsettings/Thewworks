@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<browserconfig>
+  <msapplication>
+    <tile>
+      <square70x70logo src="/images/thewworks-logo.png"/>
+      <square150x150logo src="/images/thewworks-logo.png"/>
+      <TileColor>#f97316</TileColor>
+    </tile>
+  </msapplication>
+</browserconfig>

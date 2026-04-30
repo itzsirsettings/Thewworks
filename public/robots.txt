@@ -1,6 +1,13 @@
+# https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin/
+Disallow: /checkout/success
+Disallow: /checkout/cancel
 
+# Host
+Host: https://thewworksict.com
+
+# Sitemaps
 Sitemap: https://thewworksict.com/sitemap.xml
