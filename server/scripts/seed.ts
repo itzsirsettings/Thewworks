@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import { initializeStore, getDatabase } from '../lib/store.js';
-// @ts-expect-error: seed data type mismatch
-import { marketplaceProducts, marketplaceCategories } from '../../src/lib/marketplace-data.js';
+import { marketplaceProducts, marketplaceCategories } from '../../src/lib/marketplace-data.ts';
 
 async function seed() {
   await initializeStore();

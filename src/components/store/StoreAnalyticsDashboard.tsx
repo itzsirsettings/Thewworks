@@ -27,7 +27,7 @@ const tooltipStyle = {
     'rgba(0,0,0,0.02) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 2px 6px, rgba(0,0,0,0.1) 0px 4px 8px',
 };
 
-const dashboardCardSurface = 'rounded-[20px] bg-white shadow-airbnb-card';
+const dashboardCardSurface = 'live-card rounded-[20px] bg-white shadow-airbnb-card';
 
 interface StoreAnalyticsDashboardProps {
   className?: string;
@@ -301,8 +301,8 @@ const StoreAnalyticsDashboard = ({
               </div>
 
               <p className="text-sm leading-relaxed text-[#6a6a6a]">
-                RFQs convert faster when room packages and appliance bundles are merchandised
-                clearly.
+                Print quotes convert faster when paper options, finishing choices and proof status
+                are clear.
               </p>
             </article>
           </div>

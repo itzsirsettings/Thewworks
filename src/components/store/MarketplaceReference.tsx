@@ -17,6 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import { formatCurrency } from '../../lib/currency';
+import BrandLogo from '../BrandLogo';
 import {
   heroSignals,
   supplierHighlights,
@@ -29,25 +30,25 @@ interface MarketplaceReferenceProps {
   onCheckoutRequested: () => void;
 }
 
-const topLinks = ['AI Mode', 'Products', 'Manufacturers', 'Worldwide'];
+const topLinks = ['Quote Assist', 'Services', 'Production', 'Checkout'];
 const categoryRail = [
-  'Categories for you',
-  'Apparel & Accessories',
-  'Consumer Electronics',
-  'Sports & Entertainment',
-  'Beauty',
-  'Luggage, Bags & Cases',
+  'All print services',
+  'Business Essentials',
+  'Marketing Prints',
+  'Large Format',
+  'Packaging',
+  'Labels',
 ];
 const tailoredTags = [
-  'High barrier limited runs',
-  'Versatile tableware',
-  'Family care sets',
+  'Launch-ready bundles',
+  'Premium finishing',
+  'Repeat print runs',
 ];
 
-const cardSurface = 'rounded-[20px] bg-white shadow-airbnb-card';
-const nestedCardSurface = 'rounded-[14px] bg-white shadow-airbnb-card';
+const cardSurface = 'live-card rounded-[20px] bg-white shadow-airbnb-card';
+const nestedCardSurface = 'live-card rounded-[14px] bg-white shadow-airbnb-card';
 const interactiveCardSurface =
-  'cursor-pointer transition-shadow duration-200 hover:shadow-airbnb-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#222222]/25 focus-visible:ring-offset-2';
+  'cursor-pointer transition-all duration-300 hover:shadow-airbnb-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#222222]/25 focus-visible:ring-offset-2';
 
 const normaliseCategory = (category: string) =>
   category === 'All' ? 'All' : category.toLowerCase();
@@ -56,7 +57,7 @@ const matchesCategory = (product: StoreProduct, category: string) => {
   if (category === 'All') return true;
 
   if (category === 'Projects') {
-    return ['Living Room', 'Bedroom', 'Appliances', 'Office', 'Decor'].includes(
+    return ['Essentials', 'Marketing', 'Large Format', 'Packaging', 'Labels', 'Apparel', 'Books'].includes(
       product.category,
     );
   }
@@ -285,21 +286,21 @@ const MarketplaceReference = ({
 
   const handleTopLinkClick = (link: string) => {
     switch (link) {
-      case 'AI Mode':
+      case 'Quote Assist':
         setCategory('Projects');
         setSearchQuery(heroSignals[0] || '');
         searchInputRef.current?.focus();
         scrollToElement(productGridRef.current);
         break;
-      case 'Products':
+      case 'Services':
         setCategory('All');
         setSearchQuery('');
         scrollToElement(productGridRef.current);
         break;
-      case 'Manufacturers':
+      case 'Production':
         scrollToElement(suppliersRef.current);
         break;
-      case 'Worldwide':
+      case 'Checkout':
         scrollToElement(checkoutRef.current);
         break;
       default:
@@ -328,9 +329,10 @@ const MarketplaceReference = ({
         <div className="mx-auto w-full max-w-[1440px] px-4 pb-2 pt-3">
           <div className="flex flex-wrap items-center gap-3 lg:flex-nowrap lg:gap-5">
             <div className="flex min-w-0 flex-1 items-center justify-between gap-3 lg:w-auto lg:flex-none lg:justify-start">
-              <span className="shrink-0 text-[1.375rem] font-semibold tracking-[-0.03em] text-[#ff385c]">
-                Stankings
-              </span>
+              <BrandLogo
+                markClassName="h-10 w-[72px]"
+                textClassName="text-[1.375rem] text-[#ff385c]"
+              />
               <button
                 type="button"
                 onClick={() => setIsCartOpen(true)}
@@ -380,7 +382,7 @@ const MarketplaceReference = ({
                   type="button"
                   onClick={() => handleTopLinkClick(link)}
                   className={`border-b-2 border-transparent px-2 pb-1 text-sm font-semibold transition ${
-                    link === 'Products'
+                    link === 'Services'
                       ? 'border-[#222222] text-[#222222]'
                       : 'text-[#6a6a6a] hover:text-[#222222]'
                   }`}
@@ -461,7 +463,7 @@ const MarketplaceReference = ({
                 type="button"
                 onClick={() => handleTopLinkClick(link)}
                 className={`shrink-0 whitespace-nowrap border-b-2 px-0.5 pb-1 text-sm font-semibold ${
-                  link === 'Products'
+                  link === 'Services'
                     ? 'border-[#222222] text-[#222222]'
                     : 'border-transparent text-[#6a6a6a]'
                 }`}
@@ -527,7 +529,7 @@ const MarketplaceReference = ({
               </div>
               <div className="p-4">
                 <p className="text-[8px] font-bold uppercase tracking-[0.32px] text-[#6a6a6a]">
-                  Frequently searched
+                  Frequently requested
                 </p>
                 <h3 className="mt-1 text-[22px] font-semibold leading-[1.18] tracking-[-0.44px] text-[#222222]">
                   {item.name}
@@ -548,18 +550,18 @@ const MarketplaceReference = ({
                 Featured
               </p>
               <h3 className="mt-2 text-[22px] font-semibold leading-[1.18] tracking-[-0.44px] text-[#222222]">
-                MatchExpo picks
+                Thewworks picks
               </h3>
               <p className="mt-2 max-w-[260px] text-sm leading-normal text-[#6a6a6a]">
-                Fast-moving Stankings products ranked for buyers who browse like a
-                travel gallery.
+                Fast-moving print services ranked for teams preparing launches,
+                events and retail runs.
               </p>
               <button
                 type="button"
                 onClick={handleSourceNow}
                 className="mt-4 rounded-lg bg-[#222222] px-6 py-2.5 text-base font-medium text-white transition hover:bg-[#ff385c]"
               >
-                Source now
+                Add to quote
               </button>
             </div>
             {bannerProduct ? (
@@ -581,12 +583,12 @@ const MarketplaceReference = ({
                 Fast customization
               </p>
               <h3 className="mt-2 text-xl font-bold leading-tight tracking-[-0.02em] text-[#222222]">
-                Build tailored packages faster
+                Build print bundles faster
               </h3>
               <ul className="mt-3 space-y-1.5 text-sm text-[#6a6a6a]">
-                <li>Low MOQ supply-ready bundles</li>
-                <li>Design options for room packages</li>
-                <li>Order protections and payment flow</li>
+                <li>Low MOQ print-ready bundles</li>
+                <li>Paper and finish recommendations</li>
+                <li>Proofing, payment and production flow</li>
               </ul>
             </div>
 
@@ -794,7 +796,7 @@ const MarketplaceReference = ({
         <section ref={productGridRef} className="mt-6">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-[1.75rem] font-bold leading-snug text-[#222222]">
-              Curated marketplace grid
+              Curated print catalog
             </h2>
             <button
               type="button"
@@ -811,7 +813,7 @@ const MarketplaceReference = ({
             <div className="mb-4 flex flex-col gap-3 rounded-[20px] border border-[#c1c1c1] bg-[#f2f2f2] px-4 py-4 text-sm text-[#222222] shadow-airbnb-card md:flex-row md:items-center md:justify-between">
               <p>
                 No exact matches for &ldquo;{searchQuery}&rdquo; yet. Showing the closest
-                Stankings picks instead.
+                Thewworks picks instead.
               </p>
               <button
                 type="button"
@@ -874,7 +876,7 @@ const MarketplaceReference = ({
         <section className="mt-6 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
           <article ref={suppliersRef} className={`${cardSurface} p-4`}>
             <h2 className="text-[1.25rem] font-semibold leading-tight text-[#222222]">
-              Supplier credibility
+              Production credibility
             </h2>
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               {supplierHighlights.map((supplier) => (
@@ -896,13 +898,13 @@ const MarketplaceReference = ({
             className={`${cardSurface} border-l-4 border-l-[#ff385c] p-6`}
           >
             <p className="text-[8px] font-bold uppercase tracking-[0.32px] text-[#6a6a6a]">
-              Protected checkout
+              Protected quote checkout
             </p>
             <h2 className="mt-3 text-[1.31rem] font-bold leading-snug text-[#222222]">
-              Marketplace layout on top, secure Stankings payment flow underneath.
+              Print catalog on top, secure Thewworks payment flow underneath.
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-[#6a6a6a]">
-              Customers can place orders, pay, and receive confirmation email and SMS once
+              Customers can shortlist print services, pay, and receive confirmation email and SMS once
               their payment is processed and confirmed.
             </p>
           </article>
@@ -938,7 +940,7 @@ const MarketplaceReference = ({
                         Click-to-preview catalog
                       </p>
                       <p className="mt-1 text-xs text-[#6a6a6a]">
-                        Three viewpoints generated from the product image for a faster visual
+                        Three viewpoints generated from the print service image for a faster visual
                         review.
                       </p>
                     </div>
@@ -1175,10 +1177,10 @@ const MarketplaceReference = ({
                     <ShoppingCart size={24} />
                   </div>
                   <h4 className="mt-5 text-[1.5rem] font-semibold leading-tight text-[#222222]">
-                    No products shortlisted yet
+                    No print services shortlisted yet
                   </h4>
                   <p className="mt-3 max-w-xs text-sm leading-relaxed text-[#6a6a6a]">
-                    Add items from the marketplace grid and continue to checkout.
+                    Add items from the print catalog and continue to checkout.
                   </p>
                 </div>
               ) : (

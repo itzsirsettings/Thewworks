@@ -193,7 +193,10 @@ export async function createOrder(order: OrderRecord) {
     }))
   );
 
-  if (itemsError) throw itemsError;
+  if (itemsError) {
+    await supabaseAdmin.from('orders').delete().eq('reference', order.reference);
+    throw itemsError;
+  }
 
   return order;
 }

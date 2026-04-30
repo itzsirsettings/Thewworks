@@ -38,32 +38,34 @@ const Features = () => {
   return (
     <section
       ref={sectionRef}
-      className="py-24 md:py-32 lg:py-[200px]"
-      style={{ backgroundColor: 'rgba(139, 109, 75, 0.05)' }}
+      className="py-16 md:py-20 bg-[var(--chevron-bg-alt)]"
     >
-      <div className="max-w-[1400px] mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+      <div className="max-w-[1200px] mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-0">
           {featuresConfig.features.map((feature, index) => {
             const IconComponent = iconMap[feature.icon];
             return (
               <div
                 key={feature.title}
-                className={`p-8 lg:p-[63px] border-b md:border-b-0 md:border-r border-[#e1e1e1] last:border-0 transition-all duration-700 ${
+                className={`p-8 lg:py-16 lg:px-10 transition-all duration-700 ${
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
-                style={{ transitionDelay: `${index * 150}ms` }}
+                style={{ 
+                  transitionDelay: `${index * 120}ms`,
+                  borderRight: index < 3 ? '1px solid var(--chevron-border)' : 'none'
+                }}
               >
                 {IconComponent && (
                   <IconComponent
-                    size={36}
-                    strokeWidth={1.2}
-                    className="text-[#5a1a2a] mb-6"
+                    size={32}
+                    strokeWidth={1.5}
+                    className="text-[var(--chevron-blue)] mb-5"
                   />
                 )}
-                <h3 className="font-serif text-2xl lg:text-[36px] text-black mb-4 leading-tight">
+                <h3 className="font-heading text-xl text-black mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-[#696969] text-base leading-relaxed">
+                <p className="text-[var(--chevron-muted)] text-base leading-relaxed">
                   {feature.description}
                 </p>
               </div>

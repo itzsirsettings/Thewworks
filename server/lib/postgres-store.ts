@@ -126,6 +126,11 @@ function getPostgresSslConfig() {
   return isLocalHost ? false : { rejectUnauthorized: false };
 }
 
+function getDatabaseQueryTimeout() {
+  const timeoutMs = Number(process.env.DATABASE_STATEMENT_TIMEOUT_MS || 10000);
+  return Number.isFinite(timeoutMs) ? timeoutMs : 10000;
+}
+
 function resolveLocalSqlitePath() {
   const configuredPath = process.env.ORDER_DATABASE_PATH?.trim();
 
@@ -497,8 +502,8 @@ async function insertOrder(client: PoolClient, order: OrderRecord) {
       notification_email_status,
       notification_sms_status
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-      $17, $18, $19, $20, $21
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17,
+      $18, $19, $20, $21
     )`,
     [
       order.reference,
@@ -582,8 +587,9 @@ async function runInTransaction<T>(handler: (client: PoolClient) => Promise<T>) 
     } catch (error) {
       try {
         await client.query('ROLLBACK');
-      } catch {
-        // Ignore rollback failures and rethrow the original issue.
+      } catch (rollbackError) {
+        // Log but don't throw - original error takes precedence
+        console.error('Rollback failed:', rollbackError);
       }
 
       throw error;
@@ -672,11 +678,15 @@ async function migrateLegacyStoresIfNeeded() {
 async function initializeStore() {
   if (!initializationPromise) {
     initializationPromise = (async () => {
+      const queryTimeout = getDatabaseQueryTimeout();
+      
       pool = new Pool({
         connectionString: getRequiredDatabaseUrl(),
         max: getDatabasePoolMax(),
         ssl: getPostgresSslConfig(),
         idleTimeoutMillis: 10000,
+        query_timeout: queryTimeout,
+        statement_timeout: queryTimeout,
       });
       pool.on('error', (error) => {
         logSecurityEvent({

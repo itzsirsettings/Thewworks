@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Play, ArrowRight } from 'lucide-react';
 import { videoSectionConfig } from '../config';
 
 const VideoSection = () => {
@@ -30,37 +31,41 @@ const VideoSection = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen flex flex-col lg:flex-row"
+      className="relative min-h-[70vh] flex flex-col lg:flex-row"
     >
-      {/* Image Side */}
-      <div className="relative w-full lg:w-1/2 h-[50vh] lg:h-auto min-h-[400px]">
+      {/* Image/Video Side */}
+      <div className="relative w-full lg:w-1/2 h-[45vh] lg:h-auto min-h-[350px]">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${videoSectionConfig.backgroundImage})` }}
         />
-        <div className="absolute inset-0 bg-black/20" />
+        <div className="absolute inset-0 bg-black/30" />
+        
+        {/* Play Button */}
+        <button
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors"
+          aria-label="Play video"
+        >
+          <Play size={24} className="text-black ml-1" fill="currentColor" />
+        </button>
       </div>
 
       {/* Content Side */}
-      <div
-        className="w-full lg:w-1/2 flex items-center justify-center p-8 md:p-16 lg:p-24"
-        style={{ backgroundColor: 'rgba(243, 239, 239, 0.49)' }}
-      >
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-10 md:p-14 lg:p-20 bg-[var(--chevron-bg-alt)]">
         <div className="max-w-lg">
           <span
-            className={`inline-block mb-4 text-sm tracking-[0.2em] text-[#5a1a2a] font-medium uppercase transition-all duration-700 ${
+            className={`inline-block mb-4 text-sm font-medium tracking-widest uppercase text-[var(--chevron-blue)] transition-all duration-700 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
-            style={{ transitionDelay: '200ms' }}
           >
             {videoSectionConfig.tag}
           </span>
 
           <h2
-            className={`font-serif text-3xl md:text-4xl lg:text-[54px] text-black leading-tight mb-6 transition-all duration-700 ${
+            className={`font-heading text-3xl md:text-4xl text-black leading-tight mb-6 transition-all duration-700 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
-            style={{ transitionDelay: '400ms', lineHeight: '1.2' }}
+            style={{ transitionDelay: '150ms' }}
           >
             {videoSectionConfig.heading}
           </h2>
@@ -68,33 +73,30 @@ const VideoSection = () => {
           {videoSectionConfig.bodyParagraphs.map((paragraph, index) => (
             <p
               key={index}
-              className={`text-[#696969] text-lg leading-relaxed mb-6 transition-all duration-700 ${
+              className={`text-[var(--chevron-muted)] text-lg leading-relaxed mb-5 transition-all duration-700 ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               }`}
-              style={{ transitionDelay: `${600 + index * 200}ms` }}
+              style={{ transitionDelay: `${300 + index * 100}ms` }}
             >
               {paragraph}
             </p>
           ))}
 
           {videoSectionConfig.ctaText && (
-            <div
-              className={`flex flex-col sm:flex-row gap-4 transition-all duration-700 ${
+            <a
+              href={videoSectionConfig.ctaTarget}
+              onClick={(e) => {
+                e.preventDefault();
+                document.querySelector(videoSectionConfig.ctaTarget)?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className={`inline-flex items-center gap-2 text-[var(--chevron-blue)] font-medium mt-6 hover:gap-3 transition-all ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               }`}
-              style={{ transitionDelay: `${600 + videoSectionConfig.bodyParagraphs.length * 200 + 200}ms` }}
+              style={{ transitionDelay: '500ms' }}
             >
-              <a
-                href={videoSectionConfig.ctaTarget}
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.querySelector(videoSectionConfig.ctaTarget)?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="inline-flex items-center justify-center px-8 py-4 bg-[#5a1a2a] text-white font-light tracking-widest text-sm btn-hover"
-              >
-                {videoSectionConfig.ctaText}
-              </a>
-            </div>
+              {videoSectionConfig.ctaText}
+              <ArrowRight size={18} />
+            </a>
           )}
         </div>
       </div>

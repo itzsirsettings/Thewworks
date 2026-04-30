@@ -1,7 +1,8 @@
 import 'dotenv/config';
 
-import { randomBytes } from 'node:crypto';
+import { randomBytes, randomInt } from 'node:crypto';
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -10,6 +11,10 @@ import { z } from 'zod';
 import { sendOrderNotifications } from './lib/notifications.js';
 import { getAdminDashboardStats } from './lib/stats.js';
 import { supabaseAdmin } from './lib/supabase-admin.js';
+import {
+  CaptchaValidationError,
+  verifyCheckoutCaptcha,
+} from './lib/captcha.js';
 import {
   createDemoPaystackTransaction,
   initializePaystackTransaction,
@@ -20,8 +25,11 @@ import {
 import {
   applySecurityHeaders,
   clearReceiptTokenCookie,
+  corsMiddleware,
   createRateLimiter,
   createReceiptToken,
+  csrfProtectionMiddleware,
+  generateCsrfToken,
   getCheckoutReturnUrl,
   getClientIp,
   getReceiptTokenFromRequest,
@@ -40,18 +48,24 @@ import {
 import type { OrderItemRecord, OrderRecord, PaystackTransactionData } from './lib/types.js';
 
 const approvedAdminEmails = new Set(
-  (process.env.VITE_ADMIN_EMAILS || '')
+  (process.env.ADMIN_EMAILS || '')
     .split(',')
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean),
 );
+
+interface AuthenticatedAdmin {
+  user: User;
+  email: string;
+  role: string;
+}
 
 function hasAdminAccess(user: User | null | undefined): boolean {
   if (!user) {
     return false;
   }
 
-  const role = user.app_metadata?.role ?? user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   const email = user.email?.trim().toLowerCase() || '';
 
   return role === 'admin' || approvedAdminEmails.has(email);
@@ -61,6 +75,7 @@ interface RequestWithRawBody extends express.Request {
 }
 
 class CheckoutValidationError extends Error {}
+class AdminValidationError extends Error {}
 
 const customerSchema = z
   .object({
@@ -88,10 +103,58 @@ const checkoutRequestSchema = z
       )
       .min(1, 'Your cart is empty.')
       .max(20, 'Too many items were submitted.'),
+    captchaToken: z.string().trim().max(4096).optional(),
   })
   .strict();
 
-const app = express();
+const safeImageUrlSchema = z
+  .string()
+  .trim()
+  .max(2048)
+  .refine(
+    (value) => value.startsWith('/') || /^https:\/\/[^\s]+$/i.test(value),
+    'Image URL must be a local path or HTTPS URL.',
+  );
+
+const optionalImageUrlSchema = z.preprocess(
+  (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+  safeImageUrlSchema.optional(),
+);
+
+const optionalTextField = (maxLength: number) =>
+  z.string().trim().max(maxLength).optional();
+
+const requiredTextField = (name: string, maxLength: number) =>
+  z.string().trim().min(1, `${name} is required.`).max(maxLength);
+
+const productUpdateSchema = z
+  .object({
+    imageBase64: z.string().max(5 * 1024 * 1024).optional(),
+    image: optionalImageUrlSchema,
+    name: requiredTextField('Name', 140).optional(),
+    price: z.number().finite().positive().max(100_000_000).optional(),
+    category: requiredTextField('Category', 80).optional(),
+    supplier: requiredTextField('Supplier', 120).optional(),
+    origin: optionalTextField(120),
+    moq: optionalTextField(80),
+    lead_time: optionalTextField(80),
+    rating: z.number().finite().min(0).max(5).optional(),
+    orders: optionalTextField(80),
+    badge: optionalTextField(80),
+    summary: optionalTextField(500),
+  })
+  .strict();
+
+const productCreateSchema = productUpdateSchema
+  .extend({
+    name: requiredTextField('Name', 140),
+    price: z.number().finite().positive().max(100_000_000),
+    category: requiredTextField('Category', 80),
+    supplier: requiredTextField('Supplier', 120),
+  })
+  .strict();
+
+export const app = express();
 const serverPort = Number(process.env.SERVER_PORT || 3001);
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(currentDirectory, '..');
@@ -102,6 +165,14 @@ app.set('trust proxy', 1);
 
 function createOrderReference() {
   return `STK-${Date.now()}-${randomBytes(10).toString('hex').toUpperCase()}`;
+}
+
+function createProductId() {
+  return Date.now() * 1000 + randomInt(0, 1000);
+}
+
+function isValidOrderReference(reference: string) {
+  return /^STK-[A-Za-z0-9-]{8,80}$/.test(reference);
 }
 
 function normalizePhoneNumber(phoneNumber: string) {
@@ -210,10 +281,16 @@ async function finalizeSuccessfulPayment(
   return finalOrder;
 }
 
+app.use(corsMiddleware);
+app.use(cookieParser());
 app.use(applySecurityHeaders);
+app.use(csrfProtectionMiddleware);
+
+const MAX_BODY_SIZE = process.env.MAX_BODY_SIZE || '5mb';
+
 app.use(
   express.json({
-    limit: '5mb',
+    limit: MAX_BODY_SIZE,
     verify: (request, _response, buffer) => {
       (request as RequestWithRawBody).rawBody = Buffer.from(buffer);
     },
@@ -240,9 +317,30 @@ const adminRateLimiter = createRateLimiter({
   keyResolver: (request) => `admin_api:${getClientIp(request)}`,
 });
 
+app.use('/api/admin', adminRateLimiter, (_request, response, next) => {
+  response.setHeader('Cache-Control', 'no-store, max-age=0');
+  response.setHeader('Pragma', 'no-cache');
+  next();
+});
+
+app.get('/api/admin/me', async (request: express.Request, response: express.Response) => {
+  const admin = await requireAdminToken(request, response);
+
+  if (!admin) {
+    return;
+  }
+
+  response.json({
+    user: {
+      id: admin.user.id,
+      email: admin.email,
+      role: admin.role,
+    },
+  });
+});
+
 app.get(
   '/api/admin/stats',
-  adminRateLimiter,
   async (request: express.Request, response: express.Response) => {
     if (!await requireAdminToken(request, response)) return;
 
@@ -260,48 +358,126 @@ app.get('/api/health', (_request, response) => {
   response.json({ status: 'ok' });
 });
 
+app.get('/api/security/csrf-token', (request, response) => {
+  const token = generateCsrfToken();
+  response.cookie('XSRF-TOKEN', token, {
+    httpOnly: false, // Must be accessible by client JS to send back in header
+    secure: request.secure || request.header('x-forwarded-proto') === 'https',
+    sameSite: 'lax',
+    path: '/',
+  });
+  response.json({ token });
+});
+
 // ─── Admin Product Management ───────────────────────────────────────────
 
-async function requireAdminToken(request: express.Request, response: express.Response): Promise<boolean> {
+function getAdminRole(user: User) {
+  const role = user.app_metadata?.role;
+  return typeof role === 'string' && role.trim() ? role.trim() : 'admin';
+}
+
+async function requireAdminToken(
+  request: express.Request,
+  response: express.Response,
+): Promise<AuthenticatedAdmin | null> {
   const authHeader = request.header('Authorization');
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : '';
   
   if (!token) {
     response.status(401).json({ message: 'Unauthorized admin session.' });
-    return false;
+    return null;
   }
 
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+  const { data, error } = await supabaseAdmin.auth.getUser(token);
+  const user = data?.user;
   
   if (error || !user) {
     response.status(401).json({ message: 'Invalid or expired admin session.' });
-    return false;
+    return null;
   }
 
   if (!hasAdminAccess(user)) {
     response.status(403).json({ message: 'Admin privileges are required.' });
-    return false;
+    return null;
   }
 
-  return true;
+  return {
+    user,
+    email: user.email?.trim().toLowerCase() || '',
+    role: getAdminRole(user),
+  };
 }
 
-// Helper to save base64 image strings to the local public folder
+const MAX_PRODUCT_IMAGE_BYTES = 2 * 1024 * 1024;
+const PRODUCT_IMAGE_CONTENT_TYPES: Record<string, string> = {
+  jpg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+};
+
+function hasJpegSignature(buffer: Buffer) {
+  return buffer.length > 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+}
+
+function hasPngSignature(buffer: Buffer) {
+  return (
+    buffer.length > 8 &&
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47 &&
+    buffer[4] === 0x0d &&
+    buffer[5] === 0x0a &&
+    buffer[6] === 0x1a &&
+    buffer[7] === 0x0a
+  );
+}
+
+function hasWebpSignature(buffer: Buffer) {
+  return (
+    buffer.length > 12 &&
+    buffer.toString('ascii', 0, 4) === 'RIFF' &&
+    buffer.toString('ascii', 8, 12) === 'WEBP'
+  );
+}
+
+function validateProductImageBuffer(buffer: Buffer, extension: string) {
+  if (buffer.length === 0) {
+    throw new AdminValidationError('Uploaded image is empty.');
+  }
+
+  if (buffer.length > MAX_PRODUCT_IMAGE_BYTES) {
+    throw new AdminValidationError('Image must be 2MB or smaller.');
+  }
+
+  const isExpectedType =
+    (extension === 'jpg' && hasJpegSignature(buffer)) ||
+    (extension === 'png' && hasPngSignature(buffer)) ||
+    (extension === 'webp' && hasWebpSignature(buffer));
+
+  if (!isExpectedType) {
+    throw new AdminValidationError('Image content does not match the declared file type.');
+  }
+}
+
 async function processImageUpload(base64Data: unknown): Promise<string | undefined> {
   if (typeof base64Data !== 'string' || !base64Data.startsWith('data:image/')) return undefined;
   
-  const matches = base64Data.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
-  if (!matches) return undefined;
+  const matches = base64Data.match(/^data:image\/(png|jpe?g|webp);base64,([A-Za-z0-9+/]+={0,2})$/i);
+  if (!matches) {
+    throw new AdminValidationError('Only PNG, JPEG, and WebP images are allowed.');
+  }
   
-  const extension = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+  const extension = matches[1].toLowerCase().replace('jpeg', 'jpg');
   const buffer = Buffer.from(matches[2], 'base64');
+  validateProductImageBuffer(buffer, extension);
   
   const filename = `product-${Date.now()}-${randomBytes(2).toString('hex')}.${extension}`;
   
   const { error } = await supabaseAdmin.storage
     .from('products')
     .upload(filename, buffer, {
-      contentType: `image/${extension}`,
+      contentType: PRODUCT_IMAGE_CONTENT_TYPES[extension],
       cacheControl: '3600',
       upsert: false
     });
@@ -344,33 +520,32 @@ app.put(
     if (!await requireAdminToken(request, response)) return;
 
     const productId = Number(request.params.id);
-    if (!Number.isFinite(productId)) {
+    if (!Number.isInteger(productId) || productId <= 0) {
       response.status(400).json({ message: 'Invalid product ID.' });
       return;
     }
 
-    const body = request.body as Record<string, unknown>;
-    const updates: Record<string, unknown> = {};
-
     try {
+      const body = productUpdateSchema.parse(request.body);
+      const updates: Record<string, unknown> = {};
       const newImageUrl = await processImageUpload(body.imageBase64);
       if (newImageUrl) {
         updates.image = newImageUrl;
-      } else if (typeof body.image === 'string' && body.image.trim()) {
-        updates.image = body.image.trim();
+      } else if (body.image) {
+        updates.image = body.image;
       }
 
-      if (typeof body.name === 'string') updates.name = body.name.trim();
-      if (typeof body.price === 'number' && body.price > 0) updates.price = body.price;
-      if (typeof body.category === 'string') updates.category = body.category.trim();
-      if (typeof body.supplier === 'string') updates.supplier = body.supplier.trim();
-      if (typeof body.origin === 'string') updates.origin = body.origin.trim();
-      if (typeof body.moq === 'string') updates.moq = body.moq.trim();
-      if (typeof body.lead_time === 'string') updates.lead_time = body.lead_time.trim();
-      if (typeof body.rating === 'number') updates.rating = body.rating;
-      if (typeof body.orders === 'string') updates.orders = body.orders.trim();
-      if (typeof body.badge === 'string') updates.badge = body.badge.trim();
-      if (typeof body.summary === 'string') updates.summary = body.summary.trim();
+      if (body.name !== undefined) updates.name = body.name;
+      if (body.price !== undefined) updates.price = body.price;
+      if (body.category !== undefined) updates.category = body.category;
+      if (body.supplier !== undefined) updates.supplier = body.supplier;
+      if (body.origin !== undefined) updates.origin = body.origin;
+      if (body.moq !== undefined) updates.moq = body.moq;
+      if (body.lead_time !== undefined) updates.lead_time = body.lead_time;
+      if (body.rating !== undefined) updates.rating = body.rating;
+      if (body.orders !== undefined) updates.orders = body.orders;
+      if (body.badge !== undefined) updates.badge = body.badge;
+      if (body.summary !== undefined) updates.summary = body.summary;
 
       if (Object.keys(updates).length === 0) {
         response.status(400).json({ message: 'No valid fields to update.' });
@@ -386,6 +561,18 @@ app.put(
       if (error) throw error;
       response.json(data);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        response.status(400).json({
+          message: error.issues[0]?.message || 'Product update is invalid.',
+        });
+        return;
+      }
+
+      if (error instanceof AdminValidationError) {
+        response.status(400).json({ message: error.message });
+        return;
+      }
+
       console.error(`Failed to update product ${productId}:`, error);
       response.status(500).json({ message: 'Failed to update product.' });
     }
@@ -397,39 +584,28 @@ app.post(
   async (request: express.Request, response: express.Response) => {
     if (!await requireAdminToken(request, response)) return;
 
-    const body = request.body as Record<string, unknown>;
-
-    const name = typeof body.name === 'string' ? body.name.trim() : '';
-    const price = typeof body.price === 'number' ? body.price : 0;
-    const category = typeof body.category === 'string' ? body.category.trim() : '';
-    const supplier = typeof body.supplier === 'string' ? body.supplier.trim() : '';
-
-    if (!name || price <= 0 || !category || !supplier) {
-      response.status(400).json({ message: 'Name, price, category, and supplier are required.' });
-      return;
-    }
-
     try {
+      const body = productCreateSchema.parse(request.body);
       const newImageUrl = await processImageUpload(body.imageBase64);
-      let finalImage = newImageUrl || (typeof body.image === 'string' ? body.image.trim() : '');
+      let finalImage = newImageUrl || body.image || '';
       if (!finalImage) finalImage = '/images/product-1.jpg'; // fallback
 
       const { data, error } = await supabaseAdmin
         .from('products')
         .insert({
-          id: Date.now(),
-          name,
-          price,
+          id: createProductId(),
+          name: body.name,
+          price: body.price,
           image: finalImage,
-          category,
-          supplier,
-          origin: typeof body.origin === 'string' ? body.origin.trim() : 'Local stock',
-          moq: typeof body.moq === 'string' ? body.moq.trim() : '1 unit',
-          lead_time: typeof body.lead_time === 'string' ? body.lead_time.trim() : '3-5 days',
-          rating: typeof body.rating === 'number' ? body.rating : 4.5,
-          orders: typeof body.orders === 'string' ? body.orders.trim() : '0 orders',
-          badge: typeof body.badge === 'string' ? body.badge.trim() : 'New',
-          summary: typeof body.summary === 'string' ? body.summary.trim() : '',
+          category: body.category,
+          supplier: body.supplier,
+          origin: body.origin || 'Local stock',
+          moq: body.moq || '1 unit',
+          lead_time: body.lead_time || '3-5 days',
+          rating: body.rating ?? 4.5,
+          orders: body.orders || '0 orders',
+          badge: body.badge || 'New',
+          summary: body.summary || '',
         })
         .select()
         .single();
@@ -437,6 +613,18 @@ app.post(
       if (error) throw error;
       response.status(201).json(data);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        response.status(400).json({
+          message: error.issues[0]?.message || 'Product details are invalid.',
+        });
+        return;
+      }
+
+      if (error instanceof AdminValidationError) {
+        response.status(400).json({ message: error.message });
+        return;
+      }
+
       console.error('Failed to create product:', error);
       response.status(500).json({ message: 'Failed to create product.' });
     }
@@ -449,7 +637,7 @@ app.delete(
     if (!await requireAdminToken(request, response)) return;
 
     const productId = Number(request.params.id);
-    if (!Number.isFinite(productId)) {
+    if (!Number.isInteger(productId) || productId <= 0) {
       response.status(400).json({ message: 'Invalid product ID.' });
       return;
     }
@@ -472,6 +660,7 @@ app.delete(
 app.post('/api/checkout/initialize', initializeRateLimiter, async (request, response) => {
   try {
     const parsedRequest = checkoutRequestSchema.parse(request.body);
+    await verifyCheckoutCaptcha(parsedRequest.captchaToken, getClientIp(request));
     const orderItems = await buildOrderItems(parsedRequest.items);
     const amount = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const reference = createOrderReference();
@@ -549,6 +738,11 @@ app.post('/api/checkout/initialize', initializeRateLimiter, async (request, resp
       return;
     }
 
+    if (error instanceof CaptchaValidationError) {
+      response.status(400).json({ message: error.message });
+      return;
+    }
+
     logSecurityEvent({
       event: 'checkout_initialize_failed',
       ip: getClientIp(request),
@@ -567,6 +761,11 @@ app.get('/api/checkout/verify/:reference', verifyRateLimiter, async (request, re
     const reference = getSingleRouteParam(request.params.reference);
 
     if (!reference) {
+      response.status(400).json({ message: 'The order reference is invalid.' });
+      return;
+    }
+
+    if (!isValidOrderReference(reference)) {
       response.status(400).json({ message: 'The order reference is invalid.' });
       return;
     }
@@ -637,6 +836,28 @@ app.get('/api/checkout/verify/:reference', verifyRateLimiter, async (request, re
   }
 });
 
+// ─── Global Error Handler ──────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((error: Error & { status?: number; statusCode?: number }, _request: express.Request, response: express.Response, _next: express.NextFunction) => {
+  const statusCode = error.status || error.statusCode || 500;
+  const message = statusCode === 500 ? 'An unexpected error occurred. Please try again later.' : error.message;
+
+  logSecurityEvent({
+    event: 'unhandled_error',
+    outcome: 'failed',
+    reason: error.message,
+    statusCode,
+  });
+
+  const isDevOrTest = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
+  
+  response.status(statusCode).json({ 
+    message,
+    ...(isDevOrTest ? { stack: error.stack, detail: error.message } : {})
+  });
+});
+
 app.post(
   '/api/payments/paystack/webhook',
   async (request: RequestWithRawBody, response) => {
@@ -680,6 +901,10 @@ app.post(
   },
 );
 
+app.use('/api', (_request, response) => {
+  response.status(404).json({ message: 'API endpoint not found.' });
+});
+
 app.use(express.static(distDirectory));
 
 app.get(/^(?!\/api).*/, async (_request, response) => {
@@ -693,6 +918,12 @@ app.get(/^(?!\/api).*/, async (_request, response) => {
   }
 });
 
-app.listen(serverPort, () => {
-  console.log(`Checkout API running on http://localhost:${serverPort}`);
-});
+export function startServer(port = serverPort) {
+  return app.listen(port, () => {
+    console.log(`Checkout API running on http://localhost:${port}`);
+  });
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  startServer();
+}

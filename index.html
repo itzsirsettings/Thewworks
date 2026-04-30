@@ -3,54 +3,101 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Stankings Trade Hub</title>
-    <meta name="description" content="Your one-stop destination for quality, comfort and style. Turkish sofas, modern bed frames, contemporary furniture, electronics, home appliances, rugs, interior decoration, mirrors, and office furniture in Asaba, Delta State." />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <title>Thewworks | Thewworks ICT & Prints in Asaba, Delta State</title>
+    <meta name="description" content="Thewworks, also known as Thewworks ICT & Prints, is a printing press in Asaba, Delta State, Nigeria. Get business cards, brochures, packaging, labels, banners, books, apparel printing and branded materials." />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+    <link rel="canonical" href="https://thewworksict.com/" />
 
     <!-- Open Graph / Social Sharing -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Stankings Home Value | Quality Furniture & Home Appliances" />
-    <meta property="og:description" content="Your one-stop destination for quality, comfort and style. Turkish sofas, modern bed frames, contemporary furniture, electronics, home appliances, rugs, interior decoration, mirrors, and office furniture in Asaba, Delta State." />
-    <meta property="og:image" content="/images/hero-bg.jpg" />
-    <meta property="og:url" content="/" />
+    <meta property="og:site_name" content="Thewworks ICT & Prints" />
+    <meta property="og:locale" content="en_NG" />
+    <meta property="og:title" content="Thewworks | Thewworks ICT & Prints in Asaba, Delta State" />
+    <meta property="og:description" content="Thewworks, also known as Thewworks ICT & Prints, offers print production, packaging, signage, books and brand collateral in Asaba, Delta State." />
+    <meta property="og:image" content="https://thewworksict.com/images/thewworks-press-hero.png" />
+    <meta property="og:url" content="https://thewworksict.com/" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Stankings Home Value | Quality Furniture & Home Appliances" />
-    <meta name="twitter:description" content="Your one-stop destination for quality, comfort and style in Asaba, Delta State." />
-    <meta name="twitter:image" content="/images/hero-bg.jpg" />
+    <meta name="twitter:title" content="Thewworks | Thewworks ICT & Prints in Asaba, Delta State" />
+    <meta name="twitter:description" content="Printing press, packaging, books, signage and branded collateral from Thewworks ICT & Prints in Asaba, Nigeria." />
+    <meta name="twitter:image" content="https://thewworksict.com/images/thewworks-press-hero.png" />
+    <meta name="twitter:image:alt" content="Thewworks ICT & Prints print production showcase" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="/images/thewworks-logo.png" />
+    <link rel="apple-touch-icon" href="/images/thewworks-logo.png" />
+    <link rel="preload" as="image" href="/images/thewworks-logo.png" />
 
     <!-- Preconnect to Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <!-- Schema.org JSON-LD for LocalBusiness / FurnitureStore -->
+    <!-- Schema.org JSON-LD for LocalBusiness / Print Shop -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "FurnitureStore",
-      "name": "Stankings Home Value",
-      "image": "https://stankingshomevalue.com/images/hero-bg.jpg",
-      "@id": "https://stankingshomevalue.com",
-      "url": "https://stankingshomevalue.com",
-      "telephone": "08037155869",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "244 Nnebisi Road, Opp. Wema Bank by Konwea Plaza",
-        "addressLocality": "Asaba",
-        "addressRegion": "Delta State",
-        "addressCountry": "NG"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": 6.198305,
-        "longitude": 6.702812
-      },
-      "priceRange": "$$$$"
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://thewworksict.com/#website",
+          "url": "https://thewworksict.com/",
+          "name": "Thewworks ICT & Prints",
+          "alternateName": "Thewworks",
+          "description": "Thewworks, also known as Thewworks ICT & Prints, is a printing press in Asaba, Delta State, Nigeria."
+        },
+        {
+          "@type": ["LocalBusiness", "ProfessionalService"],
+          "@id": "https://thewworksict.com/#business",
+          "name": "Thewworks ICT & Prints",
+          "alternateName": "Thewworks",
+          "url": "https://thewworksict.com/",
+          "mainEntityOfPage": "https://thewworksict.com/",
+          "image": "https://thewworksict.com/images/thewworks-press-hero.png",
+          "logo": "https://thewworksict.com/images/thewworks-logo.png",
+          "description": "Printing press and branded collateral business in Asaba, Delta State, Nigeria.",
+          "telephone": "+2348123986155",
+          "email": "info@thewworks.com",
+          "priceRange": "$$$",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "No. 5, Okelue Street, Opposite Wema Bank, by Nnebisi Road",
+            "addressLocality": "Asaba",
+            "addressRegion": "Delta State",
+            "addressCountry": "NG"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 6.209122,
+            "longitude": 6.715226
+          },
+          "hasMap": "https://www.google.com/maps/search/?api=1&query=Thewworks%20ICT%20%26%20Prints%2C%20No.%205%2C%20Okelue%20Street%2C%20Opposite%20Wema%20Bank%2C%20by%20Nnebisi%20Road%2C%20Asaba%2C%20Delta%20State%2C%20Nigeria",
+          "areaServed": [
+            {
+              "@type": "City",
+              "name": "Asaba"
+            },
+            {
+              "@type": "State",
+              "name": "Delta State"
+            },
+            {
+              "@type": "Country",
+              "name": "Nigeria"
+            }
+          ],
+          "knowsAbout": [
+            "Business cards",
+            "Brochures",
+            "Packaging",
+            "Labels",
+            "Banners",
+            "Books",
+            "Apparel printing"
+          ]
+        }
+      ]
     }
     </script>
   </head>

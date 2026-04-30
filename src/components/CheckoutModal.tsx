@@ -1,15 +1,77 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { LoaderCircle, ShieldCheck, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { formatCurrency } from '../lib/currency';
+import { getCsrfHeaders, resetCsrfToken } from '../lib/csrf';
 import { useStore } from '../lib/store';
 import {
   isTrustedPaymentRedirect,
   setPendingReference,
   type CheckoutFormValues,
 } from '../lib/checkout';
+
+const TURNSTILE_SCRIPT_ID = 'cloudflare-turnstile-script';
+const TURNSTILE_SCRIPT_SRC =
+  'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (
+        container: HTMLElement,
+        options: {
+          sitekey: string;
+          callback: (token: string) => void;
+          'expired-callback': () => void;
+          'error-callback': () => void;
+        },
+      ) => string;
+      remove: (widgetId: string) => void;
+      reset: (widgetId: string) => void;
+    };
+    thewworksTurnstileLoadPromise?: Promise<void>;
+  }
+}
+
+function loadTurnstileScript() {
+  if (window.turnstile) {
+    return Promise.resolve();
+  }
+
+  if (window.thewworksTurnstileLoadPromise) {
+    return window.thewworksTurnstileLoadPromise;
+  }
+
+  window.thewworksTurnstileLoadPromise = new Promise<void>((resolve, reject) => {
+    const existingScript = document.getElementById(TURNSTILE_SCRIPT_ID) as
+      | HTMLScriptElement
+      | null;
+
+    if (existingScript) {
+      existingScript.addEventListener('load', () => resolve(), { once: true });
+      existingScript.addEventListener('error', () => reject(new Error('Turnstile failed to load.')), {
+        once: true,
+      });
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.id = TURNSTILE_SCRIPT_ID;
+    script.src = TURNSTILE_SCRIPT_SRC;
+    script.async = true;
+    script.defer = true;
+    script.addEventListener('load', () => resolve(), { once: true });
+    script.addEventListener('error', () => reject(new Error('Turnstile failed to load.')), {
+      once: true,
+    });
+    document.head.appendChild(script);
+  });
+
+  return window.thewworksTurnstileLoadPromise;
+}
 
 const checkoutSchema = z.object({
   fullName: z.string().min(2, 'Name is required'),
@@ -33,6 +95,9 @@ const CheckoutModal = ({
   onCheckoutStarted,
 }: CheckoutModalProps) => {
   const cartItems = useStore((state) => state.cartItems);
+  const turnstileContainerRef = useRef<HTMLDivElement | null>(null);
+  const turnstileWidgetIdRef = useRef<string | null>(null);
+  const isCaptchaEnabled = Boolean(turnstileSiteKey);
   
   const {
     register,
@@ -52,6 +117,8 @@ const CheckoutModal = ({
   });
 
   const [errorMessage, setErrorMessage] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
+  const [captchaError, setCaptchaError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const totalAmount = useMemo(
@@ -59,12 +126,72 @@ const CheckoutModal = ({
     [cartItems],
   );
 
+  useEffect(() => {
+    if (!isOpen || !isCaptchaEnabled || !turnstileSiteKey) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    loadTurnstileScript()
+      .then(() => {
+        if (
+          isCancelled ||
+          !window.turnstile ||
+          !turnstileContainerRef.current ||
+          turnstileWidgetIdRef.current
+        ) {
+          return;
+        }
+
+        turnstileWidgetIdRef.current = window.turnstile.render(
+          turnstileContainerRef.current,
+          {
+            sitekey: turnstileSiteKey,
+            callback: (token) => {
+              setCaptchaToken(token);
+              setCaptchaError('');
+            },
+            'expired-callback': () => {
+              setCaptchaToken('');
+              setCaptchaError('Security check expired. Please complete it again.');
+            },
+            'error-callback': () => {
+              setCaptchaToken('');
+              setCaptchaError('Security check failed to load. Please try again.');
+            },
+          },
+        );
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setCaptchaError('Security check failed to load. Please refresh and try again.');
+        }
+      });
+
+    return () => {
+      isCancelled = true;
+
+      if (turnstileWidgetIdRef.current && window.turnstile) {
+        window.turnstile.remove(turnstileWidgetIdRef.current);
+        turnstileWidgetIdRef.current = null;
+      }
+
+      setCaptchaToken('');
+      setCaptchaError('');
+    };
+  }, [isCaptchaEnabled, isOpen]);
+
   const onSubmit = async (formValues: CheckoutFormValues) => {
     if (cartItems.length === 0) {
       setErrorMessage('Add at least one item to your cart before checking out.');
       return;
     }
 
+    if (isCaptchaEnabled && !captchaToken) {
+      setCaptchaError('Complete the security check before starting payment.');
+      return;
+    }
 
     try {
       setIsSubmitting(true);
@@ -75,6 +202,7 @@ const CheckoutModal = ({
         credentials: 'same-origin',
         headers: {
           'Content-Type': 'application/json',
+          ...(await getCsrfHeaders()),
         },
         body: JSON.stringify({
           customer: formValues,
@@ -82,6 +210,7 @@ const CheckoutModal = ({
             id: item.id,
             quantity: item.quantity,
           })),
+          captchaToken: captchaToken || undefined,
         }),
       });
 
@@ -108,6 +237,11 @@ const CheckoutModal = ({
           ? error.message
           : 'Unable to start payment right now.',
       );
+      resetCsrfToken();
+      setCaptchaToken('');
+      if (turnstileWidgetIdRef.current) {
+        window.turnstile?.reset(turnstileWidgetIdRef.current);
+      }
       setIsSubmitting(false);
     }
   };
@@ -227,7 +361,7 @@ const CheckoutModal = ({
                     ? 'border-[#c13515] focus:border-[#c13515] focus:ring-2 focus:ring-[#c13515]/20'
                     : 'border-[#c1c1c1] focus:border-[#222222] focus:ring-2 focus:ring-[#222222]/15'
                 }`}
-                placeholder="Asaba"
+                placeholder="City Center"
               />
               {errors.city && (
                 <p className="mt-1 text-sm text-[#c13515]">{errors.city.message}</p>
@@ -294,6 +428,15 @@ const CheckoutModal = ({
             {errorMessage && (
               <div className="md:col-span-2 rounded-lg border border-[#c13515]/30 bg-[#fff5f3] px-4 py-3 text-sm text-[#c13515]">
                 {errorMessage}
+              </div>
+            )}
+
+            {isCaptchaEnabled && (
+              <div className="md:col-span-2 rounded-lg border border-[#c1c1c1] bg-white px-4 py-4">
+                <div ref={turnstileContainerRef} />
+                {captchaError && (
+                  <p className="mt-3 text-sm text-[#c13515]">{captchaError}</p>
+                )}
               </div>
             )}
 

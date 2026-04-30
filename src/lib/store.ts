@@ -69,7 +69,7 @@ export const useStore = create<StoreState>()(
       toggleDenseLayout: () => set((state) => ({ isDenseLayout: !state.isDenseLayout })),
     }),
     {
-      name: 'stankings-preferences', 
+      name: 'thewworksict-preferences', 
     }
   )
 );

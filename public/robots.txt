@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /admin/
 
-Sitemap: https://stankingshomevalue.com/sitemap.xml
+Sitemap: https://thewworksict.com/sitemap.xml

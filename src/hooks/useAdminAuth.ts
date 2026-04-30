@@ -1,14 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { buildAdminRedirectUrl } from '../lib/admin-auth';
 
-const ADMIN_TOKEN_KEY = 'stankings_admin_token';
-const approvedAdminEmails = new Set(
-  (import.meta.env.VITE_ADMIN_EMAILS || '')
-    .split(',')
-    .map((email: string) => email.trim().toLowerCase())
-    .filter(Boolean),
-);
+const ADMIN_TOKEN_KEY = 'thewworksict_admin_token';
 
 interface AdminAuthState {
   session: Session | null;
@@ -25,6 +20,15 @@ interface UseAdminAuth extends AdminAuthState {
   logout: () => Promise<void>;
 }
 
+interface AdminMeResponse {
+  user?: {
+    id: string;
+    email: string;
+    role: string;
+  };
+  message?: string;
+}
+
 function storeToken(token: string | null) {
   try {
     if (token) {
@@ -38,23 +42,25 @@ function storeToken(token: string | null) {
   }
 }
 
-function hasAdminAccess(user: User | null): boolean {
-  if (!user) {
-    return false;
+async function fetchAdminSession(token: string) {
+  const response = await fetch('/api/admin/me', {
+    credentials: 'same-origin',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const payload = (await response.json().catch(() => null)) as AdminMeResponse | null;
+
+  if (!response.ok || !payload?.user) {
+    throw new Error(payload?.message || 'This Google account does not have admin access.');
   }
 
-  const appRole = user.app_metadata?.role;
-  const userRole = user.user_metadata?.role;
-  const email = user.email?.trim().toLowerCase() || '';
-
-  return (
-    appRole === 'admin' ||
-    userRole === 'admin' ||
-    approvedAdminEmails.has(email)
-  );
+  return payload.user;
 }
 
 export function useAdminAuth(): UseAdminAuth {
+  const rejectedSessionMessageRef = useRef('');
   const [state, setState] = useState<AdminAuthState>({
     session: null,
     isAuthenticated: false,
@@ -63,13 +69,17 @@ export function useAdminAuth(): UseAdminAuth {
     error: '',
   });
 
-  const syncSession = useCallback((session: Session | null, error = '') => {
-    storeToken(session?.access_token ?? null);
+  const syncSession = useCallback((
+    session: Session | null,
+    isAdmin: boolean,
+    error = '',
+  ) => {
+    storeToken(isAdmin ? session?.access_token ?? null : null);
     setState((prev) => ({
       ...prev,
       session,
       isAuthenticated: Boolean(session?.access_token),
-      isAdmin: hasAdminAccess(session?.user ?? null),
+      isAdmin,
       isLoading: false,
       error,
     }));
@@ -83,18 +93,37 @@ export function useAdminAuth(): UseAdminAuth {
         return;
       }
 
-      if (session?.user && !hasAdminAccess(session.user)) {
+      if (!session?.access_token) {
+        const rejectedMessage = rejectedSessionMessageRef.current;
+        rejectedSessionMessageRef.current = '';
+        syncSession(null, false, rejectedMessage);
+        return;
+      }
+
+      setState((prev) => ({ ...prev, isLoading: true, error: '' }));
+
+      try {
+        await fetchAdminSession(session.access_token);
+
+        if (!isMounted) {
+          return;
+        }
+
+        syncSession(session, true);
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'This Google account does not have admin access.';
+        rejectedSessionMessageRef.current = message;
         await supabase.auth.signOut();
 
         if (!isMounted) {
           return;
         }
 
-        syncSession(null, 'This Google account does not have admin access.');
-        return;
+        syncSession(null, false, message);
       }
-
-      syncSession(session);
     };
 
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -120,7 +149,7 @@ export function useAdminAuth(): UseAdminAuth {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/admin`,
+          redirectTo: buildAdminRedirectUrl(window.location.origin),
           queryParams: {
             access_type: 'offline',
             prompt: 'select_account',
@@ -156,7 +185,7 @@ export function useAdminAuth(): UseAdminAuth {
         throw error;
       }
 
-      syncSession(null);
+      syncSession(null, false);
     } catch (error) {
       setState((prev) => ({
         ...prev,

@@ -38,73 +38,74 @@ const Blog = () => {
     <section
       id="blog"
       ref={sectionRef}
-      className="py-24 bg-[#f7f7f7]"
+      className="py-20 md:py-28 bg-white"
     >
-      <div className="max-w-[1100px] mx-auto px-6">
+      <div className="max-w-[1200px] mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-12">
           <span
-            className={`inline-block mb-4 text-sm tracking-[0.2em] text-[#5a1a2a] font-medium uppercase transition-all duration-700 ${
+            className={`inline-block mb-4 text-sm font-medium tracking-widest uppercase text-[var(--chevron-blue)] transition-all duration-700 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
           >
             {blogConfig.tag}
           </span>
           <h2
-            className={`font-serif text-4xl md:text-5xl text-black mb-6 transition-all duration-700 ${
+            className={`font-heading text-3xl md:text-4xl lg:text-5xl text-black transition-all duration-700 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
-            style={{ transitionDelay: '200ms' }}
+            style={{ transitionDelay: '150ms' }}
           >
             {blogConfig.heading}
           </h2>
         </div>
 
-        {/* Blog Grid */}
+        {/* Blog Grid - Chevron Newsroom Style */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {visiblePosts.map((post, index) => (
             <article
               key={post.id}
-              className={`group relative h-[500px] overflow-hidden cursor-pointer transition-all duration-700 ${
+              className={`group cursor-pointer transition-all duration-700 ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}
-              style={{ transitionDelay: `${400 + index * 150}ms` }}
+              style={{ transitionDelay: `${300 + index * 120}ms` }}
             >
               {/* Background Image */}
               <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-600"
-                style={{ backgroundImage: `url(${post.image})` }}
-              />
-
-              {/* Dark overlay - appears on hover */}
-              <div
-                className="absolute inset-0 bg-black/60 opacity-60 group-hover:opacity-90 transition-opacity duration-600"
-              />
+                className="relative h-56 overflow-hidden mb-4"
+              >
+                <img
+                  src={post.image}
+                  alt={post.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </div>
 
               {/* Content */}
-              <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
-                {/* Date */}
-                <span className="text-sm font-light tracking-wide opacity-80 mb-3 transform translate-y-0 group-hover:-translate-y-4 transition-transform duration-600">
+              <div>
+                {/* Date - Chevron Newsroom Style */}
+                <span className="text-xs text-[var(--chevron-muted)] font-medium">
                   {post.date}
                 </span>
 
                 {/* Title */}
-                <h3 className="font-serif text-2xl md:text-[26px] leading-tight mb-4 transform translate-y-0 group-hover:-translate-y-4 transition-transform duration-600">
+                <h3 className="font-heading text-xl text-black mt-2 mb-3 leading-tight group-hover:text-[var(--chevron-blue)] transition-colors">
                   {post.title}
                 </h3>
 
-                {/* Excerpt - hidden by default, shows on hover */}
-                <p className="text-sm font-light opacity-0 transform translate-y-4 group-hover:opacity-80 group-hover:translate-y-0 transition-all duration-600 mb-4">
+                {/* Excerpt */}
+                <p className="text-sm text-[var(--chevron-muted)] leading-relaxed mb-4">
                   {post.excerpt}
                 </p>
 
                 {/* Read More Link */}
-                <div className="flex items-center gap-2 opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-600">
-                  <span className="text-sm tracking-[0.2em] uppercase">{blogConfig.readMoreText}</span>
-                  <ArrowRight size={16} />
-                  {/* Underline animation */}
-                  <div className="absolute bottom-6 left-6 h-[2px] bg-[#7f7e7e] w-0 group-hover:w-24 transition-all duration-600" />
-                </div>
+                <a
+                  href="#"
+                  className="inline-flex items-center gap-1 text-sm text-[var(--chevron-blue)] font-medium hover:gap-2 transition-all"
+                >
+                  {blogConfig.readMoreText}
+                  <ArrowRight size={14} />
+                </a>
               </div>
             </article>
           ))}
@@ -116,14 +117,14 @@ const Blog = () => {
             className={`text-center mt-12 transition-all duration-700 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
-            style={{ transitionDelay: '900ms' }}
+            style={{ transitionDelay: '700ms' }}
           >
             <button
               type="button"
               onClick={() => setShowAllPosts((currentValue) => !currentValue)}
-              className="inline-flex items-center gap-2 text-[#5a1a2a] font-medium tracking-wide hover:gap-4 transition-all duration-300"
+              className="inline-flex items-center gap-2 text-[var(--chevron-blue)] font-medium hover:gap-3 transition-all"
             >
-              {showAllPosts ? 'Show Fewer Articles' : blogConfig.viewAllText}
+              {showAllPosts ? 'Show Fewer' : blogConfig.viewAllText}
               <ArrowRight size={18} />
             </button>
           </div>

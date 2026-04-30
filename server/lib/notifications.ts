@@ -127,18 +127,24 @@ function buildSmsText(order: OrderRecord) {
 async function sendEmailConfirmation(order: OrderRecord): Promise<NotificationStatus> {
   const senderEmail = process.env.RESEND_FROM_EMAIL?.trim();
 
-  if (!resendClient || !senderEmail) {
+  if (!resendClient || !senderEmail || !senderEmail.includes('@')) {
+    console.warn('Email confirmation skipped: RESEND_API_KEY or valid RESEND_FROM_EMAIL not configured.');
     return 'not_configured';
   }
 
   try {
-    await resendClient.emails.send({
+    const { error } = await resendClient.emails.send({
       from: senderEmail,
       to: order.customer.email,
       subject: `${storeName} payment confirmation - ${order.reference}`,
       html: buildEmailHtml(order),
       text: buildEmailText(order),
     });
+
+    if (error) {
+      console.error('Resend API error:', error);
+      return 'failed';
+    }
 
     return 'sent';
   } catch (error) {

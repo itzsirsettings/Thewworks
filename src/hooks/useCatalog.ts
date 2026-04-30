@@ -1,6 +1,33 @@
 import { useState, useEffect } from 'react';
-import type { StoreProduct, MarketplaceCategory } from '../lib/marketplace-data';
+import {
+  marketplaceCategories,
+  marketplaceProducts,
+  type MarketplaceCategory,
+  type StoreProduct,
+} from '../lib/marketplace-data';
 import { supabase } from '../lib/supabase';
+
+const legacyCatalogTerms = [
+  'sofa',
+  'bed',
+  'refrigerator',
+  'rug',
+  'dining',
+  'appliance',
+  'living room',
+  'bedroom',
+];
+
+const shouldUseThewworksCatalog = (products: StoreProduct[]) => {
+  if (products.length === 0) {
+    return true;
+  }
+
+  return products.some((product) => {
+    const searchable = `${product.name} ${product.category} ${product.summary}`.toLowerCase();
+    return legacyCatalogTerms.some((term) => searchable.includes(term));
+  });
+};
 
 export function useCatalog() {
   const [products, setProducts] = useState<StoreProduct[]>([]);
@@ -37,7 +64,7 @@ export function useCatalog() {
         if (active) {
           const formattedProducts = (productsData || []).map((p: Record<string, unknown>) => ({
             ...p,
-            gallery: (p.gallery as Record<string, unknown>[]).map((g: Record<string, unknown>) => ({
+            gallery: ((p.gallery as Record<string, unknown>[] | null) || []).map((g: Record<string, unknown>) => ({
               id: g.id,
               image: g.image,
               title: g.title,
@@ -45,11 +72,19 @@ export function useCatalog() {
               objectPosition: g.object_position,
               imageTransform: g.image_transform
             })),
-            tags: (p.tags as Record<string, unknown>[]).map((t: Record<string, unknown>) => t.tag),
+            tags: ((p.tags as Record<string, unknown>[] | null) || []).map((t: Record<string, unknown>) => t.tag),
             leadTime: p.lead_time
-          }));
+          })) as StoreProduct[];
 
-          setProducts(formattedProducts as StoreProduct[]);
+          if (shouldUseThewworksCatalog(formattedProducts)) {
+            setProducts(marketplaceProducts);
+            setCategories(marketplaceCategories);
+            setSuppliers([]);
+            setError(null);
+            return;
+          }
+
+          setProducts(formattedProducts);
           setCategories(categoriesData as MarketplaceCategory[]);
           setSuppliers(suppliersData || []);
           setError(null);
@@ -58,6 +93,9 @@ export function useCatalog() {
         console.error('Supabase fetch error:', err);
         if (active) {
           const errorMessage = err instanceof Error ? err.message : String(err);
+          setProducts(marketplaceProducts);
+          setCategories(marketplaceCategories);
+          setSuppliers([]);
           setError(errorMessage || 'An error occurred loading the catalog');
         }
       } finally {

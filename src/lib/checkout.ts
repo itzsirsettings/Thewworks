@@ -41,8 +41,8 @@ export interface VerifiedOrder {
 
 const PAYSTACK_REDIRECT_HOSTS = new Set(['checkout.paystack.com', 'paystack.com']);
 
-export const CART_STORAGE_KEY = 'stankings-cart';
-export const PENDING_REFERENCE_STORAGE_KEY = 'stankings-pending-reference';
+export const CART_STORAGE_KEY = 'thewworksict-cart';
+export const PENDING_REFERENCE_STORAGE_KEY = 'thewworksict-pending-reference';
 
 export const defaultCheckoutFormValues: CheckoutFormValues = {
   fullName: '',

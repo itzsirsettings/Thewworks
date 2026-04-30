@@ -79,12 +79,19 @@ export async function verifyCheckoutCaptcha(
   const payload = (await response.json()) as TurnstileVerificationResult;
 
   if (!payload.success) {
+    const errorCodes = payload['error-codes']?.join(', ') || 'no error codes';
+    console.error(`Turnstile verification failed: ${errorCodes}`);
     throw new CaptchaValidationError('Security check failed. Please try again.');
   }
 
-  const expectedHostname = getTrustedSiteUrl().hostname;
+  // Only check hostname in production to avoid issues with local testing or preview sites
+  if (process.env.NODE_ENV === 'production' && payload.hostname) {
+    const expectedHostname = getTrustedSiteUrl().hostname;
 
-  if (payload.hostname && payload.hostname !== expectedHostname) {
-    throw new CaptchaValidationError('Security check was issued for the wrong hostname.');
+    if (payload.hostname !== expectedHostname) {
+      console.warn(`Turnstile hostname mismatch: expected ${expectedHostname}, got ${payload.hostname}`);
+      throw new CaptchaValidationError('Security check was issued for the wrong hostname.');
+    }
   }
 }
+

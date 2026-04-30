@@ -8,6 +8,7 @@ import {
   Twitter,
   Store,
 } from 'lucide-react';
+import BrandLogo from '../components/BrandLogo';
 import { navigationConfig } from '../config';
 import { formatCurrency } from '../lib/currency';
 import type { CartItem } from '../lib/checkout';
@@ -79,39 +80,80 @@ const Navigation = ({
       {/* Skip Navigation */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[99999] focus:rounded focus:bg-[#5a1a2a] focus:px-4 focus:py-2 focus:text-white focus:outline-none"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[99999] focus:rounded focus:bg-black focus:px-4 focus:py-2 focus:text-white focus:outline-none"
       >
         Skip to main content
       </a>
+      
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled ? 'bg-white shadow-sm' : 'bg-transparent'
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+          isScrolled 
+            ? 'bg-white shadow-sm border-b border-[var(--chevron-border)]' 
+            : 'bg-transparent'
         }`}
       >
-        <div className="flex items-center justify-between h-[70px] px-6 md:px-12 lg:px-[170px]">
+        <div className="flex items-center justify-between h-16 md:h-20 px-6 md:px-12 lg:px-20">
+          {/* Logo */}
           <a
             href="#hero"
             onClick={(e) => {
               e.preventDefault();
               scrollToSection('#hero');
             }}
-            className="font-serif text-2xl tracking-wide"
-            style={{ color: isScrolled ? '#000' : '#fff' }}
+            className="font-heading text-xl md:text-2xl tracking-tight font-bold"
           >
-            {navigationConfig.brandName}
+            <BrandLogo
+              markClassName="h-10 w-[72px]"
+              textClassName="text-xl md:text-2xl"
+              taglineClassName="hidden sm:block"
+              showTagline
+              textTone={isScrolled ? 'dark' : 'light'}
+            />
           </a>
 
-          <div className="flex items-center gap-6">
+          {/* Desktop Navigation Links */}
+          <div className="hidden lg:flex items-center gap-8">
+            {navigationConfig.menuLinks.slice(0, 4).map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={(e) => {
+                  e.preventDefault();
+                  const element = document.querySelector(link.href);
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="text-sm font-medium tracking-wide hover:opacity-60 transition-opacity"
+                style={{ color: isScrolled ? 'var(--chevron-gray)' : '#fff' }}
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+
+          {/* Right Side Actions */}
+          <div className="flex items-center gap-4">
+            {/* Search Icon */}
+            <button
+              className="p-2 hover:opacity-60 transition-opacity"
+              style={{ color: isScrolled ? 'var(--chevron-gray)' : '#fff' }}
+              aria-label="Search"
+            >
+              <Search size={20} strokeWidth={1.5} />
+            </button>
+
             {showCart ? (
               <button
                 ref={cartButtonRef}
                 onClick={() => setIsCartOpen(true)}
-                className="relative btn-hover"
-                style={{ color: isScrolled ? '#5a1a2a' : '#fff' }}
+                className="relative p-2 hover:opacity-60 transition-opacity"
+                style={{ color: isScrolled ? 'var(--chevron-gray)' : '#fff' }}
+                aria-label="Shopping cart"
               >
-                <ShoppingBag size={22} strokeWidth={1.5} />
+                <ShoppingBag size={20} strokeWidth={1.5} />
                 {totalItems > 0 && (
-                  <span className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center text-xs text-white bg-[#5a1a2a] rounded-full">
+                  <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs text-white bg-[var(--chevron-blue)] rounded-full">
                     {totalItems}
                   </span>
                 )}
@@ -121,20 +163,21 @@ const Navigation = ({
                 href={storeHref}
                 className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all duration-300 hover:-translate-y-0.5"
                 style={{
-                  color: isScrolled ? '#5a1a2a' : '#fff',
-                  borderColor: isScrolled ? 'rgba(90,26,42,0.22)' : 'rgba(255,255,255,0.35)',
-                  backgroundColor: isScrolled ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.08)',
+                  color: isScrolled ? 'var(--chevron-blue)' : '#fff',
+                  borderColor: isScrolled ? 'var(--chevron-blue)' : 'rgba(255,255,255,0.5)',
+                  backgroundColor: isScrolled ? 'transparent' : 'rgba(255,255,255,0.1)',
                 }}
               >
-                <Store size={18} strokeWidth={1.75} />
+                <Store size={16} strokeWidth={1.75} />
                 <span className="hidden sm:inline">{storeLabel}</span>
               </a>
             )}
 
+            {/* Mobile Menu Button */}
             <button
               ref={menuButtonRef}
               onClick={() => setIsMenuOpen(true)}
-              className="flex flex-col gap-1.5 w-7 btn-hover"
+              className="flex flex-col gap-1.5 w-6 p-2 lg:hidden"
               aria-label="Open navigation menu"
             >
               <span
@@ -152,37 +195,38 @@ const Navigation = ({
         </div>
       </nav>
 
+      {/* Fullscreen Menu Overlay */}
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
-        className={`fixed inset-0 z-[9999] transition-all duration-700 ${
+        className={`fixed inset-0 z-[9999] transition-all duration-500 ${
           isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
         }`}
       >
         <div className="absolute inset-0 bg-white" />
-        <div className="relative h-full flex">
-          <div className="flex-1 flex flex-col justify-center items-center px-8 lg:px-20">
+        <div className="relative h-full flex flex-col">
+          {/* Menu Header */}
+          <div className="flex items-center justify-between h-16 px-6 border-b">
+            <a
+              href="#hero"
+              onClick={closeMenu}
+              className="font-heading text-xl font-bold"
+            >
+              <BrandLogo markClassName="h-9 w-16" textClassName="text-xl" />
+            </a>
             <button
               onClick={closeMenu}
-              className="absolute top-6 right-6 lg:right-20 p-2 hover:opacity-60 transition-opacity"
+              className="p-2 hover:opacity-50 transition-opacity"
               aria-label="Close navigation menu"
             >
-              <X size={28} strokeWidth={1.5} />
+              <X size={24} strokeWidth={1.5} />
             </button>
+          </div>
 
-            <div className="w-full max-w-md mb-8">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder={navigationConfig.searchPlaceholder}
-                  className="w-full py-3 border-b-2 border-[#5a1a2a] bg-transparent focus:outline-none font-light text-lg"
-                />
-                <Search className="absolute right-0 top-1/2 -translate-y-1/2 text-[#5a1a2a]" size={20} />
-              </div>
-            </div>
-
-            <nav className="flex flex-col items-center gap-6">
+          {/* Menu Content */}
+          <div className="flex-1 flex flex-col justify-center px-6 md:px-12 lg:px-20">
+            <nav className="flex flex-col gap-6">
               {navigationConfig.menuLinks.map((link, index) => (
                 <a
                   key={link.label}
@@ -195,11 +239,11 @@ const Navigation = ({
                       element.scrollIntoView({ behavior: 'smooth' });
                     }
                   }}
-                  className="font-serif text-3xl lg:text-[45px] text-black hover:text-[#5a1a2a] transition-colors duration-300"
+                  className="font-heading text-3xl md:text-4xl lg:text-5xl text-black hover:text-[var(--chevron-blue)] transition-colors duration-300"
                   style={{
                     opacity: isMenuOpen ? 1 : 0,
                     transform: isMenuOpen ? 'translateY(0)' : 'translateY(20px)',
-                    transition: `all 0.5s ease ${index * 0.1}s`,
+                    transition: `all 0.4s ease ${index * 0.08}s`,
                   }}
                 >
                   {link.label}
@@ -207,38 +251,53 @@ const Navigation = ({
               ))}
             </nav>
 
-             <div className="flex items-center gap-6 mt-12">
-               {navigationConfig.socialLinks.map((social) => {
-                 const IconComponent = iconMap[social.icon];
-                 if (!IconComponent) return null;
-                 return (
-                   <a
-                     key={social.label}
-                     href={social.href}
-                     className="text-[#696969] hover:text-[#5a1a2a] transition-colors"
-                     aria-label={social.label}
-                   >
-                     <IconComponent size={20} strokeWidth={1.5} />
-                   </a>
-                 );
-               })}
-             </div>
+            {/* Search Input */}
+            <div className="mt-12 max-w-md">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder={navigationConfig.searchPlaceholder}
+                  className="w-full py-3 border-b-2 border-black bg-transparent focus:outline-none font-light text-lg"
+                />
+                <Search className="absolute right-0 top-1/2 -translate-y-1/2 text-black" size={20} />
+              </div>
+            </div>
+
+            {/* Social Links */}
+            <div className="flex items-center gap-6 mt-12">
+              {navigationConfig.socialLinks.map((social) => {
+                const IconComponent = iconMap[social.icon];
+                if (!IconComponent) return null;
+                return (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    className="text-[var(--chevron-muted)] hover:text-black transition-colors"
+                    aria-label={social.label}
+                  >
+                    <IconComponent size={20} strokeWidth={1.5} />
+                  </a>
+                );
+              })}
+            </div>
           </div>
 
+          {/* Menu Background Image */}
           {navigationConfig.menuBackgroundImage && (
             <div
-              className="hidden lg:block w-[40%] bg-cover bg-center"
+              className="hidden lg:block absolute right-0 top-0 bottom-0 w-[40%] bg-cover bg-center"
               style={{
                 backgroundImage: `url(${navigationConfig.menuBackgroundImage})`,
                 opacity: isMenuOpen ? 1 : 0,
                 transform: isMenuOpen ? 'translateX(0)' : 'translateX(100%)',
-                transition: 'all 0.7s ease 0.2s',
+                transition: 'all 0.6s ease 0.2s',
               }}
             />
           )}
         </div>
       </div>
 
+      {/* Cart Sidebar */}
       {showCart && (
         <div
           role="dialog"
@@ -259,10 +318,10 @@ const Navigation = ({
           >
             <div className="flex flex-col h-full">
               <div className="flex items-center justify-between p-6 border-b">
-                <h3 className="font-serif text-2xl">{navigationConfig.brandName}</h3>
+                <BrandLogo markClassName="h-9 w-16" textClassName="text-xl" />
                 <button
                   onClick={closeCart}
-                  className="p-2 hover:opacity-60 transition-opacity"
+                  className="p-2 hover:opacity-50 transition-opacity"
                   aria-label="Close cart"
                 >
                   <X size={24} strokeWidth={1.5} />
@@ -272,11 +331,11 @@ const Navigation = ({
               <div className="flex-1 overflow-y-auto p-6">
                 {cartItems.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center">
-                    <ShoppingBag size={48} className="text-gray-300 mb-4" strokeWidth={1} />
-                    <p className="text-[#696969] text-lg">{navigationConfig.cartEmptyText}</p>
+                    <ShoppingBag size={48} className="text-[var(--chevron-subtle)] mb-4" strokeWidth={1} />
+                    <p className="text-[var(--chevron-muted)] text-lg">{navigationConfig.cartEmptyText}</p>
                     <button
                       onClick={closeCart}
-                      className="mt-6 px-8 py-3 bg-[#5a1a2a] text-white font-light tracking-wide btn-hover"
+                      className="mt-6 px-8 py-3 bg-[var(--chevron-blue)] text-white font-medium tracking-wide transition-all hover:opacity-90"
                     >
                       {navigationConfig.continueShoppingText}
                     </button>
@@ -284,8 +343,8 @@ const Navigation = ({
                 ) : (
                   <div className="space-y-6">
                     {cartItems.map((item) => (
-                      <div key={item.id} className="flex gap-4 pb-6 border-b border-gray-100">
-                        <div className="w-24 h-24 bg-[#fafafa] overflow-hidden">
+                      <div key={item.id} className="flex gap-4 pb-6 border-b border-[var(--chevron-bg-alt)]">
+                        <div className="w-24 h-24 bg-[var(--chevron-bg)] overflow-hidden">
                           <img
                             src={item.image}
                             alt={item.name}
@@ -293,12 +352,12 @@ const Navigation = ({
                           />
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-serif text-lg">{item.name}</h4>
-                          <p className="text-[#aea4a4] mt-1">{formatCurrency(item.price)}</p>
+                          <h4 className="font-heading text-lg">{item.name}</h4>
+                          <p className="text-[var(--chevron-muted)] mt-1">{formatCurrency(item.price)}</p>
                           <div className="flex items-center gap-3 mt-3">
                             <button
                               onClick={() => onUpdateQuantity(item.id, Math.max(0, item.quantity - 1))}
-                              className="w-8 h-8 flex items-center justify-center border border-gray-200 hover:border-[#5a1a2a] transition-colors"
+                              className="w-8 h-8 flex items-center justify-center border border-[var(--chevron-border)] hover:border-black transition-colors"
                               aria-label={`Decrease quantity of ${item.name}`}
                             >
                               -
@@ -306,7 +365,7 @@ const Navigation = ({
                             <span className="w-8 text-center">{item.quantity}</span>
                             <button
                               onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                              className="w-8 h-8 flex items-center justify-center border border-gray-200 hover:border-[#5a1a2a] transition-colors"
+                              className="w-8 h-8 flex items-center justify-center border border-[var(--chevron-border)] hover:border-black transition-colors"
                               aria-label={`Increase quantity of ${item.name}`}
                             >
                               +
@@ -315,7 +374,7 @@ const Navigation = ({
                         </div>
                         <button
                           onClick={() => onRemoveFromCart(item.id)}
-                          className="text-gray-400 hover:text-red-500 transition-colors"
+                          className="text-[var(--chevron-subtle)] hover:text-black transition-colors"
                           aria-label={`Remove ${item.name} from cart`}
                         >
                           <X size={18} />
@@ -327,26 +386,26 @@ const Navigation = ({
               </div>
 
               {cartItems.length > 0 && (
-                <div className="p-6 border-t bg-[#fafafa]">
+                <div className="p-6 border-t bg-[var(--chevron-bg)]">
                   <div className="flex items-center justify-between mb-6">
                     <span className="text-lg">Subtotal</span>
-                    <span className="font-serif text-xl">{formatCurrency(totalPrice)}</span>
+                    <span className="font-heading text-xl">{formatCurrency(totalPrice)}</span>
                   </div>
                   <button
                     onClick={() => {
                       closeCart();
                       onCheckoutRequested();
                     }}
-                    className="w-full py-4 bg-[#5a1a2a] text-white font-light tracking-widest btn-hover"
+                    className="w-full py-4 bg-[var(--chevron-blue)] text-white font-medium tracking-wide transition-all hover:opacity-90"
                   >
                     {navigationConfig.cartCheckoutText}
                   </button>
-                  <p className="mt-3 text-center text-xs uppercase tracking-[0.2em] text-[#696969]">
-                    Secure verified checkout
+                  <p className="mt-3 text-center text-xs uppercase tracking-[0.15em] text-[var(--chevron-muted)]">
+                    Secure checkout
                   </p>
                   <button
                     onClick={closeCart}
-                    className="w-full py-3 mt-3 text-[#696969] font-light tracking-wide hover:text-black transition-colors"
+                    className="w-full py-3 mt-3 text-[var(--chevron-muted)] font-medium hover:text-black transition-colors"
                   >
                     {navigationConfig.continueShoppingText}
                   </button>

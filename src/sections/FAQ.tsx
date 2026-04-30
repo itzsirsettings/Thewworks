@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Minus } from 'lucide-react';
 import { faqConfig } from '../config';
 
 const FAQ = () => {
@@ -37,93 +37,77 @@ const FAQ = () => {
     <section
       id="faq"
       ref={sectionRef}
-      className="py-24 md:py-32 bg-[#fafafa]"
+      className="py-20 md:py-28 bg-white"
     >
-      <div className="max-w-[1200px] mx-auto px-6">
-        {/* Header */}
+      <div className="max-w-[800px] mx-auto px-6">
         <div className="text-center mb-12">
           <span
-            className={`inline-block mb-4 text-sm tracking-[0.2em] text-[#5a1a2a] font-medium uppercase transition-all duration-700 ${
+            className={`inline-block mb-4 text-sm font-medium tracking-widest uppercase text-[var(--chevron-blue)] transition-all duration-700 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
           >
             {faqConfig.tag}
           </span>
           <h2
-            className={`font-serif text-4xl md:text-5xl text-black mb-6 transition-all duration-700 ${
+            className={`font-heading text-3xl md:text-4xl text-black transition-all duration-700 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
-            style={{ transitionDelay: '200ms' }}
+            style={{ transitionDelay: '150ms' }}
           >
             {faqConfig.heading}
           </h2>
         </div>
 
-        {/* FAQ Items */}
         <div className="space-y-3">
           {faqConfig.faqs.map((faq, index) => (
             <div
               key={faq.id}
-              className={`transition-all duration-700 ${
+              className={`live-card border border-[var(--chevron-border)] transition-all duration-700 ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               }`}
-              style={{ transitionDelay: `${400 + index * 100}ms` }}
+              style={{ transitionDelay: `${250 + index * 80}ms` }}
             >
-              {/* Question */}
               <button
                 onClick={() => toggleFaq(faq.id)}
-                className={`w-full flex items-center justify-between px-6 lg:px-8 py-5 bg-white border border-[#e9e9e9] text-left transition-shadow duration-300 hover:shadow-[0_1px_13px_rgba(161,161,161,0.16)] ${
-                  openId === faq.id ? 'border-b-0' : ''
-                }`}
+                className="w-full flex items-center justify-between p-5 text-left hover:bg-[var(--chevron-bg-alt)] transition-colors"
+                aria-expanded={openId === faq.id}
               >
-                <span className="font-sans text-lg text-[#3c3c3b] font-light pr-4">
-                  {faq.question}
-                </span>
-                <div
-                  className={`flex-shrink-0 w-6 h-6 flex items-center justify-center border border-[#c3bab0] rounded-full transition-transform ${
-                    openId === faq.id ? 'rotate-45' : ''
-                  }`}
-                  style={{ transition: 'transform 0.7s cubic-bezier(0.55, 0.055, 0.675, 0.19)' }}
-                >
-                  <Plus size={14} strokeWidth={1.5} className="text-[#5a1a2a]" />
-                </div>
+                <span className="font-heading text-lg pr-4">{faq.question}</span>
+                {openId === faq.id ? (
+                  <Minus size={20} className="text-[var(--chevron-blue)] flex-shrink-0" />
+                ) : (
+                  <Plus size={20} className="text-[var(--chevron-muted)] flex-shrink-0" />
+                )}
               </button>
-
-              {/* Answer */}
               <div
-                className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                  openId === faq.id ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                className={`overflow-hidden transition-all duration-300 ${
+                  openId === faq.id ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
                 }`}
               >
-                <div className="px-6 lg:px-8 py-6 bg-white border border-t-0 border-[#e9e9e9]">
-                  <p className="text-[#696969] text-base font-light leading-relaxed">
-                    {faq.answer}
-                  </p>
-                </div>
+                <p className="px-5 pb-5 text-[var(--chevron-muted)] leading-relaxed">
+                  {faq.answer}
+                </p>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Contact CTA */}
         {faqConfig.ctaText && (
           <div
-            className={`text-center mt-12 transition-all duration-700 ${
+            className={`text-center mt-10 transition-all duration-700 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
-            style={{ transitionDelay: '1000ms' }}
+            style={{ transitionDelay: '600ms' }}
           >
-            <p className="text-[#696969] mb-4">{faqConfig.ctaText}</p>
             <a
               href={faqConfig.ctaTarget}
               onClick={(e) => {
                 e.preventDefault();
                 document.querySelector(faqConfig.ctaTarget)?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="inline-flex items-center gap-2 text-[#5a1a2a] font-medium tracking-wide hover:gap-4 transition-all duration-300"
+              className="inline-flex items-center gap-2 text-[var(--chevron-blue)] font-medium hover:gap-3 transition-all"
             >
               {faqConfig.ctaText}
-              <span className="text-lg">&rarr;</span>
             </a>
           </div>
         )}

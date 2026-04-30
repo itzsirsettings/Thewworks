@@ -1,5 +1,8 @@
 import { Instagram, Facebook, Twitter, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import BrandLogo from '../components/BrandLogo';
+import { openCookieSettings } from '../components/CookieConsentBanner';
 import { contactConfig, footerConfig } from '../config';
 import { openMailto } from '../lib/browser-actions';
 
@@ -36,6 +39,11 @@ const Footer = () => {
   };
 
   const scrollToSection = (href: string) => {
+    if (href === '#cookies') {
+      openCookieSettings();
+      return;
+    }
+
     if (href === '#') return;
     const element = document.querySelector(href);
     if (element) {
@@ -46,13 +54,22 @@ const Footer = () => {
   if (shouldRenderNothing) return null;
 
   return (
-    <footer className="bg-white pt-16 md:pt-24">
-      <div className="max-w-[1100px] mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
-          {/* Company Info */}
+    <footer className="bg-white pt-16 md:pt-20">
+      <div className="max-w-[1200px] mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8 pb-12 border-b border-[var(--chevron-border)]">
+          {/* Brand Info */}
           <div className="lg:col-span-1">
-            <h3 className="font-serif text-2xl mb-6">{footerConfig.brandName}</h3>
-            <p className="text-[#696969] font-light text-sm leading-relaxed mb-6">
+            <BrandLogo
+              className="mb-4"
+              markClassName="h-12 w-[86px]"
+              textClassName="text-2xl font-heading"
+            />
+            {footerConfig.brandTagline && (
+              <p className="text-sm text-[var(--chevron-blue)] font-medium mb-3">
+                {footerConfig.brandTagline}
+              </p>
+            )}
+            <p className="text-[var(--chevron-muted)] text-sm leading-relaxed mb-6">
               {footerConfig.brandDescription}
             </p>
             <div className="flex items-center gap-4">
@@ -63,10 +80,10 @@ const Footer = () => {
                   <a
                     key={social.label}
                     href={social.href}
-                    className="text-[#696969] hover:text-[#5a1a2a] transition-all duration-300 hover:scale-90"
+                    className="text-[var(--chevron-muted)] hover:text-black transition-colors"
                     aria-label={social.label}
                   >
-                    <IconComponent size={20} strokeWidth={5} />
+                    <IconComponent size={20} strokeWidth={1.5} />
                   </a>
                 );
               })}
@@ -76,7 +93,7 @@ const Footer = () => {
           {/* Link Groups */}
           {footerConfig.linkGroups.map((group) => (
             <div key={group.title}>
-              <h4 className="font-sans text-sm font-medium uppercase tracking-wider mb-6">{group.title}</h4>
+              <h4 className="font-heading text-sm font-semibold uppercase tracking-wider mb-5">{group.title}</h4>
               <ul className="space-y-3">
                 {group.links.map((link) => (
                   <li key={link.label}>
@@ -86,7 +103,7 @@ const Footer = () => {
                         e.preventDefault();
                         scrollToSection(link.href);
                       }}
-                      className="text-[#696969] text-base font-light link-hover inline-block"
+                      className="text-[var(--chevron-muted)] text-sm hover:text-black transition-colors"
                     >
                       {link.label}
                     </a>
@@ -99,8 +116,8 @@ const Footer = () => {
           {/* Newsletter */}
           {footerConfig.newsletterHeading && (
             <div className="lg:col-span-1">
-              <h4 className="font-sans text-sm font-medium uppercase tracking-wider mb-6">{footerConfig.newsletterHeading}</h4>
-              <p className="text-[#696969] text-sm font-light mb-4">
+              <h4 className="font-heading text-sm font-semibold uppercase tracking-wider mb-3">{footerConfig.newsletterHeading}</h4>
+              <p className="text-[var(--chevron-muted)] text-sm mb-4">
                 {footerConfig.newsletterDescription}
               </p>
               <form onSubmit={handleSubscribe} className="flex flex-col gap-3">
@@ -111,12 +128,12 @@ const Footer = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full px-4 py-3 border border-gray-200 text-sm focus:outline-none focus:border-[#5a1a2a] transition-colors"
+                    className="w-full px-4 py-3 border border-[var(--chevron-border)] text-sm focus:outline-none focus:border-black transition-colors"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="flex items-center justify-center gap-2 px-6 py-3 bg-[#5a1a2a] text-white text-sm font-light tracking-wider btn-hover"
+                  className="flex items-center justify-center gap-2 px-5 py-3 bg-[var(--chevron-blue)] text-white text-sm font-medium transition-all hover:opacity-90"
                 >
                   {isSubscribed ? (
                     <span>{footerConfig.newsletterSuccessText}</span>
@@ -133,27 +150,44 @@ const Footer = () => {
         </div>
 
         {/* Bottom Section */}
-        <div className="mt-16 pt-8 border-t border-gray-200">
+        <div className="py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-[#333] text-xs uppercase tracking-wider font-medium">
+            <p className="text-xs text-[var(--chevron-muted)] font-medium">
               {footerConfig.copyrightText}
             </p>
             <div className="flex items-center gap-6">
               {footerConfig.legalLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className="text-[#696969] text-xs hover:text-black transition-colors"
-                >
-                  {link.label}
-                </a>
+                link.href.startsWith('/') ? (
+                  <Link
+                    key={link.label}
+                    to={link.href}
+                    className="text-xs text-[var(--chevron-muted)] hover:text-black transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                ) : (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    onClick={(e) => {
+                      if (link.href === '#cookies') {
+                        e.preventDefault();
+                        scrollToSection(link.href);
+                      }
+                    }}
+                    className="text-xs text-[var(--chevron-muted)] hover:text-black transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                )
               ))}
             </div>
           </div>
         </div>
 
-        <div className="mt-12 overflow-hidden border-t border-[#5a1a2a]/10 pt-6">
-          <p className="translate-y-[-18%] pl-[0] text-left font-serif text-[clamp(4.5rem,18vw,12rem)] leading-none tracking-[-0.12em] text-[#5a1a2a]/12">
+        {/* Wordmark */}
+        <div className="py-4 overflow-hidden">
+          <p className="text-left font-heading text-[clamp(3rem,12vw,10rem)] leading-none tracking-tighter text-[var(--chevron-subtle)] opacity-30">
             {footerWordmark}
           </p>
         </div>

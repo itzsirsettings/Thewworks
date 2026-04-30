@@ -6,17 +6,17 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "@remotion/cli": "4.0.448",
+    "@remotion/cli": "4.0.451",
     "mediabunny": "^1.39.2",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "remotion": "4.0.448"
+    "remotion": "4.0.451"
   },
   "devDependencies": {
-    "@remotion/eslint-config-flat": "4.0.448",
+    "@remotion/eslint-config-flat": "4.0.451",
     "@types/react": "19.2.7",
     "@types/web": "0.0.166",
-    "eslint": "9.19.0",
+    "eslint": "9.39.4",
     "prettier": "3.8.1",
     "typescript": "5.9.3"
   },
@@ -28,5 +28,9 @@
     "preview:buyer-walkthrough": "remotion studio",
     "render:buyer-walkthrough": "remotion render BuyerWalkthrough build/buyer-walkthrough.mp4",
     "voiceover:buyer-walkthrough": "node ./scripts/generate-voiceover.mjs"
+  },
+  "overrides": {
+    "@eslint/plugin-kit": "^0.3.4",
+    "postcss": "^8.5.10"
   }
 }

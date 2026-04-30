@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 import { subHeroConfig } from '../config';
 
 const useCountUp = (end: number, duration: number = 2000, start: boolean = false) => {
@@ -24,31 +25,9 @@ const useCountUp = (end: number, duration: number = 2000, start: boolean = false
   return count;
 };
 
-const useParallaxOffset = (ref: React.RefObject<HTMLDivElement | null>) => {
-  const [offset, setOffset] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!ref.current) return;
-      const rect = ref.current.getBoundingClientRect();
-      const windowH = window.innerHeight;
-      if (rect.top < windowH && rect.bottom > 0) {
-        const progress = (windowH - rect.top) / (windowH + rect.height);
-        setOffset((progress - 0.5) * 60);
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [ref]);
-
-  return offset;
-};
-
 interface SubHeroStatCardProps {
   isVisible: boolean;
   label: string;
-  showRightBorder: boolean;
   suffix: string;
   value: number;
 }
@@ -56,19 +35,17 @@ interface SubHeroStatCardProps {
 const SubHeroStatCard = ({
   isVisible,
   label,
-  showRightBorder,
   suffix,
   value,
 }: SubHeroStatCardProps) => {
   const count = useCountUp(value, 2000, isVisible);
 
   return (
-    <div className={`p-6 ${showRightBorder ? 'border-r border-gray-200' : ''}`}>
-      <span className="block font-serif text-4xl md:text-5xl text-[#5a1a2a] mb-2">
-        {count}
-        {suffix}
+    <div className="text-center">
+      <span className="font-heading text-4xl md:text-5xl font-bold text-[var(--chevron-blue)]">
+        {count}{suffix}
       </span>
-      <span className="text-[#696969] text-sm tracking-wide uppercase">{label}</span>
+      <span className="block text-sm text-[var(--chevron-muted)] mt-2">{label}</span>
     </div>
   );
 };
@@ -80,11 +57,6 @@ const SubHero = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [statsVisible, setStatsVisible] = useState(false);
   const statsRef = useRef<HTMLDivElement>(null);
-  const img1Ref = useRef<HTMLDivElement>(null);
-  const img2Ref = useRef<HTMLDivElement>(null);
-
-  const img1Offset = useParallaxOffset(img1Ref);
-  const img2Offset = useParallaxOffset(img2Ref);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -128,24 +100,24 @@ const SubHero = () => {
     <section
       id="subhero"
       ref={sectionRef}
-      className="relative py-24 md:py-32 lg:py-40 bg-white overflow-hidden"
+      className="relative py-20 md:py-28 lg:py-32 bg-white"
     >
-      <div className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+      <div className="max-w-[1200px] mx-auto px-6 md:px-12 lg:px-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Content Side */}
           <div
-            className={`relative z-10 transition-all duration-1000 ${
-              isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
+            className={`transition-all duration-700 ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
           >
-            <span className="inline-block mb-4 text-sm tracking-[0.2em] text-[#5a1a2a] font-medium uppercase">
+            <span className="inline-block mb-4 text-sm font-medium tracking-widest uppercase text-[var(--chevron-blue)]">
               {subHeroConfig.tag}
             </span>
-            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-black leading-tight mb-6">
+            <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl text-black leading-tight mb-6">
               {subHeroConfig.heading}
             </h2>
             {subHeroConfig.bodyParagraphs.map((paragraph, index) => (
-              <p key={index} className="text-[#696969] text-lg leading-relaxed mb-6">
+              <p key={index} className="text-[var(--chevron-muted)] text-lg leading-relaxed mb-5">
                 {paragraph}
               </p>
             ))}
@@ -156,116 +128,73 @@ const SubHero = () => {
                   e.preventDefault();
                   document.querySelector(subHeroConfig.linkTarget)?.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className="inline-flex items-center gap-2 text-[#5a1a2a] font-medium tracking-wide hover:gap-4 transition-all duration-300"
+                className="inline-flex items-center gap-2 text-[var(--chevron-blue)] font-medium hover:gap-3 transition-all duration-300"
               >
                 {subHeroConfig.linkText}
-                <span className="text-lg">&rarr;</span>
+                <ArrowRight size={18} />
               </a>
             )}
           </div>
 
-          {/* Image Side */}
-          <div className="relative h-[500px] md:h-[600px] lg:h-[700px]" style={{ perspective: '1200px' }}>
-            {/* Main Image */}
+          {/* Image Side - Clean Split Layout */}
+          <div className="relative h-[400px] md:h-[500px]">
             {subHeroConfig.image1 && (
               <div
-                ref={img1Ref}
-                className="absolute top-0 right-0 w-[85%] h-[75%] overflow-hidden shadow-2xl"
+                className="absolute top-0 right-0 w-[85%] h-[70%] overflow-hidden"
                 style={{
-                  clipPath: isVisible
-                    ? 'inset(0% 0% 0% 0%)'
-                    : 'inset(0% 100% 0% 0%)',
-                  transition: 'clip-path 1.4s cubic-bezier(0.77, 0, 0.18, 1) 0.2s, transform 1.4s cubic-bezier(0.33, 1, 0.68, 1) 0.2s',
-                  transform: isVisible
-                    ? `translateY(${img1Offset * 0.4}px) rotateY(0deg)`
-                    : `translateY(40px) rotateY(-4deg)`,
-                  transformOrigin: 'right center',
+                  opacity: isVisible ? 1 : 0,
+                  transform: isVisible ? 'translateX(0)' : 'translateX(40px)',
+                  transition: 'all 0.8s ease 0.3s',
                 }}
               >
                 <img
                   src={subHeroConfig.image1}
-                  alt="Quality furniture showcase at Stankings Home Value"
+                  alt="Thewworks team at work"
                   className="w-full h-full object-cover"
-                  style={{
-                    transform: `scale(1.1) translateY(${img1Offset * 0.2}px)`,
-                    transition: 'transform 0.1s linear',
-                  }}
                 />
               </div>
             )}
 
-            {/* Secondary Image */}
             {subHeroConfig.image2 && (
               <div
-                ref={img2Ref}
-                className="absolute bottom-0 left-0 w-[60%] h-[50%] overflow-hidden shadow-2xl"
+                className="absolute bottom-0 left-0 w-[60%] h-[50%] overflow-hidden shadow-xl"
                 style={{
-                  clipPath: isVisible
-                    ? 'inset(0% 0% 0% 0%)'
-                    : 'inset(100% 0% 0% 0%)',
-                  transition: 'clip-path 1.4s cubic-bezier(0.77, 0, 0.18, 1) 0.6s, transform 1.4s cubic-bezier(0.33, 1, 0.68, 1) 0.6s',
-                  transform: isVisible
-                    ? `translateY(${img2Offset * 0.6}px) rotateX(0deg)`
-                    : `translateY(60px) rotateX(4deg)`,
-                  transformOrigin: 'bottom center',
+                  opacity: isVisible ? 1 : 0,
+                  transform: isVisible ? 'translateX(0)' : 'translateX(-40px)',
+                  transition: 'all 0.8s ease 0.5s',
                 }}
               >
                 <img
                   src={subHeroConfig.image2}
-                  alt="Modern interior design details at our Asaba showroom"
+                  alt="Print samples and finished products"
                   className="w-full h-full object-cover"
-                  style={{
-                    transform: `scale(1.08) translateY(${img2Offset * 0.3}px)`,
-                    transition: 'transform 0.1s linear',
-                  }}
                 />
               </div>
             )}
-
-            {/* Decorative line */}
-            <div
-              className="absolute top-[10%] left-[-5%] w-32 h-32 border border-[#5a1a2a]/20"
-              style={{
-                opacity: isVisible ? 1 : 0,
-                transform: isVisible ? 'scale(1) rotate(0deg)' : 'scale(0.6) rotate(-12deg)',
-                transition: 'all 1.2s cubic-bezier(0.33, 1, 0.68, 1) 1s',
-              }}
-            />
-
-            {/* Floating accent dot */}
-            <div
-              className="absolute bottom-[15%] right-[-3%] w-4 h-4 rounded-full bg-[#5a1a2a]/30"
-              style={{
-                opacity: isVisible ? 1 : 0,
-                transform: isVisible ? 'scale(1)' : 'scale(0)',
-                transition: 'all 0.8s cubic-bezier(0.33, 1, 0.68, 1) 1.4s',
-              }}
-            />
           </div>
         </div>
+
+        {/* Stats Section - Chevron Style */}
+        {subHeroConfig.stats.length > 0 && (
+          <div ref={statsRef} className="mt-16 md:mt-24 pt-12 border-t border-[var(--chevron-border)]">
+            <div
+              className={`grid grid-cols-3 gap-8 md:gap-4 text-center transition-all duration-700 delay-300 ${
+                statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+              }`}
+            >
+              {subHeroConfig.stats.map((stat, index) => (
+                <SubHeroStatCard
+                  key={`${stat.label}-${index}`}
+                  isVisible={statsVisible}
+                  label={stat.label}
+                  suffix={stat.suffix}
+                  value={stat.value}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Stats Section */}
-      {subHeroConfig.stats.length > 0 && (
-        <div ref={statsRef} className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20 mt-20 lg:mt-32">
-          <div
-            className={`grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4 text-center transition-all duration-700 delay-300 ${
-              statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}
-          >
-            {subHeroConfig.stats.map((stat, index) => (
-              <SubHeroStatCard
-                key={`${stat.label}-${index}`}
-                isVisible={statsVisible}
-                label={stat.label}
-                showRightBorder={index < subHeroConfig.stats.length - 1}
-                suffix={stat.suffix}
-                value={stat.value}
-              />
-            ))}
-          </div>
-        </div>
-      )}
     </section>
   );
 };

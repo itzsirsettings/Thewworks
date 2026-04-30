@@ -7,77 +7,65 @@ export interface CatalogItem {
 
 export const catalogItems: CatalogItem[] = [
   {
-    "id": 1,
-    "name": "Turkish Presidential Sofa Suite",
-    "price": 450000,
-    "image": "/images/product-1.jpg"
+    id: 1,
+    name: 'Premium Business Cards - 500 units',
+    price: 15000,
+    image: '/images/printworks-press-hero.png',
   },
   {
-    "id": 2,
-    "name": "Modern Platform Bed Frame",
-    "price": 280000,
-    "image": "/images/product-2.jpg"
+    id: 2,
+    name: 'Corporate Letterheads - 250 sheets',
+    price: 8500,
+    image: '/images/printworks-press-hero.png',
   },
   {
-    "id": 3,
-    "name": "Executive Task Chair",
-    "price": 85000,
-    "image": "/images/product-3.jpg"
+    id: 3,
+    name: 'Tri-fold Brochures - 1000 units',
+    price: 42000,
+    image: '/images/printworks-press-hero.png',
   },
   {
-    "id": 4,
-    "name": "Cloud L-Shape Lounge Sofa",
-    "price": 380000,
-    "image": "/images/product-4.jpg"
+    id: 4,
+    name: 'A5 Flyers - 2000 units',
+    price: 30000,
+    image: '/images/printworks-press-hero.png',
   },
   {
-    "id": 5,
-    "name": "Samsung Smart TV 55\"",
-    "price": 320000,
-    "image": "/images/product-5.jpg"
+    id: 5,
+    name: 'Pull-up Banner Stand',
+    price: 28000,
+    image: '/images/printworks-press-hero.png',
   },
   {
-    "id": 6,
-    "name": "Persian Heritage Rug",
-    "price": 65000,
-    "image": "/images/product-6.jpg"
+    id: 6,
+    name: 'Custom Product Boxes - 100 units',
+    price: 55000,
+    image: '/images/printworks-press-hero.png',
   },
   {
-    "id": 7,
-    "name": "Glass Dining Collection",
-    "price": 195000,
-    "image": "/images/product-7.jpg"
+    id: 7,
+    name: 'Waterproof Roll Labels - 500 units',
+    price: 12000,
+    image: '/images/printworks-press-hero.png',
   },
   {
-    "id": 8,
-    "name": "Hisense Inverter Refrigerator",
-    "price": 245000,
-    "image": "/images/product-8.jpg"
+    id: 8,
+    name: 'Sticker Sheets - 100 sheets',
+    price: 9500,
+    image: '/images/printworks-press-hero.png',
   },
   {
-    "id": 101,
-    "name": "Royal Velvet Hospitality Bed",
-    "price": 580000,
-    "image": "/images/bed-premium-1.jpg"
+    id: 9,
+    name: 'Custom T-Shirt Printing - 20 units',
+    price: 48000,
+    image: '/images/printworks-press-hero.png',
   },
   {
-    "id": 102,
-    "name": "Modern Leather Headboard Bed",
-    "price": 420000,
-    "image": "/images/bed-premium-2.jpg"
+    id: 10,
+    name: 'Saddle-Stitched Booklets - 250 units',
+    price: 68000,
+    image: '/images/printworks-press-hero.png',
   },
-  {
-    "id": 201,
-    "name": "Solid Mahogany Bed Base",
-    "price": 185000,
-    "image": "/images/bed-local-1.jpg"
-  },
-  {
-    "id": 202,
-    "name": "Rattan Accent Headboard Bed",
-    "price": 145000,
-    "image": "/images/bed-local-2.jpg"
-  }
 ];
 
 export const catalogById = new Map<number, CatalogItem>(

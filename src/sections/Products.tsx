@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ShoppingBag, Check } from 'lucide-react';
+import { ShoppingBag, Check, ArrowRight } from 'lucide-react';
 import { productsConfig } from '../config';
 import type { Product } from '../config';
 import { formatCurrency } from '../lib/currency';
@@ -63,31 +63,31 @@ const Products = ({
     <section
       id="products"
       ref={sectionRef}
-      className="py-24 md:py-32 bg-white"
+      className="py-20 md:py-28 bg-white"
     >
-      <div className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-[60px]">
+      <div className="max-w-[1200px] mx-auto px-6 md:px-12">
         {/* Header */}
         <div className="text-center mb-12">
           <span
-            className={`inline-block mb-4 text-sm tracking-[0.2em] text-[#5a1a2a] font-medium uppercase transition-all duration-700 ${
+            className={`inline-block mb-4 text-sm font-medium tracking-widest uppercase text-[var(--chevron-blue)] transition-all duration-700 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
           >
             {productsConfig.tag}
           </span>
           <h2
-            className={`font-serif text-4xl md:text-5xl text-black mb-6 transition-all duration-700 ${
+            className={`font-heading text-3xl md:text-4xl lg:text-5xl text-black mb-6 transition-all duration-700 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
-            style={{ transitionDelay: '200ms' }}
+            style={{ transitionDelay: '150ms' }}
           >
             {productsConfig.heading}
           </h2>
           <p
-            className={`max-w-2xl mx-auto text-[#696969] text-lg transition-all duration-700 ${
+            className={`max-w-2xl mx-auto text-[var(--chevron-muted)] text-lg transition-all duration-700 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
-            style={{ transitionDelay: '400ms' }}
+            style={{ transitionDelay: '300ms' }}
           >
             {productsConfig.description}
           </p>
@@ -96,20 +96,20 @@ const Products = ({
         {/* Category Filter */}
         {productsConfig.categories.length > 0 && (
           <div
-            className={`flex flex-wrap justify-center gap-4 mb-12 transition-all duration-700 ${
+            className={`flex flex-wrap justify-center gap-3 mb-12 transition-all duration-700 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
-            style={{ transitionDelay: '600ms' }}
+            style={{ transitionDelay: '450ms' }}
           >
             {productsConfig.categories.map((category) => (
               <button
                 key={category}
                 type="button"
                 onClick={() => setActiveCategory(category)}
-                className={`px-6 py-2 text-sm tracking-wide transition-all duration-300 ${
+                className={`px-6 py-2 text-sm font-medium tracking-wide transition-all duration-300 ${
                   activeCategory === category
-                    ? 'bg-[#5a1a2a] text-white'
-                    : 'bg-[#fafafa] text-[#696969] hover:bg-[#f0f0f0]'
+                    ? 'bg-[var(--chevron-blue)] text-white'
+                    : 'bg-[var(--chevron-bg-alt)] text-[var(--chevron-muted)] hover:text-black'
                 }`}
               >
                 {category}
@@ -119,62 +119,62 @@ const Products = ({
         )}
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredProducts.map((product, index) => (
             <div
               key={product.id}
-              className={`group bg-[#fafafa] border border-[#f5f5f5] transition-all duration-700 ${
+              className={`live-card group bg-white border border-[var(--chevron-border)] transition-all duration-700 ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}
-              style={{ transitionDelay: `${800 + index * 100}ms` }}
+              style={{ transitionDelay: `${600 + index * 80}ms` }}
             >
               {/* Image Container */}
-              <div className="relative h-[400px] overflow-hidden bg-[#fafafa]">
+              <div className="relative h-56 overflow-hidden">
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
+              </div>
 
+              {/* Product Info */}
+              <div className="p-5">
+                <span className="text-xs text-[var(--chevron-subtle)] tracking-wider uppercase">{product.category}</span>
+                <h3 className="font-heading text-lg text-black mt-1 mb-2">{product.name}</h3>
+                <p className="text-[var(--chevron-muted)] font-medium">{formatCurrency(product.price)}</p>
+                
                 {/* Quick Add Button */}
                 {isShowcase ? (
                   <a
                     href={storeHref}
-                    className="absolute bottom-4 left-1/2 inline-flex -translate-x-1/2 items-center gap-2 bg-[#5a1a2a] px-6 py-3 text-sm tracking-wide text-white opacity-0 translate-y-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0"
+                    className="mt-4 w-full inline-flex items-center justify-center gap-2 bg-[var(--chevron-blue)] px-4 py-2 text-sm text-white transition-all opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0"
                   >
-                    <ShoppingBag size={16} />
+                    <ShoppingBag size={14} />
                     View in Store
                   </a>
                 ) : (
                   <button
                     type="button"
                     onClick={() => handleAddToCart(product)}
-                    className={`absolute bottom-4 left-1/2 -translate-x-1/2 px-6 py-3 flex items-center gap-2 text-sm tracking-wide transition-all duration-300 ${
+                    className={`mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-sm transition-all ${
                       addedItems.includes(product.id)
-                        ? 'bg-green-600 text-white'
-                        : 'bg-[#5a1a2a] text-white opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0'
+                        ? 'bg-green-600 text-white opacity-100'
+                        : 'bg-[var(--chevron-blue)] text-white opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0'
                     }`}
                   >
                     {addedItems.includes(product.id) ? (
                       <>
-                        <Check size={16} />
+                        <Check size={14} />
                         {productsConfig.addedToCartText}
                       </>
                     ) : (
                       <>
-                        <ShoppingBag size={16} />
+                        <ShoppingBag size={14} />
                         {productsConfig.addToCartText}
                       </>
                     )}
                   </button>
                 )}
-              </div>
-
-              {/* Product Info */}
-              <div className="p-5 bg-white">
-                <span className="text-xs text-[#aea4a4] tracking-wide uppercase">{product.category}</span>
-                <h3 className="font-serif text-xl text-black mt-1">{product.name}</h3>
-                <p className="text-[#aea4a4] font-medium mt-2">{formatCurrency(product.price)}</p>
               </div>
             </div>
           ))}
@@ -186,22 +186,24 @@ const Products = ({
             className={`text-center mt-12 transition-all duration-700 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
-            style={{ transitionDelay: '1200ms' }}
+            style={{ transitionDelay: '1000ms' }}
           >
             {isShowcase ? (
               <a
                 href={storeHref}
-                className="inline-flex px-12 py-4 border-2 border-[#5a1a2a] text-[#5a1a2a] font-light tracking-widest text-sm hover:bg-[#5a1a2a] hover:text-white transition-all duration-300"
+                className="inline-flex items-center gap-2 px-8 py-3 border-2 border-[var(--chevron-blue)] text-[var(--chevron-blue)] font-medium transition-all hover:bg-[var(--chevron-blue)] hover:text-white"
               >
                 Browse Store Catalog
+                <ArrowRight size={16} />
               </a>
             ) : (
               <button
                 type="button"
                 onClick={handleViewAllProducts}
-                className="px-12 py-4 border-2 border-[#5a1a2a] text-[#5a1a2a] font-light tracking-widest text-sm hover:bg-[#5a1a2a] hover:text-white transition-all duration-300"
+                className="inline-flex items-center gap-2 px-8 py-3 border-2 border-[var(--chevron-blue)] text-[var(--chevron-blue)] font-medium transition-all hover:bg-[var(--chevron-blue)] hover:text-white"
               >
                 {productsConfig.viewAllText}
+                <ArrowRight size={16} />
               </button>
             )}
           </div>

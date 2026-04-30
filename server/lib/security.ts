@@ -5,6 +5,8 @@ import {
   timingSafeEqual,
 } from 'node:crypto';
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
 import { RedisClient } from './redis.js';
 
 type SecuritySeverity = 'info' | 'warning' | 'critical';
@@ -47,7 +49,7 @@ interface RateLimitStoreResult {
 }
 
 const HSTS_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
-const RECEIPT_COOKIE_PREFIX = 'stankings_receipt_';
+const RECEIPT_COOKIE_PREFIX = 'thewworksict_receipt_';
 const RECEIPT_COOKIE_MAX_AGE_MS = 2 * 60 * 60 * 1000;
 const DEFAULT_SECURITY_ALERT_COOLDOWN_MS = 5 * 60 * 1000;
 
@@ -74,7 +76,7 @@ function getDerivedKey(materialName: string, info: string) {
     hkdfSync(
       'sha256',
       Buffer.from(rawSecret, 'utf8'),
-      Buffer.from('stankings-security-salt', 'utf8'),
+      Buffer.from('thewworksict-security-salt', 'utf8'),
       Buffer.from(info, 'utf8'),
       32,
     ),
@@ -100,6 +102,76 @@ export function createReceiptToken() {
 export function getReceiptCookieName(reference: string) {
   return `${RECEIPT_COOKIE_PREFIX}${reference}`;
 }
+
+export function getCsrfSecret() {
+  return getRequiredSecret('CSRF_SECRET');
+}
+
+function signCsrfNonce(nonce: string) {
+  return createHmac('sha256', getDerivedKey('CSRF_SECRET', 'csrf-token'))
+    .update(nonce, 'utf8')
+    .digest('base64url');
+}
+
+export function generateCsrfToken() {
+  const nonce = randomBytes(32).toString('base64url');
+  return `${nonce}.${signCsrfNonce(nonce)}`;
+}
+
+function csrfTokenMatches(cookieToken: string, headerToken: string) {
+  if (cookieToken !== headerToken) {
+    return false;
+  }
+
+  const [nonce, signature, ...extra] = cookieToken.split('.');
+
+  if (!nonce || !signature || extra.length > 0) {
+    return false;
+  }
+
+  const expectedSignature = signCsrfNonce(nonce);
+  const actualDigest = Buffer.from(signature, 'base64url');
+  const expectedDigest = Buffer.from(expectedSignature, 'base64url');
+
+  return actualDigest.length === expectedDigest.length && timingSafeEqual(actualDigest, expectedDigest);
+}
+
+export const csrfProtectionMiddleware: RequestHandler = (request, response, next) => {
+  if (process.env.NODE_ENV === 'test' && !process.env.ENABLE_CSRF_TEST) {
+    return next();
+  }
+
+  // Only check state-changing methods
+  if (['GET', 'HEAD', 'OPTIONS'].includes(request.method)) {
+    return next();
+  }
+
+  if (request.path === '/api/payments/paystack/webhook') {
+    return next();
+  }
+
+  const csrfTokenFromCookie = request.cookies?.['XSRF-TOKEN'];
+  const csrfTokenFromHeader = request.header('X-XSRF-TOKEN');
+
+  if (
+    !csrfTokenFromCookie ||
+    !csrfTokenFromHeader ||
+    !csrfTokenMatches(csrfTokenFromCookie, csrfTokenFromHeader)
+  ) {
+    logSecurityEvent({
+      event: 'csrf_failed',
+      ip: getClientIp(request),
+      method: request.method,
+      path: request.path,
+      outcome: 'blocked',
+      reason: 'Missing or mismatched CSRF token',
+      statusCode: 403,
+    });
+    return response.status(403).json({ message: 'Security validation failed (CSRF).' });
+  }
+
+  next();
+};
 
 export function hashReceiptToken(token: string) {
   return createHmac('sha256', getDerivedKey('ORDER_TOKEN_SECRET', 'receipt-token'))
@@ -133,7 +205,7 @@ export function getOrderStoreEncryptionKey() {
       hkdfSync(
         'sha256',
         Buffer.from(configuredKey, 'utf8'),
-        Buffer.from('stankings-order-store-salt', 'utf8'),
+        Buffer.from('thewworksict-order-store-salt', 'utf8'),
         Buffer.from('order-store', 'utf8'),
         32,
       ),
@@ -429,7 +501,7 @@ export function logSecurityEvent(details: SecurityLogDetails) {
     timestamp: new Date().toISOString(),
     category: 'security',
     severity: classifySecuritySeverity(details),
-    service: process.env.SECURITY_SERVICE_NAME?.trim() || 'stankings-checkout-api',
+    service: process.env.SECURITY_SERVICE_NAME?.trim() || 'thewworksict-checkout-api',
     environment: process.env.NODE_ENV?.trim() || 'development',
     siteUrl: getTrustedSiteOrigin(),
     ...details,
@@ -492,49 +564,96 @@ export function createRateLimiter({
   };
 }
 
+export const corsMiddleware = cors({
+  origin: (origin, callback) => {
+    const trustedOrigin = getTrustedSiteOrigin();
+    const configuredOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
+      .split(',')
+      .map((allowedOrigin) => allowedOrigin.trim())
+      .filter(Boolean);
+    const allowedOrigins = new Set([
+      trustedOrigin,
+      ...configuredOrigins,
+    ]);
+
+    if (process.env.NODE_ENV !== 'production') {
+      allowedOrigins.add('http://localhost:3001');
+      allowedOrigins.add('http://localhost:3002');
+      allowedOrigins.add('http://localhost:5173');
+      allowedOrigins.add('http://127.0.0.1:5173');
+    }
+
+    if (!origin || allowedOrigins.has(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Order-Token', 'X-XSRF-TOKEN', 'x-paystack-signature'],
+});
+
 export function applySecurityHeaders(
   request: Request,
   response: Response,
   next: NextFunction,
 ) {
   const trustedSiteUrl = getTrustedSiteUrl();
-  const shouldEnforceHsts =
+  const isHttps =
     request.secure ||
     request.header('x-forwarded-proto') === 'https' ||
     trustedSiteUrl.protocol === 'https:';
-  const contentSecurityPolicy = [
-    "default-src 'self'",
-    "base-uri 'self'",
-    "object-src 'none'",
-    "frame-ancestors 'none'",
-    "script-src 'self'",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "font-src 'self' https://fonts.gstatic.com data:",
-    "img-src 'self' data: https:",
-    "connect-src 'self'",
-    "frame-src 'self'",
-    "form-action 'self' https://checkout.paystack.com https://paystack.com",
-  ].join('; ');
 
-  response.setHeader('Content-Security-Policy', contentSecurityPolicy);
-  response.setHeader('Referrer-Policy', 'no-referrer');
-  response.setHeader('X-Content-Type-Options', 'nosniff');
-  response.setHeader('X-Frame-Options', 'DENY');
-  response.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-  response.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
-  response.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        'default-src': ["'self'"],
+        'script-src': ["'self'", 'https://challenges.cloudflare.com'],
+        'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
+        'img-src': ["'self'", 'data:', 'blob:', 'https:'],
+        'connect-src': [
+          "'self'",
+          'https://*.supabase.co',
+          'wss://*.supabase.co',
+          'https://challenges.cloudflare.com',
+        ],
+        'frame-src': ["'self'", 'https://challenges.cloudflare.com'],
+        'form-action': ["'self'", 'https://checkout.paystack.com', 'https://paystack.com'],
+        'upgrade-insecure-requests': isHttps ? [] : null,
+      },
+    },
+    hsts: isHttps
+      ? {
+          maxAge: HSTS_MAX_AGE_SECONDS,
+          includeSubDomains: true,
+          preload: true,
+        }
+      : false,
+    referrerPolicy: { policy: 'no-referrer' },
+    frameguard: { action: 'deny' },
+    xssFilter: true,
+    noSniff: true,
+  })(request, response, () => {
+    // Additional custom headers not covered by helmet or needing specific logic
+    response.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    
+    // Expect-CT: Enforce Certificate Transparency in production
+    if (isHttps && process.env.NODE_ENV === 'production') {
+      response.setHeader('Expect-CT', 'max-age=31536000, enforce');
+    }
 
-  if (request.path.startsWith('/api/checkout') || request.path.startsWith('/api/payments')) {
-    response.setHeader('Cache-Control', 'no-store, max-age=0');
-    response.setHeader('Pragma', 'no-cache');
-  }
+    if (
+      request.path.startsWith('/api/admin') ||
+      request.path.startsWith('/api/checkout') ||
+      request.path.startsWith('/api/payments')
+    ) {
+      response.setHeader('Cache-Control', 'no-store, max-age=0');
+      response.setHeader('Pragma', 'no-cache');
+    }
 
-  if (shouldEnforceHsts) {
-    response.setHeader(
-      'Strict-Transport-Security',
-      `max-age=${HSTS_MAX_AGE_SECONDS}; includeSubDomains`,
-    );
-  }
-
-  next();
+    next();
+  });
 }

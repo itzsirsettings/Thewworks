@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,6 +7,7 @@
 
 @layer base {
   :root {
+    /* Original Design Tokens */
     --background: 40 44% 96%;
     --foreground: 224 25% 12%;
     --card: 0 0% 100%;
@@ -53,6 +55,27 @@
     --font-body: 'Bricolage Grotesque', sans-serif;
     --placeholder-idle: rgba(100, 116, 139, 0.78);
     --placeholder-accent: rgba(249, 115, 22, 0.92);
+    --ease-card-lift: cubic-bezier(0.22, 1, 0.36, 1);
+
+    /* Chevron-Inspired Corporate Design Tokens */
+    --chevron-black: #000000;
+    --chevron-dark: #1a1a1a;
+    --chevron-gray: #333333;
+    --chevron-muted: #545454;
+    --chevron-light-gray: #767676;
+    --chevron-subtle: #999999;
+    --chevron-border: #e6e6e6;
+    --chevron-bg: #fafafa;
+    --chevron-bg-alt: #f2f2f2;
+    --chevron-white: #ffffff;
+    --chevron-blue: #002D72;
+    --chevron-blue-dark: #001f4d;
+    --chevron-teal: #008C9E;
+    --chevron-cream: #FDFBF7;
+    
+    /* Typography */
+    --font-corporate: 'Libre Franklin', 'Bricolage Grotesque', sans-serif;
+    --font-heading: 'Bricolage Grotesque', sans-serif;
   }
 
   * {
@@ -160,6 +183,20 @@
 }
 
 @layer utilities {
+  /* Ken Burns Effect for Hero */
+  @keyframes ken-burns {
+    0% {
+      transform: scale(1) translate(0, 0);
+    }
+    100% {
+      transform: scale(1.08) translate(-1%, -1%);
+    }
+  }
+
+  .animate-ken-burns {
+    animation: ken-burns 12s ease-out forwards;
+  }
+
   @keyframes placeholderPulse {
     0%,
     100% {
@@ -182,6 +219,66 @@
     backdrop-filter: blur(18px);
   }
 
+  .live-card,
+  [data-slot='card'] {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    transition-property: opacity, transform, border-color, box-shadow, background-color;
+    transition-duration: 280ms;
+    transition-timing-function: var(--ease-card-lift);
+    will-change: transform;
+  }
+
+  .live-card::after,
+  [data-slot='card']::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.46), transparent 38%),
+      radial-gradient(circle at 12% 8%, rgba(249, 115, 22, 0.16), transparent 34%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 280ms var(--ease-card-lift);
+  }
+
+  .live-card > *,
+  [data-slot='card'] > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .live-card:hover,
+  .live-card:focus-within,
+  [data-slot='card']:hover,
+  [data-slot='card']:focus-within {
+    transform: translate3d(0, -6px, 0);
+    border-color: rgba(249, 115, 22, 0.38);
+    box-shadow: 0 28px 70px rgba(17, 24, 39, 0.16);
+  }
+
+  .live-card:hover::after,
+  .live-card:focus-within::after,
+  [data-slot='card']:hover::after,
+  [data-slot='card']:focus-within::after {
+    opacity: 1;
+  }
+
+  .live-card-dark:hover,
+  .live-card-dark:focus-within {
+    border-color: rgba(24, 183, 200, 0.46);
+    box-shadow: 0 30px 72px rgba(0, 0, 0, 0.34);
+  }
+
+  .live-card-dark::after {
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent 42%),
+      radial-gradient(circle at 16% 10%, rgba(24, 183, 200, 0.22), transparent 34%);
+  }
+
   .market-grid {
     position: relative;
     isolation: isolate;
@@ -196,7 +293,7 @@
     pointer-events: none;
   }
 
-  .admin-stankings {
+  .admin-thewworksict {
     background-color: var(--admin-shell);
     color: var(--admin-ink);
   }
@@ -233,5 +330,22 @@
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .live-card,
+    .live-card::after,
+    [data-slot='card'],
+    [data-slot='card']::after {
+      transition-duration: 0.01ms !important;
+      will-change: auto;
+    }
+
+    .live-card:hover,
+    .live-card:focus-within,
+    [data-slot='card']:hover,
+    [data-slot='card']:focus-within {
+      transform: none;
+    }
   }
 }

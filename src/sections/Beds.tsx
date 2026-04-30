@@ -63,37 +63,37 @@ const Beds = ({
     <section
       id="beds"
       ref={sectionRef}
-      className="w-full bg-white py-20 md:py-32"
+      className="w-full bg-white py-20 md:py-28"
     >
-      <div className="relative h-[50vh] md:h-[60vh] w-full mb-16 overflow-hidden">
+      <div className="relative h-[45vh] md:h-[55vh] w-full mb-14 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center bg-fixed"
           style={{ backgroundImage: `url(${bedsConfig.heroImage})` }}
         />
         <div className="absolute inset-0 bg-black/40" />
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center text-white px-6">
-          <span className="inline-block mb-4 text-sm tracking-[0.3em] font-light uppercase">
+          <span className="inline-block mb-4 text-sm font-medium tracking-widest uppercase opacity-90">
             {bedsConfig.tag}
           </span>
-          <h2 className="font-serif text-4xl md:text-6xl max-w-4xl leading-tight">
+          <h2 className="font-heading text-3xl md:text-5xl max-w-3xl leading-tight">
             {bedsConfig.heading}
           </h2>
-          <p className="mt-6 max-w-2xl text-lg font-light text-white/90">
+          <p className="mt-5 max-w-xl text-lg font-light opacity-90">
             {bedsConfig.description}
           </p>
         </div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-6 md:px-12">
-        <div className="flex flex-wrap justify-center gap-3 mb-12">
+      <div className="max-w-[1200px] mx-auto px-6">
+        <div className="flex flex-wrap justify-center gap-3 mb-10">
           {bedsConfig.categories.map((category) => (
             <button
               key={category}
               onClick={() => setActiveCategory(category)}
-              className={`px-6 py-3 text-sm tracking-wider transition-all duration-300 ${
+              className={`px-6 py-2 text-sm font-medium tracking-wide transition-all duration-300 ${
                 activeCategory === category
-                  ? 'bg-[#5a1a2a] text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-[var(--chevron-blue)] text-white'
+                  : 'bg-[var(--chevron-bg-alt)] text-[var(--chevron-muted)] hover:text-black'
               }`}
             >
               {category}
@@ -101,28 +101,28 @@ const Beds = ({
           ))}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredProducts.map((product, index) => (
             <div
               key={product.id}
-              className={`group bg-white border border-gray-100 overflow-hidden card-hover transition-all duration-700 ${
+              className={`live-card group bg-white border border-[var(--chevron-border)] transition-all duration-700 ${
                 isVisible
                   ? 'opacity-100 translate-y-0'
                   : 'opacity-0 translate-y-8'
               }`}
-              style={{ transitionDelay: `${index * 100}ms` }}
+              style={{ transitionDelay: `${index * 80}ms` }}
             >
-              <div className="relative aspect-[3/4] overflow-hidden bg-gray-50">
+              <div className="relative h-64 overflow-hidden">
                 <img
                   src={product.image}
                   alt={product.name}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute top-4 left-4">
-                  <span className={`px-3 py-1 text-xs tracking-wider uppercase ${
-                    product.category === 'Premium'
-                      ? 'bg-[#5a1a2a] text-white'
-                      : 'bg-amber-600 text-white'
+                <div className="absolute top-3 left-3">
+                  <span className={`px-3 py-1 text-xs font-medium tracking-wider uppercase ${
+                    product.category === 'Luxury'
+                      ? 'bg-[var(--chevron-blue)] text-white'
+                      : 'bg-black text-white'
                   }`}>
                     {product.category}
                   </span>
@@ -130,7 +130,7 @@ const Beds = ({
                 {isShowcase ? (
                   <a
                     href={storeHref}
-                    className="absolute bottom-4 right-4 inline-flex items-center justify-center rounded-full bg-white p-3 text-black transition-all duration-300 hover:bg-[#5a1a2a] hover:text-white"
+                    className="absolute bottom-4 right-4 inline-flex items-center justify-center rounded-full bg-white p-3 text-black transition-all duration-300 hover:bg-[var(--chevron-blue)] hover:text-white"
                   >
                     <ShoppingCart size={18} />
                   </a>
@@ -175,12 +175,11 @@ const Beds = ({
               <span className="w-12 h-12 bg-amber-600 flex items-center justify-center text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9"/><path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/><path d="M3 9h18"/><path d="M7 9v13"/></svg>
               </span>
-              <h3 className="font-serif text-2xl">Local Beds</h3>
+              <h3 className="font-serif text-2xl">Standard Packaging</h3>
             </div>
             <p className="text-gray-600 leading-relaxed">
-              Our locally crafted beds are made with quality Nigerian wood and materials. 
-              Supporting local artisans, these beds offer durability and traditional craftsmanship 
-              at affordable prices. Perfect for those who appreciate authentic Nigerian furniture.
+              Our standard packaging options cover printed boxes, sleeves, bags and inserts
+              for everyday retail needs, with practical materials and dependable production timing.
             </p>
           </div>
 
@@ -191,12 +190,11 @@ const Beds = ({
               <span className="w-12 h-12 bg-[#5a1a2a] flex items-center justify-center text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
               </span>
-              <h3 className="font-serif text-2xl">Premium Beds</h3>
+              <h3 className="font-serif text-2xl">Premium Finishes</h3>
             </div>
             <p className="text-gray-600 leading-relaxed">
-              Our premium collection features imported and high-end bed frames with luxurious 
-              upholstery, ornate designs, and superior comfort. These beds bring hotel-quality 
-              elegance to your bedroom with velvet, leather, and gold-accented finishes.
+              Our premium finish collection includes foil stamping, embossing, spot UV,
+              textured stocks and specialty trims for packaging and stationery that need presence.
             </p>
           </div>
         </div>

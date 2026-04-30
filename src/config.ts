@@ -7,8 +7,8 @@ export interface SiteConfig {
 }
 
 export const siteConfig: SiteConfig = {
-  title: "Stankings Home Value | Quality Furniture & Home Appliances",
-  description: "Your one-stop destination for quality, comfort and style. Turkish sofas, modern bed frames, contemporary furniture, electronics, home appliances, rugs, interior decoration, mirrors, and office furniture in Asaba, Delta State.",
+  title: "Thewworks | Thewworks ICT & Prints in Asaba, Delta State",
+  description: "Thewworks, also known as Thewworks ICT & Prints, offers business cards, brochures, packaging, labels, banners, books, apparel printing, and branded design services in Asaba, Delta State, Nigeria.",
   language: "en",
 };
 
@@ -27,6 +27,7 @@ export interface SocialLink {
 
 export interface NavigationConfig {
   brandName: string;
+  brandFullName?: string;
   menuLinks: MenuLink[];
   socialLinks: SocialLink[];
   searchPlaceholder: string;
@@ -37,12 +38,13 @@ export interface NavigationConfig {
 }
 
 export const navigationConfig: NavigationConfig = {
-  brandName: "Stankings Home Value",
+  brandName: "Thewworks",
+  brandFullName: "Thewworks",
   menuLinks: [
-    { label: "Home", href: "#hero" },
-    { label: "Products", href: "#products" },
-    { label: "Beds", href: "#beds" },
-    { label: "About Us", href: "#about" },
+    { label: "Who We Are", href: "#about" },
+    { label: "What We Do", href: "#products" },
+    { label: "Packaging", href: "#beds" },
+    { label: "Latest Updates", href: "#blog" },
     { label: "Contact", href: "#contact" },
   ],
   socialLinks: [
@@ -50,11 +52,11 @@ export const navigationConfig: NavigationConfig = {
     { icon: "Facebook", label: "Facebook", href: "https://facebook.com" },
     { icon: "Twitter", label: "Twitter", href: "https://twitter.com" },
   ],
-  searchPlaceholder: "Search furniture, appliances...",
+  searchPlaceholder: "Search services...",
   cartEmptyText: "Your cart is empty",
   cartCheckoutText: "Proceed to Checkout",
   continueShoppingText: "Continue Shopping",
-  menuBackgroundImage: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/assets/menu-bg.jpg",
+  menuBackgroundImage: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&q=80",
 };
 
 // ─── Hero ────────────────────────────────────────────────────────────────────
@@ -62,6 +64,8 @@ export const navigationConfig: NavigationConfig = {
 export interface HeroConfig {
   tagline: string;
   title: string;
+  rotatingTitles?: string[];
+  tagLineSecondary?: string;
   ctaPrimaryText: string;
   ctaPrimaryTarget: string;
   ctaSecondaryText: string;
@@ -70,11 +74,28 @@ export interface HeroConfig {
 }
 
 export const heroConfig: HeroConfig = {
-  tagline: "Quality, Comfort & Style",
-  title: "Your Home,\nYour Style,\nOur Priority",
-  ctaPrimaryText: "Shop Now",
-  ctaPrimaryTarget: "#products",
-  ctaSecondaryText: "Visit Our Store",
+  tagline: "Premium Printing & Design",
+  title: "Creative Excellence\nin Every Print",
+  rotatingTitles: [
+    "Making Every Print Count",
+    "From Concept to Quality Print",
+    "Sharp Designs. Clean Prints.",
+    "Your Trusted Print Partner",
+    "Creating Impressions That Last",
+    "Every Detail, Perfectly Printed",
+    "Prints Made with Excellence",
+    "High-Quality Printing, Delivered Right",
+    "Transforming Ideas into Beautiful Prints",
+    "Print Smart. Brand Better.",
+    "Reliable Prints for Growing Brands",
+    "Excellence on Every Page",
+    "Crafted Prints, Powerful Results",
+    "Your Message, Professionally Printed",
+  ],
+  tagLineSecondary: "Your Trusted Printing Partner",
+  ctaPrimaryText: "Explore Services",
+  ctaPrimaryTarget: "#services",
+  ctaSecondaryText: "Get a Quote",
   ctaSecondaryTarget: "#contact",
   backgroundImage: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/assets/hero-bg.jpg",
 };
@@ -99,20 +120,20 @@ export interface SubHeroConfig {
 }
 
 export const subHeroConfig: SubHeroConfig = {
-  tag: "About Us",
-  heading: "Quality Furniture & Home Appliances in Asaba",
+  tag: "Who We Are",
+  heading: "Your Trusted Printing Partner",
   bodyParagraphs: [
-    "Stankings Home Value is your trusted destination for premium furniture and home appliances in Delta State. We bring you the finest Turkish sofas, modern bed frames, and contemporary furniture that combines quality, comfort, and style.",
-    "From elegant living room sets to functional office furniture, electronics, home appliances, rugs, mirrors, and interior decoration items - we have everything you need to transform your space into a home.",
+    "Thewworks has been a leader in premium printing and design services for over 15 years. We specialize in creating stunning visual communications for businesses, events, and creative projects.",
+    "From digital design to final print, we handle every detail with precision and care. Our experienced team combines cutting-edge technology with artistic expertise to bring your ideas to life.",
   ],
   linkText: "Learn more about us",
   linkTarget: "#about",
-  image1: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/assets/subhero-1.jpg",
-  image2: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/assets/subhero-2.jpg",
+  image1: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80",
+  image2: "https://images.unsplash.com/photo-1542298089-abc8b8c77650?w=600&q=80",
   stats: [
-    { value: 10, suffix: "+", label: "Years Experience" },
-    { value: 5000, suffix: "+", label: "Happy Customers" },
-    { value: 100, suffix: "%", label: "Quality Guaranteed" },
+    { value: 15, suffix: "+", label: "Years Experience" },
+    { value: 2500, suffix: "+", label: "Projects Completed" },
+    { value: 99, suffix: "%", label: "Client Satisfaction" },
   ],
 };
 
@@ -128,15 +149,15 @@ export interface VideoSectionConfig {
 }
 
 export const videoSectionConfig: VideoSectionConfig = {
-  tag: "Our Collection",
-  heading: "Transform Your Space\nWith Premium Furniture",
+  tag: "Our Services",
+  heading: "Full-Spectrum Printing\nSolutions for Your Brand",
   bodyParagraphs: [
-    "Discover our extensive collection of Turkish sofas, modern bed frames, and contemporary furniture designed to elevate your living space.",
-    "We also stock a wide range of electronics, home appliances, beautiful rugs, elegant mirrors, and professional office furniture to meet all your needs.",
+    "From concept to completion, we offer comprehensive printing services that bring your brand to life. Our state-of-the-art equipment and skilled craftsmen ensure every project meets the highest standards.",
+    "We specialize in marketing materials, packaging design, digital printing, large format printing, and custom merchandise. Let us help you make a lasting impression.",
   ],
-  ctaText: "Explore Products",
+  ctaText: "Explore Services",
   ctaTarget: "#products",
-  backgroundImage: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/assets/video-section-bg.jpg",
+  backgroundImage: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&q=80",
 };
 
 // ─── Products ────────────────────────────────────────────────────────────────
@@ -161,22 +182,22 @@ export interface ProductsConfig {
 }
 
 export const productsConfig: ProductsConfig = {
-  tag: "Our Products",
-  heading: "Premium Furniture & Appliances",
-  description: "Browse our wide selection of quality furniture, home appliances, and interior decoration items. Everything you need for your home and office in one place.",
-  viewAllText: "View All Products",
-  addToCartText: "Add to Cart",
+  tag: "What We Do",
+  heading: "Printing & Design Services",
+  description: "Comprehensive printing solutions for businesses and creative projects. From business cards to large-format printing, we deliver quality.",
+  viewAllText: "View All Services",
+  addToCartText: "Request Quote",
   addedToCartText: "Added!",
-  categories: ["All", "Sofas", "Bed Frames", "Office Furniture", "Appliances", "Decor"],
+  categories: ["All", "Business", "Marketing", "Packaging"],
   products: [
-    { id: 1, name: "Turkish Royal Sofa Set", price: 450000, category: "Sofas", image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/product-1.jpg" },
-    { id: 2, name: "Modern King Size Bed Frame", price: 280000, category: "Bed Frames", image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/product-2.jpg" },
-    { id: 3, name: "Executive Office Chair", price: 85000, category: "Office Furniture", image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/product-3.jpg" },
-    { id: 4, name: "Contemporary L-Shape Sofa", price: 380000, category: "Sofas", image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/product-4.jpg" },
-    { id: 5, name: "Samsung Smart TV 55\"", price: 320000, category: "Appliances", image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/product-5.jpg" },
-    { id: 6, name: "Persian Style Area Rug", price: 65000, category: "Decor", image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/product-6.jpg" },
-    { id: 7, name: "Glass Top Dining Table Set", price: 195000, category: "Decor", image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/product-7.jpg" },
-    { id: 8, name: "Hisense Refrigerator", price: 245000, category: "Appliances", image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/product-8.jpg" },
+    { id: 1, name: "Business Cards (500 units)", price: 15000, category: "Business", image: "https://images.unsplash.com/photo-1611269154421-4e27233ac5c7?w=500&q=80" },
+    { id: 2, name: "Letterheads (250 sheets)", price: 8500, category: "Business", image: "https://images.unsplash.com/photo-1608085026456-02f50f55e141?w=500&q=80" },
+    { id: 3, name: "Brochures (Tri-fold 1000 units)", price: 42000, category: "Marketing", image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=500&q=80" },
+    { id: 4, name: "Posters (A2 size, 25 units)", price: 18000, category: "Large Format", image: "https://images.unsplash.com/photo-1578392670900-d6f1eae3fccb?w=500&q=80" },
+    { id: 5, name: "Custom T-Shirt Printing (10 units)", price: 35000, category: "Merchandise", image: "https://images.unsplash.com/photo-1605777927121-8bc2e65f718e?w=500&q=80" },
+    { id: 6, name: "Vinyl Labels (Roll of 500)", price: 12000, category: "Packaging", image: "https://images.unsplash.com/photo-1599923353285-e33018f92f98?w=500&q=80" },
+    { id: 7, name: "Custom Packaging Boxes (100 units)", price: 55000, category: "Packaging", image: "https://images.unsplash.com/photo-1578762694712-10c49d9d5c3e?w=500&q=80" },
+    { id: 8, name: "Banners (3x1m vinyl)", price: 22000, category: "Large Format", image: "https://images.unsplash.com/photo-1608086657464-eef74c0cc34e?w=500&q=80" },
   ],
 };
 
@@ -196,23 +217,23 @@ export const featuresConfig: FeaturesConfig = {
   features: [
     {
       icon: "Truck",
-      title: "Free Delivery",
-      description: "Complimentary delivery within Asaba and surrounding areas. We ensure your furniture arrives safely.",
+      title: "Fast Turnaround",
+      description: "Quick printing and delivery. Most orders completed within 3-5 business days without compromising quality.",
     },
     {
       icon: "ShieldCheck",
-      title: "Quality Guarantee",
-      description: "All our products come with a warranty. We stand behind the quality of every item we sell.",
+      title: "Premium Quality",
+      description: "State-of-the-art equipment and expert craftsmen ensure every print meets the highest standards.",
     },
     {
       icon: "Leaf",
-      title: "Best Prices",
-      description: "Competitive pricing on all furniture and appliances. Get the best value for your money.",
+      title: "Eco-Friendly Inks",
+      description: "We use environmentally responsible printing materials and sustainable practices.",
     },
     {
       icon: "Heart",
-      title: "Customer Service",
-      description: "Our friendly team is always ready to help you find the perfect furniture for your home.",
+      title: "Custom Design",
+      description: "Our creative team works with you to design and execute your vision perfectly.",
     },
   ],
 };
@@ -236,31 +257,31 @@ export interface BlogConfig {
 }
 
 export const blogConfig: BlogConfig = {
-  tag: "Tips & Ideas",
-  heading: "Home Improvement Insights",
+  tag: "Latest at Thewworks",
+  heading: "News & Insights",
   viewAllText: "View All Articles",
-  readMoreText: "Read More",
+  readMoreText: "read article",
   posts: [
     {
       id: 1,
-      title: "How to Choose the Perfect Sofa for Your Living Room",
+      title: "Choosing the Right Paper Stock for Your Brand",
       date: "March 15, 2024",
-      image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/assets/blog-1.jpg",
-      excerpt: "Tips on selecting the right size, style, and material for your living room sofa.",
+      image: "https://images.unsplash.com/photo-1593062096033-9a26b09da705?w=600&q=80",
+      excerpt: "Learn how to select the perfect paper type, weight, and finish to elevate your printed materials and brand perception.",
     },
     {
       id: 2,
-      title: "Creating a Modern Bedroom with the Right Bed Frame",
+      title: "Design Tips for High-Impact Marketing Materials",
       date: "February 28, 2024",
-      image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/assets/blog-2.jpg",
-      excerpt: "Discover how the right bed frame can transform your bedroom into a luxurious retreat.",
+      image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&q=80",
+      excerpt: "Discover essential design principles that make your brochures, flyers, and banners stand out from the competition.",
     },
     {
       id: 3,
-      title: "Office Furniture: Building a Productive Workspace",
+      title: "Color Management: Getting Print-Ready Files Right",
       date: "February 10, 2024",
-      image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/assets/blog-3.jpg",
-      excerpt: "Essential furniture pieces for creating a comfortable and efficient office environment.",
+      image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600&q=80",
+      excerpt: "Understanding RGB vs CMYK, color profiles, and how to prepare your designs for perfect color reproduction.",
     },
   ],
 };
@@ -289,28 +310,28 @@ export const faqConfig: FaqConfig = {
   faqs: [
     {
       id: 1,
-      question: "Do you offer delivery services?",
-      answer: "Yes! We offer free delivery within Asaba and surrounding areas in Delta State. For locations outside this area, delivery charges may apply.",
+      question: "What file formats do you accept for printing?",
+      answer: "We accept PDF, AI, PSD, TIFF, and high-resolution JPG files. PDF is our preferred format for best results. Minimum resolution should be 300 DPI for quality prints.",
     },
     {
       id: 2,
-      question: "What is your return policy?",
-      answer: "We accept returns within 7 days for items in their original condition. Please bring your receipt for any returns or exchanges.",
+      question: "How long does printing take?",
+      answer: "Most orders are completed within 3-5 business days. Rush orders are available for an additional fee. Delivery times vary based on your location.",
     },
     {
       id: 3,
-      question: "Do you offer installment payment?",
-      answer: "Yes, we offer flexible payment plans for purchases above N200,000. Contact us for more details on our installment options.",
+      question: "Do you offer design services?",
+      answer: "Yes! Our experienced design team can create custom designs from scratch or modify your existing artwork. Design consultation is available upon request.",
     },
     {
       id: 4,
-      question: "How long does delivery take?",
-      answer: "Delivery within Asaba is typically same-day or next-day. For other locations in Delta State, delivery takes 2-3 business days.",
+      question: "What is your refund policy?",
+      answer: "We stand behind the quality of our work. If you're not satisfied with your prints, we'll reprint them at no cost or provide a full refund.",
     },
     {
       id: 5,
-      question: "Do you assemble furniture?",
-      answer: "Yes, our delivery team can assemble furniture for you at a small additional cost. Please request this service when placing your order.",
+      question: "Can you handle bulk orders?",
+      answer: "Absolutely! We specialize in bulk printing projects. Contact us for volume discounts and bulk pricing on large orders.",
     },
   ],
 };
@@ -336,24 +357,24 @@ export const aboutConfig: AboutConfig = {
   sections: [
     {
       tag: "Our Story",
-      heading: "Your Trusted Furniture Partner in Asaba",
+      heading: "Your Trusted Printing Partner",
       paragraphs: [
-        "Stankings Home Value has been serving the Asaba community and beyond for over 10 years. Located at 244 Nnebisi Road, opposite Wema Bank by Konwea Plaza, we have become the go-to destination for quality furniture and home appliances.",
-        "We pride ourselves on offering a wide range of products including Turkish sofas, modern bed frames, contemporary furniture, electronics, home appliances, rugs, mirrors, and office furniture - all at competitive prices.",
+        "Thewworks has been serving businesses and creative professionals for over 15 years. Located in the heart of the city, we've established ourselves as a premier destination for high-quality printing and design services.",
+        "From small businesses to large enterprises, we've helped our clients make a lasting impression through innovative printing solutions. We combine state-of-the-art technology with artistic excellence to deliver outstanding results.",
       ],
       quote: "",
       attribution: "",
-      image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/assets/about-1.jpg",
+      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80",
       backgroundColor: "#5a1a2a",
       textColor: "#ffffff",
     },
     {
       tag: "Our Promise",
-      heading: "Quality, Comfort & Style",
+      heading: "Quality Meets Creativity",
       paragraphs: [],
-      quote: "At Stankings Home Value, we believe everyone deserves a beautiful home. That's why we bring you the best furniture and appliances at prices you can afford.",
-      attribution: "-- The Stankings Team",
-      image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/assets/about-2.jpg",
+      quote: "At Thewworks, we believe that great design and impeccable printing can transform your brand. That's why we're committed to delivering exceptional quality on every project, no matter how big or small.",
+      attribution: "-- The Thewworks Team",
+      image: "https://images.unsplash.com/photo-1542298089-abc8b8c77650?w=800&q=80",
       backgroundColor: "#f5f5f5",
       textColor: "#333333",
     },
@@ -389,27 +410,27 @@ export interface ContactConfig {
 }
 
 export const contactConfig: ContactConfig = {
-  heading: "Visit Our Store",
-  description: "Come visit us at our showroom in Asaba. Our friendly staff will help you find the perfect furniture and appliances for your home or office.",
+  heading: "Get in Touch",
+  description: "Contact Thewworks for printing quotes, design consultations, or to learn more about our services. We'd love to hear about your project.",
   locationLabel: "Address",
-  location: "244 Nnebisi Road, Opp. Wema Bank\nby Konwea Plaza, Asaba, Delta State",
+  location: "No. 5, Okelue Street, Opposite Wema Bank, by Nnebisi Road, Asaba, Delta State, Nigeria",
   emailLabel: "Email",
-  email: "stankingshomevalue@gmail.com",
+  email: "info@thewworks.com",
   phoneLabel: "Phone",
-  phone: "08037155869, 09066365653",
+  phone: "08123986155, 07065577800",
   formFields: {
     nameLabel: "Name",
     namePlaceholder: "Your name",
     emailLabel: "Email",
     emailPlaceholder: "your@email.com",
     messageLabel: "Message",
-    messagePlaceholder: "How can we help you?",
+    messagePlaceholder: "Tell us about your printing project...",
   },
   submitText: "Send Message",
   submittingText: "Sending...",
   submittedText: "Sent",
-  successMessage: "Thank you for reaching out. We'll get back to you shortly.",
-  backgroundImage: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/assets/contact-bg.jpg",
+  successMessage: "Thank you for reaching out. We'll get back to you shortly with a quote.",
+  backgroundImage: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&q=80",
 };
 
 // ─── Beds ────────────────────────────────────────────────────────────────────
@@ -418,7 +439,7 @@ export interface BedProduct {
   id: number;
   name: string;
   price: number;
-  category: "Local" | "Premium";
+  category: "Luxury" | "Standard";
   image: string;
   description: string;
 }
@@ -435,78 +456,78 @@ export interface BedsConfig {
 }
 
 export const bedsConfig: BedsConfig = {
-  tag: "Our Bed Collection",
-  heading: "Quality Beds for Every Home",
-  description: "Discover our extensive range of beds - from locally crafted wooden frames to premium luxury designs. Find the perfect bed for your comfort and style.",
-  heroImage: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/assets/beds-hero.jpg",
-  categories: ["All", "Local", "Premium"],
+  tag: "Packaging Solutions",
+  heading: "Custom Packaging & Labels",
+  description: "Discover our complete range of custom packaging solutions. From elegant product boxes to branded labels and tags, we create packaging that protects your products and elevates your brand.",
+  heroImage: "https://images.unsplash.com/photo-1578762694712-10c49d9d5c3e?w=1200&q=80",
+  categories: ["All", "Luxury", "Standard"],
   products: [
     {
       id: 101,
-      name: "Royal Velvet Bed",
-      price: 580000,
-      category: "Premium",
-      image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/bed-premium-1.jpg",
-      description: "Luxurious king size bed with tufted velvet headboard and gold trim",
+      name: "Premium Custom Boxes",
+      price: 85000,
+      category: "Luxury",
+      image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=500&q=80",
+      description: "Luxurious custom printed boxes with foil stamping and premium finishes",
     },
     {
       id: 102,
-      name: "Modern Platform Bed",
-      price: 420000,
-      category: "Premium",
-      image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/bed-premium-2.jpg",
-      description: "Contemporary platform bed with leather headboard",
+      name: "Branded Tissue Paper",
+      price: 12000,
+      category: "Luxury",
+      image: "https://images.unsplash.com/photo-1599923353285-e33018f92f98?w=500&q=80",
+      description: "Custom printed tissue paper for premium product packaging",
     },
     {
       id: 103,
-      name: "Gold Canopy Bed",
-      price: 850000,
-      category: "Premium",
-      image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/bed-premium-3.jpg",
-      description: "Ornate canopy bed with gold metal frame and royal drapery",
+      name: "Holographic Label Sheets",
+      price: 28000,
+      category: "Luxury",
+      image: "https://images.unsplash.com/photo-1562349619-3d35d84fb0a8?w=500&q=80",
+      description: "Eye-catching holographic labels that make your products stand out",
     },
     {
       id: 104,
-      name: "Navy Tufted Bed",
-      price: 495000,
-      category: "Premium",
-      image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/bed-premium-4.jpg",
-      description: "Elegant upholstered bed with diamond tufted headboard",
+      name: "Custom Gift Boxes",
+      price: 65000,
+      category: "Luxury",
+      image: "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=500&q=80",
+      description: "Elegant gift boxes with custom inserts and ribbon ties",
     },
     {
       id: 201,
-      name: "Solid Mahogany Bed",
-      price: 185000,
-      category: "Local",
-      image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/bed-local-1.jpg",
-      description: "Nigerian made solid wood bed frame, durable and elegant",
+      name: "Standard Shipping Boxes",
+      price: 28000,
+      category: "Standard",
+      image: "https://images.unsplash.com/photo-1612198188060-c7c2a3b66eae?w=500&q=80",
+      description: "Durable corrugated boxes for shipping and storage",
     },
     {
       id: 202,
-      name: "Rattan Headboard Bed",
-      price: 145000,
-      category: "Local",
-      image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/bed-local-2.jpg",
-      description: "Beautiful woven rattan headboard with natural materials",
+      name: "Product Labels (Roll)",
+      price: 8500,
+      category: "Standard",
+      image: "https://images.unsplash.com/photo-1599923353285-e33018f92f98?w=500&q=80",
+      description: "Custom printed product labels on rolls for easy application",
     },
     {
       id: 203,
-      name: "Classic Metal Bed",
-      price: 95000,
-      category: "Local",
-      image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/bed-local-3.jpg",
-      description: "Durable wrought iron bed frame, simple and affordable",
+      name: "Kraft Paper Bags",
+      price: 15000,
+      category: "Standard",
+      image: "https://images.unsplash.com/photo-1595869192324-40ed7fc00fe5?w=500&q=80",
+      description: "Eco-friendly kraft bags with custom branding",
     },
     {
       id: 204,
-      name: "Carved Wooden Bed",
-      price: 220000,
-      category: "Local",
-      image: "https://wwlzqndknqoizremunus.supabase.co/storage/v1/object/public/products/bed-local-4.jpg",
-      description: "Traditional African woodwork with carved headboard details",
+      name: "Sticker Sheets",
+      price: 6500,
+      category: "Standard",
+      image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=500&q=80",
+      description: "Durable custom printed vinyl stickers for any purpose",
     },
   ],
-  addToCartText: "Add to Cart",
+  addToCartText: "Request Quote",
   addedToCartText: "Added!",
 };
 
@@ -530,6 +551,7 @@ export interface FooterSocialLink {
 
 export interface FooterConfig {
   brandName: string;
+  brandTagline?: string;
   brandDescription: string;
   newsletterHeading: string;
   newsletterDescription: string;
@@ -543,45 +565,50 @@ export interface FooterConfig {
 }
 
 export const footerConfig: FooterConfig = {
-  brandName: "Stankings Home Value",
-  brandDescription: "Your one-stop destination for quality furniture, home appliances, and interior decoration in Asaba, Delta State.",
+  brandName: "Thewworks",
+  brandTagline: "Creative Excellence in Every Print",
+  brandDescription: "Thewworks ICT & Prints, often searched as Thewworks, is a printing and branding business in Asaba, Delta State. From business essentials to custom packaging, we deliver premium quality and creative solutions.",
   newsletterHeading: "Stay Updated",
-  newsletterDescription: "Subscribe to receive updates on new arrivals, special offers, and promotions.",
+  newsletterDescription: "Subscribe to receive updates on new printing services, design trends, and special offers.",
   newsletterPlaceholder: "Enter your email",
   newsletterButtonText: "Subscribe",
   newsletterSuccessText: "Thank you for subscribing!",
   linkGroups: [
     {
-      title: "Products",
+      title: "What We Do",
       links: [
-        { label: "Turkish Sofas", href: "#products" },
-        { label: "Bed Frames", href: "#products" },
-        { label: "Office Furniture", href: "#products" },
-        { label: "Appliances", href: "#products" },
+        { label: "Business Printing", href: "#products" },
+        { label: "Marketing Materials", href: "#products" },
+        { label: "Large Format", href: "#products" },
+        { label: "Packaging Solutions", href: "#beds" },
       ],
     },
     {
-      title: "Company",
+      title: "Who We Are",
       links: [
         { label: "About Us", href: "#about" },
-        { label: "Our Store", href: "#contact" },
+        { label: "Our Studio", href: "#contact" },
         { label: "Contact", href: "#contact" },
+        { label: "Careers", href: "#contact" },
       ],
     },
     {
       title: "Support",
       links: [
         { label: "FAQ", href: "#faq" },
-        { label: "Delivery", href: "#faq" },
-        { label: "Returns", href: "#faq" },
+        { label: "File Guidelines", href: "#faq" },
+        { label: "Turnaround Times", href: "#faq" },
+        { label: "Track Order", href: "#contact" },
       ],
     },
   ],
   legalLinks: [
+    { label: "Admin Entrance", href: "/admin" },
     { label: "Privacy Policy", href: `mailto:${contactConfig.email}?subject=Privacy%20Policy%20Request` },
     { label: "Terms of Service", href: `mailto:${contactConfig.email}?subject=Terms%20of%20Service%20Request` },
+    { label: "Cookie Settings", href: "#cookies" },
   ],
-  copyrightText: `© ${new Date().getFullYear()} Stankings Home Value. All rights reserved.`,
+  copyrightText: `© ${new Date().getFullYear()} Thewworks. All rights reserved.`,
   socialLinks: [
     { icon: "Instagram", label: "Instagram", href: "https://instagram.com" },
     { icon: "Facebook", label: "Facebook", href: "https://facebook.com" },

@@ -12,19 +12,19 @@ import {
   type VerifiedOrder,
 } from './lib/checkout';
 import { useStore } from './lib/store';
+import BrandLogo from './components/BrandLogo';
+import CookieConsentBanner from './components/CookieConsentBanner';
 
 const AdminDashboardPage = lazy(() => import('./components/admin/AdminDashboardPage'));
 const CheckoutModal = lazy(() => import('./components/CheckoutModal'));
 const LandingPage = lazy(() => import('./components/LandingPage'));
 const PaymentStatusDialog = lazy(() => import('./components/PaymentStatusDialog'));
-const StankingsMarketplace = lazy(() => import('./components/StankingsMarketplace'));
+const ThewworksICTMarketplace = lazy(() => import('./components/ThewworksICTMarketplace'));
 
 const AppLoadingState = ({ message }: { message: string }) => (
   <div className="flex min-h-screen items-center justify-center bg-[var(--market-sand)] px-6">
     <div className="rounded-[1.5rem] border border-[var(--market-stroke)] bg-[var(--market-ivory)] px-6 py-5 text-center shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--market-orange)]">
-        Stankings
-      </p>
+      <BrandLogo className="justify-center" markClassName="h-9 w-16" textTone="brand" />
       <p className="mt-3 text-sm font-medium text-[var(--market-muted)]">{message}</p>
     </div>
   </div>
@@ -43,10 +43,10 @@ function AppShell() {
 
   useEffect(() => {
     document.title = isAdminRoute
-      ? 'Stankings Admin | Dashboard'
+      ? 'Thewworks Admin | Dashboard'
       : isStoreRoute
-        ? 'Stankings Trade Hub | Store'
-        : 'Stankings Home Value | Landing Site';
+        ? 'Thewworks | Order'
+        : 'Thewworks | Premium Printing & Design';
   }, [isAdminRoute, isStoreRoute]);
 
   const verifyPaymentReference = useCallback(async (reference: string) => {
@@ -129,7 +129,7 @@ function AppShell() {
           path="/store"
           element={(
             <Suspense fallback={<AppLoadingState message="Loading storefront..." />}>
-              <StankingsMarketplace onCheckoutRequested={() => setIsCheckoutOpen(true)} />
+              <ThewworksICTMarketplace onCheckoutRequested={() => setIsCheckoutOpen(true)} />
             </Suspense>
           )}
         />
@@ -168,6 +168,7 @@ function AppShell() {
           />
         </Suspense>
       ) : null}
+      <CookieConsentBanner />
     </>
   );
 }

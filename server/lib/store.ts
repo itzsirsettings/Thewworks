@@ -13,9 +13,26 @@ import type {
   OrderRecord,
   PaystackTransactionData,
 } from './types.js';
+import { catalogById, catalogItems } from './catalog.js';
 
 // We are now fully committed to Supabase for the entire app.
 // The SQLite and local JSON logic is preserved in history but removed from active duty.
+
+const legacyCatalogTerms = [
+  'sofa',
+  'bed',
+  'refrigerator',
+  'rug',
+  'dining',
+  'appliance',
+  'living room',
+  'bedroom',
+];
+
+function isLegacyCatalogItem(product: { name?: unknown; category?: unknown; summary?: unknown }) {
+  const searchable = `${String(product.name ?? '')} ${String(product.category ?? '')} ${String(product.summary ?? '')}`.toLowerCase();
+  return legacyCatalogTerms.some((term) => searchable.includes(term));
+}
 
 export async function findOrderByReference(reference: string) {
   return findOrderByReferenceSupabase(reference);
@@ -40,11 +57,25 @@ export async function updateNotificationStatus(
 }
 
 export async function getProducts() {
-  return getProductsSupabase();
+  const products = await getProductsSupabase();
+
+  if (!products || products.length === 0 || products.some((product) => isLegacyCatalogItem(product))) {
+    return catalogItems;
+  }
+
+  return products;
 }
 
 export async function getProductsByIds(ids: number[]) {
-  return getProductsByIdsSupabase(ids);
+  const products = await getProductsByIdsSupabase(ids);
+
+  if (!products || products.length !== ids.length || products.some((product) => isLegacyCatalogItem(product))) {
+    return ids
+      .map((id) => catalogById.get(id))
+      .filter((product): product is NonNullable<typeof product> => Boolean(product));
+  }
+
+  return products;
 }
 
 export async function getCategories() {
