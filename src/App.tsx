@@ -6,6 +6,7 @@ import {
   Routes,
   useLocation,
 } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import {
   clearPendingReference,
   getPendingReference,
@@ -34,7 +35,6 @@ const AppLoadingState = ({ message }: { message: string }) => (
 function AppShell() {
   const { pathname } = useLocation();
   const isStoreRoute = useMemo(() => pathname.startsWith('/store'), [pathname]);
-  const isAdminRoute = useMemo(() => pathname === '/admin', [pathname]);
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
@@ -173,6 +173,7 @@ function App() {
   return (
     <Router>
       <AppShell />
+      <Analytics />
     </Router>
   );
 }
