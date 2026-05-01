@@ -64,7 +64,7 @@ export interface HeroConfig {
 }
 
 export const heroConfig: HeroConfig = {
-  tagline: "Premium Printing & Design",
+  tagline: "",
   title: "Creative Excellence\nin Every Print",
   rotatingTitles: [
     "Making Every Print Count",
@@ -113,7 +113,7 @@ export const subHeroConfig: SubHeroConfig = {
   tag: "Who We Are",
   heading: "Your Trusted Printing Partner",
   bodyParagraphs: [
-    "Thewworks has been a leader in premium printing and design services for over 15 years. We specialize in creating stunning visual communications for businesses, events, and creative projects.",
+    "Thewworks has been a leader in premium printing and design services for over 2 years. We specialize in creating stunning visual communications for businesses, events, and creative projects.",
     "From digital design to final print, we handle every detail with precision and care. Our experienced team combines cutting-edge technology with artistic expertise to bring your ideas to life.",
   ],
   linkText: "Learn more about us",
@@ -121,7 +121,7 @@ export const subHeroConfig: SubHeroConfig = {
   image1: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80",
   image2: "https://images.unsplash.com/photo-1542298089-abc8b8c77650?w=600&q=80",
   stats: [
-    { value: 15, suffix: "+", label: "Years Experience" },
+    { value: 2, suffix: "+", label: "Years Experience" },
     { value: 2500, suffix: "+", label: "Projects Completed" },
     { value: 99, suffix: "%", label: "Client Satisfaction" },
   ],
@@ -349,7 +349,7 @@ export const aboutConfig: AboutConfig = {
       tag: "Our Story",
       heading: "Your Trusted Printing Partner",
       paragraphs: [
-        "Thewworks has been serving businesses and creative professionals for over 15 years. Located in the heart of the city, we've established ourselves as a premier destination for high-quality printing and design services.",
+        "Thewworks has been serving businesses and creative professionals for over 2 years. Located in the heart of the city, we've established ourselves as a premier destination for high-quality printing and design services.",
         "From small businesses to large enterprises, we've helped our clients make a lasting impression through innovative printing solutions. We combine state-of-the-art technology with artistic excellence to deliver outstanding results.",
       ],
       quote: "",
