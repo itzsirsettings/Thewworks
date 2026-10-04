@@ -1,3 +1,5 @@
+> Historical pre-rebrand document retained for preservation. The active public website is Wills Group of Company (doors, gates, metalwork and interiors). Former business details are not current. See docs/REBRAND_DECISIONS.md for current scope and configuration.
+
 # Client Walkthrough
 
 This document explains the app as a product, not just as code. It is written for a client who is evaluating whether to buy, adopt, or commission the platform.

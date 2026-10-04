@@ -1,3 +1,5 @@
+> Historical pre-rebrand document retained for preservation. The active public website is Wills Group of Company (doors, gates, metalwork and interiors). Former business details are not current. See docs/REBRAND_DECISIONS.md for current scope and configuration.
+
 # ThewworksICT E-Commerce Application - Product Requirements Document (PRD)
 
 **Version**: 0.0.0  

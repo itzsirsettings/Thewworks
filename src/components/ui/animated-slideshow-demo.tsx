@@ -10,46 +10,46 @@ import {
 const SLIDES = [
   {
     id: "slide-1",
-    title: "3d Signages",
-    imageUrl: "/images/3d signages.jpg",
+    title: "Decorative gates",
+    imageUrl: "/media/wills/IMG-20261003-WA0067.webp",
   },
   {
     id: "slide-2",
-    title: "Cap branding",
-    imageUrl: "/images/Cap branding.jpg",
+    title: "Statement doors",
+    imageUrl: "/media/wills/IMG-20261003-WA0018.webp",
   },
   {
     id: "slide-3",
-    title: "van branding",
-    imageUrl: "/images/van branding.jpg",
+    title: "Modern entrances",
+    imageUrl: "/media/wills/IMG-20261003-WA0039.webp",
   },
   {
     id: "slide-4",
-    title: "Rollup stand",
-    imageUrl: "/images/Rollup stand.jpg",
+    title: "Metal detailing",
+    imageUrl: "/media/wills/IMG-20261003-WA0023.webp",
   },
   {
     id: "slide-5",
-    title: "Mugs",
-    imageUrl: "/images/mugs.jpg",
+    title: "Custom fabrication",
+    imageUrl: "/media/wills/IMG-20261003-WA0054.webp",
   },
   {
     id: "slide-6",
-    title: "Vest branding",
-    imageUrl: "/images/Vest branding.jpg",
+    title: "Interiors",
+    imageUrl: "/media/wills/IMG-20261003-WA0036.webp",
   },
 ]
 
 export function HoverSliderDemo() {
   return (
-    <HoverSlider className="min-h-[60vh] w-full flex flex-col justify-center px-6 md:px-12 bg-[#faf9f5] text-[#3d3929]">
+    <HoverSlider className="brand-dot-surface wills-slideshow min-h-[60vh] py-20 w-full flex flex-col justify-center px-6 md:px-12 bg-[var(--brand-navy)] text-[var(--brand-lavender)]">
       <div className="flex flex-wrap items-center justify-evenly gap-6 md:gap-12">
         <div className="flex flex-col space-y-2 md:space-y-4">
           {SLIDES.map((slide, index) => (
             <TextStaggerHover
               key={slide.title}
               index={index}
-              className="cursor-pointer text-4xl font-bold uppercase tracking-tighter"
+              className="cursor-pointer text-2xl md:text-4xl font-bold uppercase tracking-tighter"
               text={slide.title}
             />
           ))}
@@ -63,7 +63,7 @@ export function HoverSliderDemo() {
                 src={slide.imageUrl}
                 alt={slide.title}
                 className="size-full max-h-96 w-full object-cover"
-                loading="eager"
+                loading="lazy"
                 decoding="async"
               />
             </div>

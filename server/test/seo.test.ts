@@ -1,5 +1,6 @@
 // @vitest-environment node
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+vi.hoisted(() => { process.env.PUBLIC_SITE_URL = 'https://wills.example'; });
 import {
   getApexRedirectUrl,
   getRouteSeo,
@@ -15,18 +16,18 @@ const htmlShell = `
     <meta name="description" content="Old description" />
     <meta name="keywords" content="old" />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://thewworksict.com/" />
+    <link rel="canonical" href="https://wills.example/" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Old title" />
     <meta property="og:description" content="Old description" />
-    <meta property="og:url" content="https://thewworksict.com/" />
-    <meta property="og:image" content="https://thewworksict.com/old.png" />
+    <meta property="og:url" content="https://wills.example/" />
+    <meta property="og:image" content="https://wills.example/old.png" />
     <meta property="og:image:alt" content="Old image" />
     <meta name="twitter:site" content="@old" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Old title" />
     <meta name="twitter:description" content="Old description" />
-    <meta name="twitter:image" content="https://thewworksict.com/old.png" />
+    <meta name="twitter:image" content="https://wills.example/old.png" />
     <meta name="twitter:image:alt" content="Old image" />
     <script type="application/ld+json">{"old":true}</script>
   </head>
@@ -37,8 +38,8 @@ describe('server SEO helpers', () => {
   it('injects route-aware store metadata into the initial HTML shell', () => {
     const html = injectRouteSeo(htmlShell, '/store?reference=STK-test');
 
-    expect(html).toContain('<title>Thewworks Store &amp; Quote Desk | Printing Services in Asaba</title>');
-    expect(html).toContain('<link rel="canonical" href="https://thewworksict.com/store" />');
+    expect(html).toContain('<title>Wills Group of Company | Project Quote Desk</title>');
+    expect(html).toContain('<link rel="canonical" href="https://wills.example/store" />');
     expect(html).toContain('<meta name="robots" content="noindex, nofollow" />');
     expect(html).not.toContain('name="twitter:site"');
     expect(html).toContain('"@type": "WebPage"');
@@ -51,13 +52,13 @@ describe('server SEO helpers', () => {
     expect(shouldNoIndexRequest('/checkout/success')).toBe(true);
     expect(shouldNoIndexRequest('/store?trxref=abc')).toBe(true);
     expect(shouldNoIndexRequest('/sitemap.xml')).toBe(false);
-    expect(shouldNoIndexRequest('/images/thewworks-logo.png')).toBe(false);
+    expect(shouldNoIndexRequest('/media/wills/wills-group-logo.png')).toBe(false);
   });
 
   it('redirects www traffic to the canonical apex domain', () => {
-    expect(getApexRedirectUrl('www.thewworksict.com', '/store')).toBe(
-      'https://thewworksict.com/store',
+    expect(getApexRedirectUrl('www.wills.example', '/store')).toBe(
+      'https://wills.example/store',
     );
-    expect(getApexRedirectUrl('thewworksict.com', '/store')).toBe('');
+    expect(getApexRedirectUrl('wills.example', '/store')).toBe('');
   });
 });

@@ -142,13 +142,13 @@ async function sendEmailConfirmation(order: OrderRecord): Promise<NotificationSt
     });
 
     if (error) {
-      console.error('Resend API error:', error);
+      console.error(JSON.stringify({ event: 'email_provider_rejected' }));
       return 'failed';
     }
 
     return 'sent';
-  } catch (error) {
-    console.error('Email confirmation failed:', error);
+  } catch {
+    console.error(JSON.stringify({ event: 'email_confirmation_failed' }));
     return 'failed';
   }
 }
@@ -168,8 +168,8 @@ async function sendSmsConfirmation(order: OrderRecord): Promise<NotificationStat
     });
 
     return 'sent';
-  } catch (error) {
-    console.error('SMS confirmation failed:', error);
+  } catch {
+    console.error(JSON.stringify({ event: 'sms_confirmation_failed' }));
     return 'failed';
   }
 }

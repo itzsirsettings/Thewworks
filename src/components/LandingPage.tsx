@@ -1,367 +1,145 @@
-import { CtaCard } from '@/components/ui/cta-card';
-import BrandLogo from '@/components/BrandLogo';
-import LeafletMap from '@/components/ui/leaflet-map';
-import Footer from '@/sections/Footer';
-import Hero from '@/sections/Hero';
-import SEO from '@/components/SEO';
+import { useEffect, useRef, useState } from 'react';
+import { Menu, X, MessageCircle, Check, DoorOpen, Fence, PanelsTopLeft, Grid2X2, Wrench, Hammer } from 'lucide-react';
+import BrandLogo from './BrandLogo';
+import SEO from './SEO';
+import Hero from '../sections/Hero';
+import Footer from '../sections/Footer';
 import { HeroWithGreeting } from './ui/hero-with-greeting';
 import { HoverSliderDemo } from './ui/animated-slideshow-demo';
-import { siteConfig } from '../config';
-import { buildWhatsAppUrl } from '@/lib/whatsapp';
-import {
-  ArrowRight,
-  BadgeCheck,
-  BookOpen,
-  Box,
-  CheckCircle2,
-  Clock3,
-  FileCheck2,
-  Layers3,
-  MessageCircleMore,
-  PackageCheck,
-  Palette,
-  Printer,
-  Shirt,
-  SwatchBook,
-} from 'lucide-react';
+import { CtaCard } from './ui/cta-card';
+import LeafletMap from './ui/leaflet-map';
+import ProjectGallery from './ProjectGallery';
+import ProjectBrief from './ProjectBrief';
+import InteriorConcepts from './InteriorConcepts';
+import { brand, mediaPath } from '../lib/brand';
+import { buildWhatsAppUrl } from '../lib/whatsapp';
+import { faqConfig } from '../config';
 
 const services = [
-  {
-    title: 'Business Essentials',
-    detail: 'Business cards, letterheads, envelopes, forms, folders and presentation packs.',
-    spec: 'Matte, gloss, textured, soft-touch',
-    icon: FileCheck2,
-  },
-  {
-    title: 'Marketing Prints',
-    detail: 'Flyers, brochures, posters, catalogs, booklets and campaign materials.',
-    spec: 'Short runs to bulk production',
-    icon: SwatchBook,
-  },
-  {
-    title: 'Large Format',
-    detail: 'Pull-up banners, vinyl banners, wall graphics, signboards and event backdrops.',
-    spec: 'Indoor and outdoor finishes',
-    icon: Printer,
-  },
-  {
-    title: 'Packaging & Labels',
-    detail: 'Product boxes, sleeves, stickers, roll labels, paper bags and retail inserts.',
-    spec: 'Foil, emboss, spot UV, die-cut',
-    icon: Box,
-  },
-  {
-    title: 'Books & Manuals',
-    detail: 'Perfect-bound books, saddlestitch booklets, reports, training manuals and programs.',
-    spec: 'Proofed, trimmed, bound',
-    icon: BookOpen,
-  },
-  {
-    title: 'Apparel Printing',
-    detail: 'T-shirts, uniforms, tote bags and branded merch for teams and events.',
-    spec: 'Screen, heat transfer, DTF',
-    icon: Shirt,
-  },
+  { icon: DoorOpen, title: 'Doors', detail: 'Statement entrances, decorative panels and door design enquiries.', spec: 'Opening dimensions · fittings · finish' },
+  { icon: Fence, title: 'Gates', detail: 'From clean modern lines to intricate ornamental entrance designs.', spec: 'Access · opening style · design' },
+  { icon: PanelsTopLeft, title: 'Interiors', detail: 'Room and interior project enquiries shaped around your space, style and priorities.', spec: 'Room plan · materials · detailing' },
+  { icon: Grid2X2, title: 'Grilles & railings', detail: 'Metal details for windows, boundaries, stairs and other parts of your property.', spec: 'Site dimensions · use · specification' },
+  { icon: Hammer, title: 'Fabrication', detail: 'Discuss structural and custom metalwork with a drawing or project brief.', spec: 'Drawing · material · fabrication scope' },
+  { icon: Wrench, title: 'Custom work & repairs', detail: 'Bring an existing piece, a reference or a repair requirement for assessment.', spec: 'Condition · intended use · feasibility' },
 ];
-
-const processSteps = [
-  ['01', 'Preflight', 'We check bleed, margins, resolution, color mode and file readiness before production.'],
-  ['02', 'Proof', 'You receive a clear proof so layout, paper, size and finishing are confirmed.'],
-  ['03', 'Produce', 'Our pressroom handles print, finishing, trimming, binding and quality control.'],
-  ['04', 'Deliver', 'Orders are packed neatly for pickup, courier delivery or scheduled bulk dispatch.'],
+const steps = [
+  ['01', 'Discuss', 'Share your project, location, reference design and intended use.'],
+  ['02', 'Measure & design', 'Confirm dimensions, drawings, materials, fittings and the proposed finish.'],
+  ['03', 'Agree & fabricate', 'Agree on the written quote, scope and schedule before production.'],
+  ['04', 'Deliver & install', 'Confirm packing, transport, site access and any installation requirements.'],
 ];
+const finishes = ['Material specification', 'Metal thickness', 'Color & surface finish', 'Fittings & hardware', 'Weather exposure', 'Maintenance requirements'];
+const nav = [['Services', '#services'], ['Interiors', '#interiors'], ['Gallery', '#gallery'], ['Process', '#process'], ['Contact', '#contact']];
 
-const finishes = [
-  'Foil stamping',
-  'Embossing',
-  'Spot UV',
-  'Die cutting',
-  'Lamination',
-  'Perfect binding',
-  'Rounded corners',
-  'Waterproof labels',
-];
-
-const articles = [
-  'Choosing paper stock that makes your brand feel premium',
-  'How bleed, trim and safe zones prevent costly reprints',
-  'CMYK, Pantone and color consistency in real production',
-];
-
-const faqs = [
-  ['What file formats do you accept?', 'Print-ready PDF is best. We also accept AI, PSD, TIFF and high-resolution JPG files when supplied with fonts, links or outlined text.'],
-  ['Can you help with design?', 'Yes. We can prepare new artwork, clean up existing layouts, adapt brand files and make production-ready corrections before proofing.'],
-  ['How fast can you deliver?', 'Many standard jobs can move within 24 to 72 hours after proof approval. Complex packaging, books and specialty finishes need a confirmed production schedule.'],
-  ['Do you handle bulk orders?', 'Yes. We support repeat business stationery, event campaigns, product launches, school materials, books, packaging and retail label runs.'],
-];
-
-const LandingPage = () => {
-  const projectWhatsAppUrl = buildWhatsAppUrl(
-    'Hello, I would like to start a printing project with Thewworks ICT & Prints.',
-  );
-
-  const scrollToContact = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const element = document.querySelector('#contact');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
+export default function LandingPage() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('#hero');
+  const menuButton = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const offset = document.querySelector('.header-inner')?.getBoundingClientRect().height ?? 80;
+      let current = '#hero';
+      for (const [, href] of nav) {
+        const section = document.querySelector(href);
+        if (section && section.getBoundingClientRect().top <= offset + window.innerHeight * .25) current = href;
+      }
+      setActiveSection(current);
+    };
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
+    const resize = () => { if (window.innerWidth > 900) setMenuOpen(false); schedule(); };
+    update();
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', resize);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener('scroll', schedule); window.removeEventListener('resize', resize); };
+  }, []);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { setMenuOpen(false); menuButton.current?.focus(); }
+    };
+    window.addEventListener('keydown', close);
+    return () => window.removeEventListener('keydown', close);
+  }, [menuOpen]);
+  const projectWhatsAppUrl = buildWhatsAppUrl('Hello Wills Group of Company, I am viewing your website and would like to discuss a metalwork or interiors project.');
   return (
-    <div className="min-h-screen bg-[#f7f1e7] text-[#171717]" lang={siteConfig.language || undefined}>
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[9999] focus:bg-[#171717] focus:px-4 focus:py-2 focus:text-white"
-      >
-        Skip to main content
-      </a>
-
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/15 bg-[#151515]/82 text-white backdrop-blur-xl">
-        <div className="mx-auto flex h-20 max-w-[1480px] items-center justify-between px-5 md:px-10 lg:px-14">
-          <a href="#hero" className="flex items-center gap-3 font-semibold">
-            <BrandLogo
-              markClassName="h-11 w-20"
-              textClassName="text-lg"
-              textTone="light"
-            />
-          </a>
-
-          <nav className="hidden items-center gap-8 text-sm text-white/78 md:flex">
-            <a href="#services" className="hover:text-white">Services</a>
-            <a href="#process" className="hover:text-white">Process</a>
-            <a href="#finishes" className="hover:text-white">Finishes</a>
-            <a href="#faq" className="hover:text-white">FAQ</a>
-            <a href="#contact" className="hover:text-white" onClick={scrollToContact}>Contact</a>
-          </nav>
-
-          <a
-            href="#contact"
-            onClick={scrollToContact}
-            className="inline-flex items-center gap-2 bg-white px-4 py-2.5 text-sm font-semibold text-[#171717] hover:-translate-y-0.5"
-          >
-            Get a Quote
-            <ArrowRight size={16} />
-          </a>
+    <div className="wills-site" lang="en">
+      <a href="#main-content" className="skip-link">Skip to main content</a>
+      <header className="wills-header">
+        <div className="wills-container header-inner">
+          <nav className="desktop-nav" aria-label="Main navigation">{nav.map(([label, href]) => <a key={href} href={href} aria-current={activeSection === href ? 'location' : undefined}>{label}</a>)}</nav>
+          <button ref={menuButton} type="button" className="menu-toggle" aria-expanded={menuOpen} aria-controls="mobile-navigation" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X /> : <Menu />}</button>
+          <a className="header-home" href="#hero" aria-label="Wills Group of Company home"><BrandLogo showText={false} markClassName="header-logo" /></a>
+          <a href="#contact" className="header-quote">Start a project</a>
         </div>
+        {menuOpen && <nav id="mobile-navigation" className="mobile-nav" aria-label="Mobile navigation">{nav.map(([label, href]) => <a key={href} href={href} aria-current={activeSection === href ? 'location' : undefined} onClick={() => setMenuOpen(false)}>{label}</a>)}</nav>}
       </header>
-
-      <SEO 
-        title="Premium Printing & Design Studio in Asaba" 
-        description="Thewworks ICT & Prints: Your premier printing press in Asaba. High-quality business cards, custom packaging, branded apparel, and design services."
-        keywords="thewworks, printing press asaba, print shop delta state, custom packaging nigeria, business branding asaba"
-      />
+      <SEO title="Doors, Gates, Metalwork & Interiors" description={brand.description} keywords="Wills Group of Company, doors, gates, metal fabrication, interiors, window grilles" noIndex={!brand.siteUrl} />
       <main id="main-content">
         <Hero />
-
-        <HeroWithGreeting
-          greeting="Welcome to Thewworks"
-          title={
-            <>
-              Premium <span className="text-[#c9a87c]">Print Solutions</span> for Your Brand
-            </>
-          }
-          subtitle={
-            <span className="bg-[rgba(255,0,0,0.05)] px-1">
-              From business cards to custom packaging, we deliver exceptional print quality that elevates your brand identity.
-            </span>
-          }
-          stats={[
-            { value: '15+', label: 'Years Experience' },
-            { value: '2,500+', label: 'Projects Completed' },
-            { value: '99%', label: 'Client Satisfaction' },
-          ]}
-          images={[
-            '/images/Bags1.jpg',
-            '/images/Branded Nylon.jpg',
-            '/images/Blog.jpg',
-            '/images/Birthday jotter design.jpg',
-            '/images/Cash receipts prints.jpg',
-            '/images/Bottle branding.jpg',
-          ]}
-        />
-
-        <section id="services" className="bg-[#fffaf1] px-5 py-24 md:px-10 lg:px-14">
-          <div className="mx-auto max-w-[1480px]">
-            <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr]">
-              <div>
-                <p className="text-sm font-bold uppercase tracking-[0.24em] text-[#f04f32]">Services</p>
-                <h2 className="mt-4 text-4xl font-extrabold leading-tight tracking-[-0.04em] md:text-6xl">
-                  Everything your brand needs in print.
-                </h2>
-                <p className="mt-6 max-w-lg text-lg leading-8 text-[#69645e]">
-                  Build a launch kit, restock your stationery, package a product line or prepare a full event campaign from one production desk.
-                </p>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                {services.map((service) => {
-                  const Icon = service.icon;
-                  return (
-                    <article key={service.title} className="live-card border border-[#e1d4c2] bg-white p-6 shadow-[0_20px_50px_rgba(23,23,23,0.06)]">
-                      <div className="mb-7 flex h-12 w-12 items-center justify-center bg-[#e9fbfd] text-[#087987]">
-                        <Icon size={23} strokeWidth={1.8} />
-                      </div>
-                      <h3 className="text-2xl font-bold tracking-[-0.03em]">{service.title}</h3>
-                      <p className="mt-3 leading-7 text-[#69645e]">{service.detail}</p>
-                      <p className="mt-5 border-t border-[#eee2d2] pt-4 text-xs font-bold uppercase tracking-[0.16em] text-[#f04f32]">{service.spec}</p>
-                    </article>
-                  );
-                })}
-              </div>
+        <section className="division-brands" aria-label="Wills Group divisions">
+          <div className="wills-container">
+            <div className="division-logos">
+              <a href="#interiors" aria-label="Explore Wills Interior"><img src="/media/wills/logos/wills-interior.webp" alt="Wills Interior logo" width="640" height="640" loading="lazy" decoding="async" /></a>
+              <a href="#gallery" aria-label="Explore Wills Foreign Doors"><img src="/media/wills/logos/wills-foreign-doors.webp" alt="Wills Foreign Doors logo" width="640" height="640" loading="lazy" decoding="async" /></a>
+              <a href="#services" aria-label="Explore Wills Metal Works"><img src="/media/wills/logos/wills-metal-works.webp" alt="Wills Metal Works logo" width="640" height="640" loading="lazy" decoding="async" /></a>
             </div>
+            <p>Doors, interiors and metalwork. One Wills Group.</p>
           </div>
         </section>
-
+        <div className="offerings-strip" aria-label="Core offerings"><span>Doors & gates</span><span>Metalwork & fabrication</span><span>Interiors</span><a href="#contact">Made to your brief</a></div>
+        <div id="about" className="about-wrapper">
+          <HeroWithGreeting
+            title={<>Crafted for the outside.<br /><span className="wills-emphasis">Considered for the inside.</span></>}
+            subtitle="Wills Group of Company brings doors, gates, metalwork and interiors into one project conversation. Explore a design, share your space, and agree on the details that make it yours."
+            stats={[]}
+            images={['0039', '0064', '0023', '0046', '0018', '0054'].map((number) => mediaPath(number, true))}
+            imageAlts={['Black entrance door with a curved warm-tone panel', 'Black entrance gate with gold detailing', 'Decorative metal window grille', 'Geometric black and silver metal door', 'Polished gold-tone decorative door', 'Structural steel framework beside a building']}
+          />
+        </div>
+        <section id="services" className="wills-section service-section">
+          <div className="wills-container">
+            <div className="section-heading"><h2>One vision.<br /><em>Every detail.</em></h2><p>Choose your starting point. We use your brief to discuss the right design direction, project scope and specification.</p></div>
+            <div className="service-list">{services.map((service) => {
+              const Icon = service.icon;
+              return <article key={service.title}><Icon size={29} strokeWidth={1.3} aria-hidden="true" /><div><h3>{service.title}</h3><p>{service.detail}</p><span>{service.spec}</span></div><a href="#contact" className="wills-button button-outline service-enquiry" aria-label={`Enquire about ${service.title}`}>Enquire</a></article>;
+            })}</div>
+          </div>
+        </section>
+        <section id="interiors" className="interiors-section">
+          <span id="beds" className="anchor-alias" />
+          <div className="interiors-image"><img src="/media/wills/interiors/living-room.webp" alt="Living room design concept with ivory seating and walnut wall panelling" loading="lazy" decoding="async" width="1440" height="810" /></div>
+          <div className="interiors-copy"><h2>The space beyond<br /><em>the entrance.</em></h2><p>Interiors are a core part of Wills Group of Company. Bring your room plan, inspiration and the way you want the space to feel.</p><p>From living rooms and kitchens to fitted storage, explore a direction and discuss materials, layout and finishing details with us.</p><a className="wills-button button-primary" href="#contact">Discuss an interior project</a></div>
+          <InteriorConcepts />
+        </section>
         <HoverSliderDemo />
-
-        <section id="process" className="bg-[#171717] px-5 py-24 text-white md:px-10 lg:px-14">
-          <div className="mx-auto max-w-[1480px]">
-            <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
-              <div>
-                <p className="text-sm font-bold uppercase tracking-[0.24em] text-[#18b7c8]">Production workflow</p>
-                <h2 className="mt-4 text-4xl font-extrabold leading-tight tracking-[-0.04em] md:text-6xl">
-                  From file prep to final finish.
-                </h2>
-              </div>
-              <p className="max-w-2xl text-lg leading-8 text-white/68">
-                We keep every job controlled and visible: technical checks, proof approval,
-                press production, finishing, packaging and dispatch all move through one quality workflow.
-              </p>
-            </div>
-
-            <div className="mt-14 grid gap-4 md:grid-cols-4">
-              {processSteps.map(([number, title, detail]) => (
-                <article key={title} className="live-card live-card-dark border border-white/12 bg-white/[0.04] p-6">
-                  <p className="text-sm font-bold text-[#f04f32]">{number}</p>
-                  <h3 className="mt-8 text-2xl font-bold tracking-[-0.03em]">{title}</h3>
-                  <p className="mt-4 leading-7 text-white/65">{detail}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="finishes" className="grid bg-[#fffaf1] lg:grid-cols-2">
-          <div className="px-5 py-24 md:px-10 lg:px-14">
-            <p className="text-sm font-bold uppercase tracking-[0.24em] text-[#f04f32]">Packaging and finishes</p>
-            <h2 className="mt-4 max-w-xl text-4xl font-extrabold leading-tight tracking-[-0.04em] md:text-6xl">
-              Tactile details that make print feel valuable.
-            </h2>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-[#69645e]">
-              Choose the finish that matches the moment: premium cards, retail packaging, waterproof labels,
-              product sleeves, launch boxes and presentation materials.
-            </p>
-            <div className="mt-10 grid gap-3 sm:grid-cols-2">
-              {finishes.map((finish) => (
-                <div key={finish} className="live-card flex items-center gap-3 border border-[#e1d4c2] bg-white px-4 py-3">
-                  <CheckCircle2 size={18} className="text-[#087987]" />
-                  <span className="font-semibold">{finish}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-[#18b7c8] px-5 py-24 text-[#101010] md:px-10 lg:px-14">
-            <div className="mx-auto max-w-xl">
-              <PackageCheck size={42} strokeWidth={1.6} />
-              <h3 className="mt-8 text-4xl font-extrabold leading-tight tracking-[-0.04em]">
-                Built for brand teams, schools, events, restaurants and product founders.
-              </h3>
-              <p className="mt-6 text-lg leading-8 text-[#10383c]">
-                Bring a sketch, brand guideline, old sample or ready-to-print file. We will advise on paper,
-                quantity, finish, durability and cost before production starts.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-[#f7f1e7] px-5 py-24 md:px-10 lg:px-14">
-          <div className="mx-auto grid max-w-[1480px] gap-5 md:grid-cols-3">
-            {[
-              [Clock3, 'Fast turnaround', 'Rush and standard windows available after proof approval.'],
-              [Palette, 'Color accuracy', 'CMYK-aware production and practical guidance for brand colors.'],
-              [BadgeCheck, 'Quality control', 'Every job is checked for trimming, finishing and packing quality.'],
-            ].map(([Icon, title, detail]) => {
-              const BenefitIcon = Icon as typeof Clock3;
-              return (
-                <article key={title as string} className="live-card live-card-dark border border-white/10 bg-[#171717] p-7 text-white">
-                  <BenefitIcon size={28} className="text-[#18b7c8]" />
-                  <h3 className="mt-8 text-2xl font-bold tracking-[-0.03em]">{title as string}</h3>
-                  <p className="mt-3 leading-7 text-white/66">{detail as string}</p>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-
-        <section id="faq" className="bg-[#fffaf1] px-5 py-24 md:px-10 lg:px-14">
-          <div className="mx-auto grid max-w-[1480px] gap-12 lg:grid-cols-[0.8fr_1.2fr]">
-            <div>
-              <p className="text-sm font-bold uppercase tracking-[0.24em] text-[#f04f32]">Print intelligence</p>
-              <h2 className="mt-4 text-4xl font-extrabold leading-tight tracking-[-0.04em] md:text-6xl">
-                Better files. Better print.
-              </h2>
-              <div className="mt-8 space-y-4">
-                {articles.map((article) => (
-                  <p key={article} className="flex items-start gap-3 text-[#4f4c47]">
-                    <Layers3 size={18} className="mt-1 text-[#087987]" />
-                    <span>{article}</span>
-                  </p>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {faqs.map(([question, answer]) => (
-                <article key={question} className="live-card border border-[#e1d4c2] bg-white p-6">
-                  <h3 className="text-xl font-bold tracking-[-0.02em]">{question}</h3>
-                  <p className="mt-3 leading-7 text-[#69645e]">{answer}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="contact" className="bg-[#171717] px-5 py-24 text-white md:px-10 lg:px-14">
-          <div className="mx-auto max-w-[1480px]">
-            <p className="text-sm font-bold uppercase tracking-[0.24em] text-[#18b7c8] mb-8">Start a project</p>
-            <CtaCard
-              title="Ready to print?"
-              subtitle="Send your print brief. We will help shape the run."
-              description="Tell us what you need, quantity, size, deadline and whether you already have artwork. We will respond with production guidance and a quote path."
-              buttonText="Request a Quote"
-              secondaryButtonText="Chat on WhatsApp"
-              secondaryButtonHref={projectWhatsAppUrl}
-              imageSrc="/images/Mathias.png"
-              imageAlt="Mathias"
-              onButtonClick={() => {
-                 const contactSection = document.querySelector('#contact');
-                 if (contactSection) {
-                   contactSection.scrollIntoView({ behavior: 'smooth' });
-                 }
-              }}
-              className="bg-white text-[#171717]"
-            />
-          </div>
-        </section>
+        <ProjectGallery />
+        <section id="process" className="wills-section process-section"><div className="wills-container">
+          <div className="section-heading"><h2>From an idea<br /><em>to an agreed plan.</em></h2><p>Good work starts with a clear brief. Agree on the important decisions before a project moves into production or installation.</p></div>
+          <div className="process-grid">{steps.map(([number, title, detail]) => <article key={number}><span>{number}</span><h3>{title}</h3><p>{detail}</p></article>)}</div>
+        </div></section>
+        <section id="finishes" className="wills-section finishes-section"><div className="wills-container finishes-grid">
+          <div><h2>Details that define<br /><em>the finished piece.</em></h2><p>Material, surface, proportion and hardware all shape the result. These are specification decisions, confirmed with your individual quote.</p><div className="finish-list">{finishes.map((finish) => <span key={finish}><Check size={16} aria-hidden="true" />{finish}</span>)}</div></div>
+          <img src={mediaPath('0040')} alt="Metal entrance door with carefully arranged horizontal accent panels" loading="lazy" decoding="async" width="640" height="800" />
+        </div></section>
+        <section id="blog" className="wills-section considerations-section"><div className="wills-container"><h2>Plan with the full picture.</h2><div className="considerations-grid">
+          {[['Your opening', 'Bring dimensions and photographs. Confirm clearances and access requirements.'], ['Your environment', 'Discuss exposure, finish options and a suitable maintenance plan.'], ['Your interior', 'Share the room layout, inspiration, priorities and the scope you want quoted.']].map(([title, detail]) => <article key={title}><h3>{title}</h3><p>{detail}</p></article>)}
+        </div></div></section>
+        <section id="shipping" className="wills-section shipping-section"><div className="wills-container section-heading"><h2>A local project.<br /><em>Or a distant destination.</em></h2><div><p>For a Nigerian project, include your town and any site or installation requirements. For an international enquiry, include your country, postcode and delivery expectations.</p><p>Transport, packing, availability, lead time and responsibility for customs or installation must be agreed in the quote.</p><a href="#contact" className="text-link">Prepare a delivery enquiry</a></div></div></section>
+        <section id="faq" className="wills-section faq-section"><div className="wills-container faq-grid"><h2>Before you<br /><em>commission.</em></h2><div>{faqConfig.faqs.map((faq) => <details key={faq.id}><summary>{faq.question}<span aria-hidden="true">+</span></summary><p>{faq.answer}</p></details>)}</div></div></section>
+        <section id="contact" className="wills-section contact-section"><div className="wills-container">
+          <CtaCard title="Wills Group of Company" subtitle={<>Let’s shape<br />your next project.</>} description="A door, a gate, a room or a custom piece. Start with your idea and we will discuss the details." buttonText="Prepare a project brief" onButtonClick={() => document.getElementById('project-brief')?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })} secondaryButtonText="Chat on WhatsApp" secondaryButtonHref={projectWhatsAppUrl} imageSrc={mediaPath('0038')} imageAlt="Black entrance door with vertical warm-tone panels and gold trim" className="wills-contact-card" />
+          <ProjectBrief />
+          <div className="contact-details"><a href={projectWhatsAppUrl} target="_blank" rel="noopener noreferrer"><MessageCircle size={20} />WhatsApp +234 705 745 0799</a>{brand.email && <a href={`mailto:${brand.email}`}>{brand.email}</a>}{brand.address && <p>{brand.address}</p>}</div>
+        </div></section>
+        <section id="privacy" className="privacy-note wills-container"><h2>Your enquiry and privacy.</h2><p>The project brief runs in your browser. It is only shared when you choose email or WhatsApp, whose own privacy policies apply. This website stores a local preference when you dismiss the cookie notice. It does not upload your project brief or enable analytics in this version.</p></section>
+        <section id="security" className="privacy-note wills-container"><h2>Privacy requests and security reports.</h2><p>Contact Wills on <a href="https://wa.me/2347057450799" target="_blank" rel="noopener noreferrer">WhatsApp +234 705 745 0799</a> to ask about access, correction or deletion of information you have shared, or to report a website security concern. Share only the details needed to explain your request. Do not send passwords, payment credentials or another person's private information.</p><p>Please report security issues privately. Avoid accessing other people's data, disrupting the service or testing third-party systems. Online purchases and payments are currently unavailable. Interior concept images illustrate design ideas; project materials, dimensions, scope and pricing require agreement with Wills.</p></section>
       </main>
-
       <LeafletMap />
-
       <Footer />
-
-      <a
-        href={projectWhatsAppUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Chat with Thewworks on WhatsApp"
-        className="fixed bottom-6 right-6 z-[999] flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl"
-      >
-        <MessageCircleMore size={26} strokeWidth={2} />
-      </a>
+      <a href={projectWhatsAppUrl} target="_blank" rel="noopener noreferrer" className="floating-whatsapp" aria-label="Chat with Wills Group of Company on WhatsApp"><MessageCircle size={25} /></a>
     </div>
   );
-};
-
-export default LandingPage;
+}

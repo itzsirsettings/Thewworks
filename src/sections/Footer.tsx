@@ -1,9 +1,9 @@
-import { Instagram, Facebook, Twitter, ArrowRight } from 'lucide-react';
+import { Instagram, Facebook, Twitter } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import BrandLogo from '../components/BrandLogo';
-import { contactConfig, footerConfig } from '../config';
-import { openMailto } from '../lib/browser-actions';
+import { footerConfig } from '../config';
+import { buildWhatsAppUrl } from '../lib/whatsapp';
 import { openCookieSettings } from '../lib/cookie-consent';
 
 const iconMap: Record<string, React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>> = {
@@ -23,14 +23,7 @@ const Footer = () => {
     e.preventDefault();
 
     if (email) {
-      openMailto(contactConfig.email, {
-        subject: 'Newsletter subscription request',
-        body: [
-          `Please add this email to the ${footerConfig.brandName} newsletter list:`,
-          '',
-          email,
-        ].join('\n'),
-      });
+      window.open(buildWhatsAppUrl(`Hello Wills Group of Company, I would like to enquire about a project. My email is ${email}.`), '_blank', 'noopener,noreferrer');
 
       setIsSubscribed(true);
       setEmail('');
@@ -47,7 +40,7 @@ const Footer = () => {
     if (href === '#') return;
     const element = document.querySelector(href);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      element.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     }
   };
 
@@ -95,7 +88,7 @@ const Footer = () => {
           {/* Link Groups */}
           {footerConfig.linkGroups.map((group) => (
             <div key={group.title}>
-              <h4 className="font-heading text-sm font-semibold uppercase tracking-wider mb-5">{group.title}</h4>
+              <h4 className="font-heading text-[0.6125rem] font-semibold uppercase tracking-wider mb-5">{group.title}</h4>
               <ul className="space-y-3">
                 {group.links.map((link) => (
                   <li key={link.label}>
@@ -116,16 +109,17 @@ const Footer = () => {
           ))}
 
           {/* Newsletter */}
-          {footerConfig.newsletterHeading && (
+          {footerConfig.newsletterButtonText && (
             <div className="lg:col-span-1">
-              <h4 className="font-heading text-sm font-semibold uppercase tracking-wider mb-3">{footerConfig.newsletterHeading}</h4>
-              <p className="text-[var(--chevron-muted)] text-sm mb-4">
+              {footerConfig.newsletterHeading && <h4 className="font-heading text-[0.6125rem] font-semibold uppercase tracking-wider mb-3">{footerConfig.newsletterHeading}</h4>}
+              {footerConfig.newsletterDescription && <p className="text-[var(--chevron-muted)] text-sm mb-4">
                 {footerConfig.newsletterDescription}
-              </p>
+              </p>}
               <form onSubmit={handleSubscribe} className="flex flex-col gap-3">
                 <div className="relative">
                   <input
                     type="email"
+                    aria-label="Your email for the WhatsApp enquiry"
                     placeholder={footerConfig.newsletterPlaceholder}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -142,7 +136,7 @@ const Footer = () => {
                   ) : (
                     <>
                       <span>{footerConfig.newsletterButtonText}</span>
-                      <ArrowRight size={14} />
+
                     </>
                   )}
                 </button>
@@ -188,8 +182,8 @@ const Footer = () => {
         </div>
 
         {/* Wordmark */}
-        <div className="py-4 overflow-hidden">
-          <p className="text-left font-heading text-[clamp(3rem,12vw,10rem)] leading-none tracking-tighter text-[var(--chevron-subtle)] opacity-30">
+        <div className="footer-wordmark-crop">
+          <p className="footer-wordmark font-heading tracking-tighter text-[var(--chevron-subtle)]">
             {footerWordmark}
           </p>
         </div>

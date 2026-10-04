@@ -1,6 +1,6 @@
-const CONSENT_COOKIE_NAME = 'thewworks_cookie_consent';
-const CONSENT_STORAGE_KEY = 'thewworks:cookie-consent';
-export const COOKIE_SETTINGS_EVENT = 'thewworks:open-cookie-settings';
+const CONSENT_COOKIE_NAME = 'wills_group_cookie_consent';
+const CONSENT_STORAGE_KEY = 'wills-group:cookie-consent';
+export const COOKIE_SETTINGS_EVENT = 'wills-group:open-cookie-settings';
 
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 180;
 

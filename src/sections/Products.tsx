@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { productsConfig } from '../config';
 
 const Products = () => {
@@ -60,7 +60,7 @@ const Products = () => {
             {productsConfig.tag}
           </span>
           <h2
-            className={`font-heading text-3xl md:text-4xl lg:text-5xl text-black mb-6 transition-all duration-700 ${
+            className={`font-heading text-[1.3125rem] md:text-[1.575rem] lg:text-[2.1rem] text-black mb-6 transition-all duration-700 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
             style={{ transitionDelay: '150ms' }}
@@ -124,8 +124,8 @@ const Products = () => {
               {/* Product Info */}
               <div className="p-5">
                 <span className="text-xs text-[var(--chevron-subtle)] tracking-wider uppercase">{product.category}</span>
-                <h3 className="font-heading text-lg text-black mt-1 mb-2">{product.name}</h3>
-                
+                <h3 className="font-heading text-[0.7875rem] text-black mt-1 mb-2">{product.name}</h3>
+
                 {/* Request Quote Button */}
                 <button
                   type="button"
@@ -154,7 +154,7 @@ const Products = () => {
               className="inline-flex items-center gap-2 px-8 py-3 border-2 border-[var(--chevron-blue)] text-[var(--chevron-blue)] font-medium transition-all hover:bg-[var(--chevron-blue)] hover:text-white"
             >
               {productsConfig.viewAllText}
-              <ArrowRight size={16} />
+
             </button>
           </div>
         )}

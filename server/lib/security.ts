@@ -52,12 +52,17 @@ const HSTS_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
 const RECEIPT_COOKIE_PREFIX = 'thewworksict_receipt_';
 const RECEIPT_COOKIE_MAX_AGE_MS = 2 * 60 * 60 * 1000;
 const DEFAULT_SECURITY_ALERT_COOLDOWN_MS = 5 * 60 * 1000;
+const MAX_RATE_LIMIT_KEYS = 10_000;
+const MAX_ALERT_KEYS = 200;
+const MAX_PENDING_ALERTS = 20;
+const logIdentityKey = randomBytes(32);
 
 const rateLimitStore = new Map<string, RateLimitEntry>();
 const securityAlertCooldownStore = new Map<string, number>();
 let redisRateLimitClient: RedisClient | null = null;
 let redisRateLimitUrl = '';
 let securityAlertDispatchQueue: Promise<void> = Promise.resolve();
+let pendingSecurityAlerts = 0;
 
 function getRequiredSecret(name: string) {
   const value = process.env[name]?.trim();
@@ -220,7 +225,6 @@ function shouldUseSecureCookies(request: Request) {
 
   return (
     request.secure ||
-    request.header('x-forwarded-proto') === 'https' ||
     trustedSiteUrl.protocol === 'https:'
   );
 }
@@ -245,6 +249,12 @@ function incrementMemoryRateLimitWindow(key: string, windowMs: number): RateLimi
   const entry = rateLimitStore.get(key);
 
   if (!entry || entry.resetAt <= now) {
+    if (!entry && rateLimitStore.size >= MAX_RATE_LIMIT_KEYS) {
+      for (const [storedKey, storedEntry] of rateLimitStore) {
+        if (storedEntry.resetAt <= now) rateLimitStore.delete(storedKey);
+      }
+      if (rateLimitStore.size >= MAX_RATE_LIMIT_KEYS) throw new Error('Rate limit capacity exhausted.');
+    }
     rateLimitStore.set(key, {
       count: 1,
       resetAt: now + windowMs,
@@ -355,10 +365,7 @@ function shouldDispatchSecurityAlert(payload: SecurityLogPayload) {
 
   const cooldownKey = [
     payload.event,
-    payload.reason || '',
-    payload.path || '',
     payload.statusCode || '',
-    payload.reference || '',
   ].join(':');
   const now = Date.now();
   const lastSentAt = securityAlertCooldownStore.get(cooldownKey) || 0;
@@ -367,6 +374,10 @@ function shouldDispatchSecurityAlert(payload: SecurityLogPayload) {
     return false;
   }
 
+  if (securityAlertCooldownStore.size >= MAX_ALERT_KEYS) {
+    const oldestKey = securityAlertCooldownStore.keys().next().value;
+    if (oldestKey) securityAlertCooldownStore.delete(oldestKey);
+  }
   securityAlertCooldownStore.set(cooldownKey, now);
   return true;
 }
@@ -401,25 +412,26 @@ async function dispatchSecurityAlert(payload: SecurityLogPayload) {
 }
 
 function queueSecurityAlert(payload: SecurityLogPayload) {
+  if (pendingSecurityAlerts >= MAX_PENDING_ALERTS) return;
+  pendingSecurityAlerts += 1;
   securityAlertDispatchQueue = securityAlertDispatchQueue
     .then(async () => {
       try {
         await dispatchSecurityAlert(payload);
-      } catch (error) {
+      } catch {
         console.error(
           JSON.stringify({
             timestamp: new Date().toISOString(),
             category: 'security',
             severity: 'critical',
             event: 'security_alert_delivery_failed',
-            reason:
-              error instanceof Error ? error.message : 'Unknown security alert delivery error.',
+            reason: 'Alert delivery failed. Check the configured endpoint and provider status.',
             originalEvent: payload.event,
           }),
         );
       }
     })
-    .catch(() => undefined);
+    .finally(() => { pendingSecurityAlerts -= 1; });
 }
 
 function parseCookieHeader(cookieHeader: string | undefined) {
@@ -483,17 +495,7 @@ export function getReceiptTokenFromRequest(request: Request, reference: string) 
 }
 
 export function getClientIp(request: Request) {
-  const forwardedHeader = request.headers['x-forwarded-for'];
-
-  if (Array.isArray(forwardedHeader) && forwardedHeader[0]) {
-    return forwardedHeader[0].split(',')[0]?.trim() || request.ip;
-  }
-
-  if (typeof forwardedHeader === 'string' && forwardedHeader.length > 0) {
-    return forwardedHeader.split(',')[0]?.trim() || request.ip;
-  }
-
-  return request.ip;
+  return request.ip || request.socket?.remoteAddress || 'unknown';
 }
 
 export function logSecurityEvent(details: SecurityLogDetails) {
@@ -505,6 +507,9 @@ export function logSecurityEvent(details: SecurityLogDetails) {
     environment: process.env.NODE_ENV?.trim() || 'development',
     siteUrl: getTrustedSiteOrigin(),
     ...details,
+    ip: details.ip ? createHmac('sha256', logIdentityKey).update(details.ip).digest('hex').slice(0, 16) : undefined,
+    path: details.path?.replace(/\/verify\/[^/]+/, '/verify/:reference').slice(0, 160),
+    reference: details.reference ? createHmac('sha256', logIdentityKey).update(details.reference).digest('hex').slice(0, 16) : undefined,
   };
 
   console.info(JSON.stringify(payload));
@@ -522,7 +527,7 @@ export function createRateLimiter({
 }: RateLimitOptions): RequestHandler {
   return async (request: Request, response: Response, next: NextFunction) => {
     const resolvedKey =
-      keyResolver?.(request) || `${name}:${getClientIp(request)}:${request.path}`;
+      keyResolver?.(request) || `${name}:${getClientIp(request)}`;
     let result: RateLimitStoreResult;
 
     try {
@@ -539,7 +544,9 @@ export function createRateLimiter({
         outcome: 'failed',
         reason: name,
       });
-      result = incrementMemoryRateLimitWindow(resolvedKey, windowMs);
+      response.status(503).setHeader('Retry-After', '30');
+      response.json({ message: 'Request protection is temporarily unavailable. Please try again later.' });
+      return;
     }
 
     if (result.count > max) {
@@ -602,22 +609,22 @@ export function applySecurityHeaders(
   const trustedSiteUrl = getTrustedSiteUrl();
   const isHttps =
     request.secure ||
-    request.header('x-forwarded-proto') === 'https' ||
     trustedSiteUrl.protocol === 'https:';
+  const nonce = randomBytes(24).toString('base64');
+  response.locals.cspNonce = nonce;
 
   helmet({
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
         'default-src': ["'self'"],
-        'script-src': ["'self'", 'https://challenges.cloudflare.com'],
+        'script-src': ["'self'", `'nonce-${nonce}'`, 'https://challenges.cloudflare.com'],
+        'frame-ancestors': ["'none'"],
         'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
         'img-src': ["'self'", 'data:', 'blob:', 'https:'],
         'connect-src': [
           "'self'",
-          'https://*.supabase.co',
-          'wss://*.supabase.co',
           'https://challenges.cloudflare.com',
         ],
         'frame-src': ["'self'", 'https://challenges.cloudflare.com'],
@@ -628,8 +635,8 @@ export function applySecurityHeaders(
     hsts: isHttps
       ? {
           maxAge: HSTS_MAX_AGE_SECONDS,
-          includeSubDomains: true,
-          preload: true,
+          includeSubDomains: process.env.HSTS_INCLUDE_SUBDOMAINS === 'true',
+          preload: process.env.HSTS_PRELOAD === 'true',
         }
       : false,
     referrerPolicy: { policy: 'no-referrer' },
@@ -640,10 +647,6 @@ export function applySecurityHeaders(
     // Additional custom headers not covered by helmet or needing specific logic
     response.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     
-    // Expect-CT: Enforce Certificate Transparency in production
-    if (isHttps && process.env.NODE_ENV === 'production') {
-      response.setHeader('Expect-CT', 'max-age=31536000, enforce');
-    }
 
     if (
       request.path.startsWith('/api/admin') ||

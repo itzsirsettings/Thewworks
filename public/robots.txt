@@ -1,15 +1,4 @@
-# https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Allow: /
-Disallow: /api/
-Disallow: /admin
-Disallow: /admin/
-Disallow: /checkout/
-Disallow: /checkout/success
-Disallow: /checkout/cancel
+Disallow: /
 
-# Host
-Host: https://thewworksict.com
-
-# Sitemaps
-Sitemap: https://thewworksict.com/sitemap.xml
+# Preview default. Set the confirmed domain and release SEO configuration before indexing.

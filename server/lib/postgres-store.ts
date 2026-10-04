@@ -5,6 +5,7 @@ import path from 'node:path';
 import { Pool, type PoolClient, type QueryResultRow } from 'pg';
 import { fileURLToPath } from 'node:url';
 import { getOrderStoreEncryptionKey, logSecurityEvent } from './security.js';
+import { validatePaymentForOrder } from './payment-validation.js';
 import type {
   NotificationState,
   NotificationStatus,
@@ -106,15 +107,17 @@ function getPostgresSslConfig() {
   const configuredMode = process.env.DATABASE_SSL_MODE?.trim().toLowerCase();
 
   if (configuredMode === 'disable') {
+    const host = new URL(getRequiredDatabaseUrl()).hostname;
+    if (process.env.NODE_ENV === 'production' && !host.endsWith('.railway.internal')) throw new Error('Unencrypted database transport is restricted to verified Railway private networking.');
     return false;
   }
 
   if (configuredMode === 'verify-full') {
-    return { rejectUnauthorized: true };
+    return { rejectUnauthorized: true, ...(process.env.DATABASE_CA_CERT ? { ca: process.env.DATABASE_CA_CERT } : {}) };
   }
 
   if (configuredMode === 'require') {
-    return { rejectUnauthorized: false };
+    return { rejectUnauthorized: true, ...(process.env.DATABASE_CA_CERT ? { ca: process.env.DATABASE_CA_CERT } : {}) };
   }
 
   const parsedUrl = new URL(getRequiredDatabaseUrl());
@@ -123,7 +126,7 @@ function getPostgresSslConfig() {
     parsedUrl.hostname === '127.0.0.1' ||
     parsedUrl.hostname === '::1';
 
-  return isLocalHost ? false : { rejectUnauthorized: false };
+  return isLocalHost && process.env.NODE_ENV !== 'production' ? false : { rejectUnauthorized: true };
 }
 
 function getDatabaseQueryTimeout() {
@@ -545,9 +548,9 @@ async function insertOrder(client: PoolClient, order: OrderRecord) {
   }
 }
 
-async function readOrderByReferenceWithClient(client: PoolClient, reference: string) {
+async function readOrderByReferenceWithClient(client: PoolClient, reference: string, lock = false) {
   const orderResult = await client.query<PostgresOrderRow>(
-    'SELECT * FROM orders WHERE reference = $1 LIMIT 1',
+    `SELECT * FROM orders WHERE reference = $1 LIMIT 1${lock ? ' FOR UPDATE' : ''}`,
     [reference],
   );
 
@@ -587,9 +590,9 @@ async function runInTransaction<T>(handler: (client: PoolClient) => Promise<T>) 
     } catch (error) {
       try {
         await client.query('ROLLBACK');
-      } catch (rollbackError) {
+      } catch {
         // Log but don't throw - original error takes precedence
-        console.error('Rollback failed:', rollbackError);
+        logSecurityEvent({ event: 'postgres_rollback_failed', outcome: 'failed', statusCode: 500 });
       }
 
       throw error;
@@ -679,28 +682,30 @@ async function initializeStore() {
   if (!initializationPromise) {
     initializationPromise = (async () => {
       const queryTimeout = getDatabaseQueryTimeout();
+      const connection = new URL(getRequiredDatabaseUrl());
+      for (const key of ['sslmode', 'sslcert', 'sslkey', 'sslrootcert']) connection.searchParams.delete(key);
       
       pool = new Pool({
-        connectionString: getRequiredDatabaseUrl(),
+        connectionString: connection.toString(),
         max: getDatabasePoolMax(),
         ssl: getPostgresSslConfig(),
         idleTimeoutMillis: 10000,
+        connectionTimeoutMillis: 5000,
         query_timeout: queryTimeout,
         statement_timeout: queryTimeout,
       });
-      pool.on('error', (error) => {
+      pool.on('error', () => {
         logSecurityEvent({
           event: 'postgres_pool_error',
           outcome: 'failed',
-          reason: error.message,
+          reason: 'Database connection failed.',
         });
       });
 
-      await withClient(async (client) => {
-        await createSchema(client);
-      });
-
-      await migrateLegacyStoresIfNeeded();
+      if (process.env.NODE_ENV !== 'production') {
+        await withClient(async (client) => { await createSchema(client); });
+        await migrateLegacyStoresIfNeeded();
+      }
     })();
   }
 
@@ -710,7 +715,7 @@ async function initializeStore() {
 export async function getProducts() {
   await initializeStore();
   return withClient(async (client) => {
-    const productsRes = await client.query('SELECT * FROM products');
+    const productsRes = await client.query('SELECT * FROM products ORDER BY id LIMIT 200');
     const galleriesRes = await client.query('SELECT * FROM product_galleries');
     const tagsRes = await client.query('SELECT * FROM product_tags');
 
@@ -802,7 +807,7 @@ export async function claimPaidOrder(
   await initializeStore();
 
   return runInTransaction(async (client) => {
-    const order = await readOrderByReferenceWithClient(client, reference);
+    const order = await readOrderByReferenceWithClient(client, reference, true);
 
     if (!order) {
       return {
@@ -811,6 +816,7 @@ export async function claimPaidOrder(
       };
     }
 
+    validatePaymentForOrder(order, payment);
     order.status = 'paid';
     order.paidAt = payment.paid_at ?? order.paidAt ?? new Date().toISOString();
     order.paymentChannel = payment.channel ?? order.paymentChannel;
@@ -846,7 +852,7 @@ export async function updateNotificationStatus(
   await initializeStore();
 
   return runInTransaction(async (client) => {
-    const order = await readOrderByReferenceWithClient(client, reference);
+    const order = await readOrderByReferenceWithClient(client, reference, true);
 
     if (!order) {
       return null;
@@ -861,4 +867,42 @@ export async function updateNotificationStatus(
     await insertOrder(client, order);
     return clone(order);
   });
+}
+
+export async function queryDatabase(sql: string, values: unknown[] = []) {
+  await initializeStore();
+  return withClient(async client => (await client.query(sql, values)).rows);
+}
+
+const productColumns = new Set(['id', 'name', 'price', 'category', 'image', 'supplier', 'origin', 'moq', 'lead_time', 'rating', 'orders', 'badge', 'summary']);
+export async function createProduct(values: Record<string, unknown>) {
+  const keys = Object.keys(values);
+  if (!keys.length || keys.some(key => !productColumns.has(key))) throw new Error('Invalid product fields.');
+  const placeholders = keys.map((_, index) => '$' + (index + 1));
+  const rows = await queryDatabase(`INSERT INTO products (${keys.join(',')}) VALUES (${placeholders.join(',')}) RETURNING *`, keys.map(key => values[key]));
+  return rows[0];
+}
+export async function updateProduct(id: number, values: Record<string, unknown>) {
+  const keys = Object.keys(values);
+  if (!keys.length || keys.some(key => key === 'id' || !productColumns.has(key))) throw new Error('Invalid product fields.');
+  const assignments = keys.map((key, index) => key + '=$' + (index + 2));
+  const rows = await queryDatabase(`UPDATE products SET ${assignments.join(',')} WHERE id=$1 RETURNING *`, [id, ...keys.map(key => values[key])]);
+  return rows[0] || null;
+}
+export async function deleteProduct(id: number) {
+  await queryDatabase('DELETE FROM products WHERE id=$1', [id]);
+}
+export async function migrateDatabaseSchema() {
+  const connectionString = process.env.MIGRATION_DATABASE_URL;
+  if (!connectionString) throw new Error('MIGRATION_DATABASE_URL is required for schema changes.');
+  const migrationPool = new Pool({ connectionString, max: 1, connectionTimeoutMillis: 5000 });
+  const client = await migrationPool.connect();
+  try {
+    await client.query('BEGIN');
+    await createSchema(client);
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally { client.release(); await migrationPool.end(); }
 }

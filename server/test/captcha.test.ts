@@ -78,10 +78,10 @@ describe('Captcha Verification (Turnstile)', () => {
     await expect(verifyCheckoutCaptcha('token')).rejects.toThrow('Turnstile is partially configured');
   });
 
-  it('should skip verification if captcha is not configured', async () => {
+  it('should reject production verification if captcha is not configured', async () => {
     process.env.VITE_TURNSTILE_SITE_KEY = '';
     process.env.TURNSTILE_SECRET_KEY = '';
     
-    await expect(verifyCheckoutCaptcha('token')).resolves.not.toThrow();
+    await expect(verifyCheckoutCaptcha('token')).rejects.toThrow('Turnstile is required');
   });
 });

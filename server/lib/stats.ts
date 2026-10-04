@@ -1,4 +1,4 @@
-import { supabaseAdmin } from './supabase-admin.js';
+import { queryDatabase } from './postgres-store.js';
 
 export interface DashboardStats {
   metrics: {
@@ -12,71 +12,24 @@ export interface DashboardStats {
 }
 
 export async function getAdminDashboardStats(): Promise<DashboardStats> {
-  // 1. Fetch all orders to calculate GMV and conversion
-  const { data: orders, error: ordersError } = await supabaseAdmin
-    .from('orders')
-    .select('status, amount, created_at, reference');
-
-  if (ordersError) throw ordersError;
-
-  // 2. Fetch all order items and products for category analysis
-  const { data: items, error: itemsError } = await supabaseAdmin
-    .from('order_items')
-    .select('*');
-
-  if (itemsError) throw itemsError;
-
-  const { data: products, error: productsError } = await supabaseAdmin
-    .from('products')
-    .select('id, category');
-
-  if (productsError) throw productsError;
-
-  // 3. Process Metrics
-  const paidOrders = orders.filter(o => o.status === 'paid');
-  const gmv = paidOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
-  const totalOrders = orders.length;
-  const conversionRate = totalOrders > 0 ? (paidOrders.length / totalOrders) * 100 : 0;
-  const avgOrderSize = paidOrders.length > 0 ? gmv / paidOrders.length : 0;
-
-  // 4. Process Revenue Series (Last 4 weeks simple mock-live hybrid)
-  // For a real app, we would group by date. For now, we'll return a basic breakdown.
-  const revenueSeries = [
-    { label: 'Week 1', revenue: gmv * 0.15, orders: Math.floor(paidOrders.length * 0.15) },
-    { label: 'Week 2', revenue: gmv * 0.25, orders: Math.floor(paidOrders.length * 0.25) },
-    { label: 'Week 3', revenue: gmv * 0.30, orders: Math.floor(paidOrders.length * 0.30) },
-    { label: 'Week 4', revenue: gmv * 0.30, orders: Math.ceil(paidOrders.length * 0.30) },
-  ];
-
-  // 5. Process Category Demand
-  const categoryCount: Record<string, { demand: number; paid: number }> = {};
-  
-  items.forEach((item: { quantity: number; order_reference: string; item_id: number }) => {
-    const product = products.find(p => Number(p.id) === Number(item.item_id));
-    const cat = product?.category || 'Uncategorized';
-    if (!categoryCount[cat]) categoryCount[cat] = { demand: 0, paid: 0 };
-    categoryCount[cat].demand += item.quantity;
-    
-    const parentOrder = orders.find(o => o.reference === item.order_reference);
-    if (parentOrder?.status === 'paid') {
-      categoryCount[cat].paid += item.quantity;
-    }
-  });
-
-  const categoryDemand = Object.entries(categoryCount).map(([category, stats]) => ({
-    category,
-    demand: stats.demand,
-    conversion: stats.demand > 0 ? (stats.paid / stats.demand) * 100 : 0
-  }));
-
+  const metrics = (await queryDatabase(`SELECT count(*) AS total,
+    count(*) FILTER (WHERE status='paid') AS paid,
+    coalesce(sum(amount) FILTER (WHERE status='paid'),0) AS gmv FROM orders`))[0];
+  const totalOrders = Number(metrics.total);
+  const paidOrders = Number(metrics.paid);
+  const gmv = Number(metrics.gmv);
+  const weeks = await queryDatabase(`SELECT date_trunc('week',created_at::timestamptz) AS week,
+    count(*) AS orders, coalesce(sum(amount),0) AS revenue FROM orders
+    WHERE status='paid' AND created_at::timestamptz >= now()-interval '28 days'
+    GROUP BY week ORDER BY week`);
+  const categories = await queryDatabase(`SELECT coalesce(p.category,'Uncategorized') AS category,
+    sum(i.quantity) AS demand,
+    sum(CASE WHEN o.status='paid' THEN i.quantity ELSE 0 END) AS paid
+    FROM order_items i JOIN orders o ON o.reference=i.order_reference
+    LEFT JOIN products p ON p.id=i.item_id GROUP BY p.category ORDER BY demand DESC LIMIT 200`);
   return {
-    metrics: {
-      gmv,
-      totalOrders,
-      conversionRate,
-      avgOrderSize,
-    },
-    revenueSeries,
-    categoryDemand: categoryDemand.sort((a, b) => b.demand - a.demand)
+    metrics: { gmv, totalOrders, conversionRate: totalOrders ? paidOrders / totalOrders * 100 : 0, avgOrderSize: paidOrders ? gmv / paidOrders : 0 },
+    revenueSeries: weeks.map(row => ({ label: new Date(row.week).toISOString().slice(0,10), revenue: Number(row.revenue), orders: Number(row.orders) })),
+    categoryDemand: categories.map(row => ({ category: String(row.category), demand: Number(row.demand), conversion: Number(row.demand) ? Number(row.paid) / Number(row.demand) * 100 : 0 })),
   };
 }

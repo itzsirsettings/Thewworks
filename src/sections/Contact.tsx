@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { MapPin, Mail, Phone, Send } from 'lucide-react';
 import { contactConfig } from '../config';
+import { buildWhatsAppUrl } from '../lib/whatsapp';
 import {
   createTelHref,
   openMailto,
@@ -43,8 +44,8 @@ const Contact = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    openMailto(contactConfig.email, {
-      subject: `Thewworks quote request from ${formData.name}`,
+    const enquiry = {
+      subject: `Wills Group of Company project enquiry from ${formData.name}`,
       body: [
         `Name: ${formData.name}`,
         `Email: ${formData.email}`,
@@ -52,7 +53,12 @@ const Contact = () => {
         'Message:',
         formData.message,
       ].join('\n'),
-    });
+    };
+    if (contactConfig.email) {
+      openMailto(contactConfig.email, enquiry);
+    } else {
+      window.open(buildWhatsAppUrl(`${enquiry.subject}\n${enquiry.body}`), '_blank', 'noopener,noreferrer');
+    }
 
     setIsSubmitting(false);
     setIsSubmitted(true);
@@ -88,7 +94,7 @@ const Contact = () => {
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
           >
-            <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl mb-6 leading-none">
+            <h2 className="font-heading text-[1.575rem] md:text-[2.1rem] lg:text-[2.625rem] mb-6 leading-none">
               {contactConfig.heading}
             </h2>
 

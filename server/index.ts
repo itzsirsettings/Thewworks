@@ -6,7 +6,6 @@ import cookieParser from 'cookie-parser';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { User } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { sendOrderNotifications } from './lib/notifications.js';
 import {
@@ -15,7 +14,12 @@ import {
   shouldNoIndexRequest,
 } from './lib/seo.js';
 import { getAdminDashboardStats } from './lib/stats.js';
-import { supabaseAdmin } from './lib/supabase-admin.js';
+import { requireCheckoutEnabled, requireCommerceEnabled } from './lib/checkout-availability.js';
+import { getProxyTrust, validateProductionConfig } from './lib/runtime-config.js';
+import { successfulPaymentSchema } from './lib/payment-validation.js';
+import { authenticateAdmin, AdminAccessError, type AdminIdentity } from './lib/admin-auth.js';
+import { queryDatabase, createProduct, updateProduct, deleteProduct } from './lib/postgres-store.js';
+import { storeProductImage, readProductImage } from './lib/product-storage.js';
 import {
   CaptchaValidationError,
   verifyCheckoutCaptcha,
@@ -52,29 +56,12 @@ import {
 } from './lib/store.js';
 import type { OrderItemRecord, OrderRecord, PaystackTransactionData } from './lib/types.js';
 
-const approvedAdminEmails = new Set(
-  (process.env.ADMIN_EMAILS || '')
-    .split(',')
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean),
-);
-
 interface AuthenticatedAdmin {
-  user: User;
+  user: AdminIdentity;
   email: string;
   role: string;
 }
 
-function hasAdminAccess(user: User | null | undefined): boolean {
-  if (!user) {
-    return false;
-  }
-
-  const role = user.app_metadata?.role;
-  const email = user.email?.trim().toLowerCase() || '';
-
-  return role === 'admin' || approvedAdminEmails.has(email);
-}
 interface RequestWithRawBody extends express.Request {
   rawBody?: Buffer;
 }
@@ -117,7 +104,7 @@ const safeImageUrlSchema = z
   .trim()
   .max(2048)
   .refine(
-    (value) => value.startsWith('/') || /^https:\/\/[^\s]+$/i.test(value),
+    (value) => (value.startsWith('/') && !value.startsWith('//') && !value.includes('\\')) || /^https:\/\/[^\s]+$/i.test(value),
     'Image URL must be a local path or HTTPS URL.',
   );
 
@@ -160,13 +147,13 @@ const productCreateSchema = productUpdateSchema
   .strict();
 
 export const app = express();
-const serverPort = Number(process.env.SERVER_PORT || 3001);
+const serverPort = Number(process.env.PORT || process.env.SERVER_PORT || 3001);
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(currentDirectory, '..');
 const distDirectory = path.resolve(projectRoot, 'dist');
 
 app.disable('x-powered-by');
-app.set('trust proxy', 1);
+app.set('trust proxy', getProxyTrust());
 
 app.use((request, response, next) => {
   const redirectUrl = getApexRedirectUrl(request.header('host'), request.originalUrl);
@@ -308,6 +295,41 @@ async function finalizeSuccessfulPayment(
 app.use(corsMiddleware);
 app.use(cookieParser());
 app.use(applySecurityHeaders);
+app.get('/.well-known/security.txt', (_request, response) => {
+  response.setHeader('Cache-Control', 'public, max-age=3600');
+  const origin = process.env.PUBLIC_SITE_URL || 'https://willsinteriors.com';
+  response.type('text/plain').send([
+    `Contact: ${origin}/#security`,
+    `Expires: ${new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()}`,
+    `Canonical: ${origin}/.well-known/security.txt`,
+    'Preferred-Languages: en', '',
+  ].join('\n'));
+});
+app.use((request, response, next) => {
+  if (process.env.NODE_ENV === 'production' && process.env.ENFORCE_HTTPS === 'true' && !request.secure && request.path !== '/api/health') {
+    const origin = new URL(process.env.PUBLIC_SITE_URL || '').origin;
+    const target = request.originalUrl.startsWith('/') && !request.originalUrl.startsWith('//') ? request.originalUrl : '/';
+    response.redirect(308, `${origin}${target}`);
+    return;
+  }
+  next();
+});
+app.post('/api/checkout/initialize', requireCheckoutEnabled);
+app.use(['/api/admin', '/api/checkout', '/api/payments', '/api/security'], requireCommerceEnabled);
+app.get('/api/health', (_request, response) => {
+  response.setHeader('Cache-Control', 'no-store');
+  response.json({ status: 'ok' });
+});
+app.use('/api', createRateLimiter({ name: 'api', max: 120, windowMs: 60_000 }));
+app.get('/api/media/products/:id', async (request, response) => {
+  try {
+    const id = getSingleRouteParam(request.params.id);
+    if (!id || !/^[a-f0-9-]{36}\.webp$/.test(id)) { response.sendStatus(404); return; }
+    const image = await readProductImage(id);
+    response.setHeader('Cache-Control', 'public, max-age=86400');
+    response.type('image/webp').send(image);
+  } catch { response.sendStatus(404); }
+});
 app.use(csrfProtectionMiddleware);
 
 const MAX_BODY_SIZE = process.env.MAX_BODY_SIZE || '5mb';
@@ -316,7 +338,8 @@ app.use(
   express.json({
     limit: MAX_BODY_SIZE,
     verify: (request, _response, buffer) => {
-      (request as RequestWithRawBody).rawBody = Buffer.from(buffer);
+      const apiRequest = request as RequestWithRawBody;
+      if (apiRequest.path === '/api/payments/paystack/webhook') apiRequest.rawBody = Buffer.from(buffer);
     },
   }),
 );
@@ -331,7 +354,7 @@ const verifyRateLimiter = createRateLimiter({
   name: 'checkout_verify',
   max: 30,
   windowMs: 10 * 60 * 1000,
-  keyResolver: (request) => `${getClientIp(request)}:${request.params.reference || 'unknown'}`,
+  keyResolver: (request) => `checkout_verify:${getClientIp(request)}`,
 });
 
 const adminRateLimiter = createRateLimiter({
@@ -371,22 +394,19 @@ app.get(
     try {
       const stats = await getAdminDashboardStats();
       response.json(stats);
-    } catch (error) {
-      console.error('Failed to fetch admin stats:', error);
+    } catch {
+      logSecurityEvent({ event: 'admin_operation_failed', outcome: 'failed', statusCode: 500 });
       response.status(500).json({ message: 'Failed to fetch dashboard statistics.' });
     }
   },
 );
 
-app.get('/api/health', (_request, response) => {
-  response.json({ status: 'ok' });
-});
-
 app.get('/api/security/csrf-token', (request, response) => {
+  response.setHeader('Cache-Control', 'no-store');
   const token = generateCsrfToken();
   response.cookie('XSRF-TOKEN', token, {
     httpOnly: false, // Must be accessible by client JS to send back in header
-    secure: request.secure || request.header('x-forwarded-proto') === 'https',
+    secure: request.secure || process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
   });
@@ -395,49 +415,31 @@ app.get('/api/security/csrf-token', (request, response) => {
 
 // ─── Admin Product Management ───────────────────────────────────────────
 
-function getAdminRole(user: User) {
-  const role = user.app_metadata?.role;
-  return typeof role === 'string' && role.trim() ? role.trim() : 'admin';
-}
-
 async function requireAdminToken(
   request: express.Request,
   response: express.Response,
 ): Promise<AuthenticatedAdmin | null> {
   const authHeader = request.header('Authorization');
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : '';
-  
+
   if (!token) {
     response.status(401).json({ message: 'Unauthorized admin session.' });
     return null;
   }
 
-  const { data, error } = await supabaseAdmin.auth.getUser(token);
-  const user = data?.user;
-  
-  if (error || !user) {
-    response.status(401).json({ message: 'Invalid or expired admin session.' });
+  try {
+    const user = await authenticateAdmin(token);
+    if (!user) { response.status(401).json({ message: 'Invalid or expired admin session.' }); return null; }
+    return { user, email: user.email, role: user.role };
+  } catch (error) {
+    const denied = error instanceof AdminAccessError;
+    response.status(denied ? 403 : 401).json({ message: denied ? 'Admin access requires an approved identity and multi-factor authentication.' : 'Invalid or expired admin session.' });
     return null;
   }
 
-  if (!hasAdminAccess(user)) {
-    response.status(403).json({ message: 'Admin privileges are required.' });
-    return null;
-  }
-
-  return {
-    user,
-    email: user.email?.trim().toLowerCase() || '',
-    role: getAdminRole(user),
-  };
 }
 
 const MAX_PRODUCT_IMAGE_BYTES = 2 * 1024 * 1024;
-const PRODUCT_IMAGE_CONTENT_TYPES: Record<string, string> = {
-  jpg: 'image/jpeg',
-  png: 'image/png',
-  webp: 'image/webp',
-};
 
 function hasJpegSignature(buffer: Buffer) {
   return buffer.length > 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
@@ -485,37 +487,20 @@ function validateProductImageBuffer(buffer: Buffer, extension: string) {
 }
 
 async function processImageUpload(base64Data: unknown): Promise<string | undefined> {
-  if (typeof base64Data !== 'string' || !base64Data.startsWith('data:image/')) return undefined;
-  
+  if (base64Data === undefined) return undefined;
+  if (typeof base64Data !== 'string' || !base64Data.startsWith('data:image/')) throw new AdminValidationError('Invalid image upload.');
+
   const matches = base64Data.match(/^data:image\/(png|jpe?g|webp);base64,([A-Za-z0-9+/]+={0,2})$/i);
   if (!matches) {
     throw new AdminValidationError('Only PNG, JPEG, and WebP images are allowed.');
   }
-  
+
   const extension = matches[1].toLowerCase().replace('jpeg', 'jpg');
   const buffer = Buffer.from(matches[2], 'base64');
   validateProductImageBuffer(buffer, extension);
-  
-  const filename = `product-${Date.now()}-${randomBytes(2).toString('hex')}.${extension}`;
-  
-  const { error } = await supabaseAdmin.storage
-    .from('products')
-    .upload(filename, buffer, {
-      contentType: PRODUCT_IMAGE_CONTENT_TYPES[extension],
-      cacheControl: '3600',
-      upsert: false
-    });
 
-  if (error) {
-    console.error('Supabase Storage Error:', error.message);
-    return undefined;
-  }
+  return storeProductImage(buffer);
 
-  const { data: urlData } = supabaseAdmin.storage
-    .from('products')
-    .getPublicUrl(filename);
-
-  return urlData.publicUrl;
 }
 
 app.get(
@@ -524,15 +509,10 @@ app.get(
     if (!await requireAdminToken(request, response)) return;
 
     try {
-      const { data, error } = await supabaseAdmin
-        .from('products')
-        .select('*')
-        .order('id', { ascending: true });
-
-      if (error) throw error;
+      const data = await queryDatabase('SELECT * FROM products ORDER BY id LIMIT 200');
       response.json(data || []);
-    } catch (error) {
-      console.error('Failed to fetch admin products:', error);
+    } catch {
+      logSecurityEvent({ event: 'admin_operation_failed', outcome: 'failed', statusCode: 500 });
       response.status(500).json({ message: 'Failed to fetch products.' });
     }
   },
@@ -575,14 +555,8 @@ app.put(
         response.status(400).json({ message: 'No valid fields to update.' });
         return;
       }
-      const { data, error } = await supabaseAdmin
-        .from('products')
-        .update(updates)
-        .eq('id', productId)
-        .select()
-        .single();
-
-      if (error) throw error;
+      const data = await updateProduct(productId, updates);
+      if (!data) { response.status(404).json({ message: 'Product not found.' }); return; }
       response.json(data);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -597,7 +571,7 @@ app.put(
         return;
       }
 
-      console.error(`Failed to update product ${productId}:`, error);
+      logSecurityEvent({ event: 'admin_operation_failed', outcome: 'failed', statusCode: 500 });
       response.status(500).json({ message: 'Failed to update product.' });
     }
   },
@@ -612,29 +586,14 @@ app.post(
       const body = productCreateSchema.parse(request.body);
       const newImageUrl = await processImageUpload(body.imageBase64);
       let finalImage = newImageUrl || body.image || '';
-      if (!finalImage) finalImage = '/images/product-1.jpg'; // fallback
+      if (!finalImage) finalImage = '/media/wills/IMG-20261003-WA0039.webp'; // fallback
 
-      const { data, error } = await supabaseAdmin
-        .from('products')
-        .insert({
-          id: createProductId(),
-          name: body.name,
-          price: body.price,
-          image: finalImage,
-          category: body.category,
-          supplier: body.supplier,
-          origin: body.origin || 'Local stock',
-          moq: body.moq || '1 unit',
-          lead_time: body.lead_time || '3-5 days',
-          rating: body.rating ?? 4.5,
-          orders: body.orders || '0 orders',
-          badge: body.badge || 'New',
-          summary: body.summary || '',
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
+      const data = await createProduct({
+        id: createProductId(), name: body.name, price: body.price, image: finalImage,
+        category: body.category, supplier: body.supplier, origin: body.origin || 'Local stock',
+        moq: body.moq || '1 unit', lead_time: body.lead_time || '3-5 days',
+        rating: body.rating ?? 4.5, orders: body.orders || '0 orders', badge: body.badge || 'New', summary: body.summary || '',
+      });
       response.status(201).json(data);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -649,7 +608,7 @@ app.post(
         return;
       }
 
-      console.error('Failed to create product:', error);
+      logSecurityEvent({ event: 'admin_operation_failed', outcome: 'failed', statusCode: 500 });
       response.status(500).json({ message: 'Failed to create product.' });
     }
   },
@@ -667,15 +626,10 @@ app.delete(
     }
 
     try {
-      const { error } = await supabaseAdmin
-        .from('products')
-        .delete()
-        .eq('id', productId);
-
-      if (error) throw error;
+      await deleteProduct(productId);
       response.status(204).send();
-    } catch (error) {
-      console.error(`Failed to delete product ${productId}:`, error);
+    } catch {
+      logSecurityEvent({ event: 'admin_operation_failed', outcome: 'failed', statusCode: 500 });
       response.status(500).json({ message: 'Failed to delete product.' });
     }
   },
@@ -783,6 +737,24 @@ app.post('/api/checkout/initialize', initializeRateLimiter, async (request, resp
 app.get('/api/checkout/verify/:reference', verifyRateLimiter, async (request, response) => {
   try {
     const reference = getSingleRouteParam(request.params.reference);
+    if (!reference || !isValidOrderReference(reference)) {
+      response.status(400).json({ message: 'The order reference is invalid.' });
+      return;
+    }
+    const order = await findOrderByReference(reference);
+    if (!order || !receiptTokenMatches(getReceiptTokenFromRequest(request, reference), order.receiptTokenHash)) {
+      response.status(404).json({ message: 'We could not find that order.' });
+      return;
+    }
+    response.json({ order: serializeOrder(order) });
+  } catch {
+    response.status(503).json({ message: 'Order status is temporarily unavailable.' });
+  }
+});
+
+app.post('/api/checkout/verify/:reference', verifyRateLimiter, async (request, response) => {
+  try {
+    const reference = getSingleRouteParam(request.params.reference);
 
     if (!reference) {
       response.status(400).json({ message: 'The order reference is invalid.' });
@@ -860,27 +832,6 @@ app.get('/api/checkout/verify/:reference', verifyRateLimiter, async (request, re
   }
 });
 
-// ─── Global Error Handler ──────────────────────────────────────────────
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use((error: Error & { status?: number; statusCode?: number }, _request: express.Request, response: express.Response, _next: express.NextFunction) => {
-  const statusCode = error.status || error.statusCode || 500;
-  const message = statusCode === 500 ? 'An unexpected error occurred. Please try again later.' : error.message;
-
-  logSecurityEvent({
-    event: 'unhandled_error',
-    outcome: 'failed',
-    reason: error.message,
-    statusCode,
-  });
-
-  const isDevOrTest = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
-  
-  response.status(statusCode).json({ 
-    message,
-    ...(isDevOrTest ? { stack: error.stack, detail: error.message } : {})
-  });
-});
 
 app.post(
   '/api/payments/paystack/webhook',
@@ -907,7 +858,8 @@ app.post(
       };
 
       if (event.event === 'charge.success' && event.data?.reference) {
-        await finalizeSuccessfulPayment(event.data.reference, event.data);
+        const payment = successfulPaymentSchema.parse(event.data);
+        await finalizeSuccessfulPayment(payment.reference, payment);
       }
 
       response.status(200).json({ received: true });
@@ -929,12 +881,14 @@ app.use('/api', (_request, response) => {
   response.status(404).json({ message: 'API endpoint not found.' });
 });
 
-app.use(express.static(distDirectory, { index: false }));
+app.use(express.static(distDirectory, { index: false, dotfiles: 'deny', maxAge: '1h' }));
 
 app.get(/^(?!\/api).*/, async (request, response) => {
   try {
     const indexHtml = await fs.readFile(path.join(distDirectory, 'index.html'), 'utf8');
-    response.type('html').send(injectRouteSeo(indexHtml, request.originalUrl));
+    response.setHeader('Cache-Control', 'no-cache');
+    const html = injectRouteSeo(indexHtml, request.originalUrl).replace(/<script\b/g, `<script nonce="${response.locals.cspNonce}"`);
+    response.type('html').send(html);
   } catch {
     response.status(404).json({
       message: 'Frontend build not found. Run "npm run build" before "npm run start".',
@@ -942,10 +896,39 @@ app.get(/^(?!\/api).*/, async (request, response) => {
   }
 });
 
+// ─── Global Error Handler ──────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((error: Error & { status?: number; statusCode?: number }, _request: express.Request, response: express.Response, _next: express.NextFunction) => {
+  const statusCode = error.status || error.statusCode || 500;
+  const message = statusCode === 500 ? 'An unexpected error occurred. Please try again later.' : process.env.NODE_ENV === 'production' ? 'Request could not be processed.' : error.message;
+
+  logSecurityEvent({
+    event: 'unhandled_error',
+    outcome: 'failed',
+    reason: 'Request failed; inspect the event identifier and status code.',
+    statusCode,
+  });
+
+  const isDevOrTest = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
+
+  response.status(statusCode).json({
+    message,
+    ...(isDevOrTest ? { stack: error.stack, detail: error.message } : {})
+  });
+});
+
+
 export function startServer(port = serverPort) {
-  return app.listen(port, () => {
+  validateProductionConfig();
+  const server = app.listen(port, '0.0.0.0', () => {
     console.log(`Checkout API running on http://localhost:${port}`);
   });
+  server.requestTimeout = 30_000;
+  server.headersTimeout = 10_000;
+  server.keepAliveTimeout = 5_000;
+  server.maxRequestsPerSocket = 100;
+  return server;
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

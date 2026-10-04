@@ -41,18 +41,18 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             minHeight: '100vh',
             padding: '2rem',
             fontFamily: "'IBM Plex Sans', sans-serif",
-            backgroundColor: '#faf6ef',
-            color: '#111827',
+            backgroundColor: 'var(--brand-paper)',
+            color: 'var(--brand-ink)',
             textAlign: 'center',
           }}
         >
           <h1
             style={{
               fontFamily: "'Bricolage Grotesque', sans-serif",
-              fontSize: '2rem',
+              fontSize: '1.4rem',
               fontWeight: 700,
               marginBottom: '1rem',
-              color: '#5a1a2a',
+              color: 'var(--brand-navy)',
             }}
           >
             Something went wrong
@@ -60,7 +60,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
           <p
             style={{
               fontSize: '1.1rem',
-              color: '#64748b',
+              color: 'var(--brand-muted)',
               maxWidth: '480px',
               lineHeight: 1.6,
               marginBottom: '2rem',
@@ -73,7 +73,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             onClick={() => window.location.reload()}
             style={{
               padding: '0.75rem 2rem',
-              backgroundColor: '#5a1a2a',
+              backgroundColor: 'var(--brand-navy)',
               color: '#fff',
               border: 'none',
               borderRadius: '0.5rem',

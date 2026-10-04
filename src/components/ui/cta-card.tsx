@@ -48,15 +48,20 @@ const CtaCard = React.forwardRef<HTMLDivElement, CtaCardProps>(
             src={imageSrc}
             alt={imageAlt}
             className="h-56 w-full object-cover md:h-full"
+            loading="lazy"
+            decoding="async"
+            width="640"
+            height="800"
           />
         </div>
 
         <div className="md:w-2/3 w-full p-6 md:p-8 flex flex-col justify-center">
           <div>
-            <p className="text-sm font-semibold text-primary">{title}</p>
-            <h2 className="mt-1 text-2xl md:text-3xl font-bold tracking-tight">
+
+            <h2 className="mt-1 text-[1.05rem] md:text-[1.3125rem] font-bold tracking-tight">
               {subtitle}
             </h2>
+            <p className="mt-3 text-base">{title}</p>
             <p className="mt-4 text-muted-foreground">
               {description}
             </p>
