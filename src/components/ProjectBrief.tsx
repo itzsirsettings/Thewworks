@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Download, Mail, MessageCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { brand } from '../lib/brand';
 import { buildWhatsAppUrl } from '../lib/whatsapp';
 
@@ -55,7 +56,7 @@ export default function ProjectBrief() {
           <label>Email<input type="email" required maxLength={254} autoComplete="email" value={details.email} onChange={(event) => update('email', event.target.value)} /></label>
           <label className="brief-wide">Design notes <span>(optional)</span><textarea rows={4} maxLength={3000} value={details.message} onChange={(event) => update('message', event.target.value)} placeholder="Style, intended use, site access or a reference design from the gallery" /></label>
         </div>}
-        <p className="brief-privacy">Your details stay in this browser until you choose to save the brief or share it through email or WhatsApp. They are not stored on this website.</p>
+        <p className="brief-privacy">Your details stay in this browser until you choose to save the brief or share it through email or WhatsApp. They are not stored on this website. <Link to="/privacy-policy">Read the Privacy Policy</Link>.</p>
         <div className="brief-actions">
           {step === 2 && <button type="button" className="wills-button button-outline" onClick={() => setStep(1)}>Back</button>}
           <button type="submit" className="wills-button button-primary">{step === 1 ? 'Continue' : 'Prepare my brief'}</button>

@@ -1,8 +1,8 @@
 # Responsive interaction changes
 
-FAQ plus indicators are 2.8 times the question font size, a 180% increase. They remain vertically centered, do not shrink, and rotate when their native details panel opens. Phone hero controls reserve space beside the floating WhatsApp action.
+FAQ plus indicators are 2.8 times the question font size, a 180% increase. They remain vertically centered, do not shrink, and rotate when their native details panel opens.
 
-The hero cycles through seven unique images every six seconds: a supplied gate, three supplied entrance doors and three generated interior concepts. It preloads the following image, offers Pause/Play and numbered selectors, pauses during control interaction and when the tab is hidden, and starts paused for reduced-motion users. Timer and event listeners are cleaned up on unmount. Generated interior slides are visibly labeled as AI-generated concepts. The seven selectors wrap on narrow screens.
+The hero uses a static supplied gate photograph behind its headline and supporting copy. Action links, the discovery link, captions, pause/play and numbered selectors have been removed. Static presentation avoids automatic motion without playback controls. Interior concepts remain available in the separate interiors section.
 
 Action buttons have no decorative arrow icons. Labels are centered inside each control at all widths. Service enquiry actions use visible Enquire labels, and gallery controls use Previous and Next labels while retaining their accessible names, keyboard shortcuts and touch behavior.
 

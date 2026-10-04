@@ -50,6 +50,7 @@ export default function LandingPage() {
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
     const resize = () => { if (window.innerWidth > 900) setMenuOpen(false); schedule(); };
+    if (window.location.hash) document.getElementById(window.location.hash.slice(1))?.scrollIntoView({ behavior: 'instant' });
     update();
     window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', resize);
@@ -134,8 +135,6 @@ export default function LandingPage() {
           <ProjectBrief />
           <div className="contact-details"><a href={projectWhatsAppUrl} target="_blank" rel="noopener noreferrer"><MessageCircle size={20} />WhatsApp +234 705 745 0799</a>{brand.email && <a href={`mailto:${brand.email}`}>{brand.email}</a>}{brand.address && <p>{brand.address}</p>}</div>
         </div></section>
-        <section id="privacy" className="privacy-note wills-container"><h2>Your enquiry and privacy.</h2><p>The project brief runs in your browser. It is only shared when you choose email or WhatsApp, whose own privacy policies apply. This website stores a local preference when you dismiss the cookie notice. It does not upload your project brief or enable analytics in this version.</p></section>
-        <section id="security" className="privacy-note wills-container"><h2>Privacy requests and security reports.</h2><p>Contact Wills on <a href="https://wa.me/2347057450799" target="_blank" rel="noopener noreferrer">WhatsApp +234 705 745 0799</a> to ask about access, correction or deletion of information you have shared, or to report a website security concern. Share only the details needed to explain your request. Do not send passwords, payment credentials or another person's private information.</p><p>Please report security issues privately. Avoid accessing other people's data, disrupting the service or testing third-party systems. Online purchases and payments are currently unavailable. Interior concept images illustrate design ideas; project materials, dimensions, scope and pricing require agreement with Wills.</p></section>
       </main>
       <LeafletMap />
       <Footer />

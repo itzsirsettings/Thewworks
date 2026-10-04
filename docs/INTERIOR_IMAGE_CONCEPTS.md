@@ -1,6 +1,6 @@
 # Interior imagery
 
-Six images were created with the built-in imagegen tool for the requested interiors expansion. These are AI-generated design concepts, not photographs of completed Wills Group projects. The public section identifies their purpose.
+Six images were created with the built-in imagegen tool for the requested interiors expansion. These are design concepts, not photographs of completed Wills Group projects. The public section identifies their purpose.
 
 Delivery files are under public/media/wills/interiors/. Each scene has a 1440 x 810 WebP and a 640 x 360 responsive WebP. Original generated PNG files remain in the Codex generated_images directory. Existing supplied company photographs are retained.
 

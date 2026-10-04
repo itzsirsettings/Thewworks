@@ -14,12 +14,12 @@ export default function InteriorConcepts() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const returnFocusRef = useRef<HTMLButtonElement>(null);
   return <div className="wills-container interior-concepts">
-    <div className="section-heading"><h2>Spaces to<br /><em>make your own.</em></h2><p>Explore six interior design concepts, from welcoming living spaces to fitted storage. These AI-generated visual references illustrate design directions for your project discussion.</p></div>
+    <div className="section-heading"><h2>Spaces to<br /><em>make your own.</em></h2><p>Explore six interior design concepts, from welcoming living spaces to fitted storage. These visual references illustrate design directions for your project discussion.</p></div>
     <div className="interior-concept-grid">{interiorConcepts.map((concept, index) => <figure key={concept.slug}>
       <button type="button" onClick={(event) => { returnFocusRef.current = event.currentTarget; setSelectedIndex(index); }} aria-label={`View ${concept.title} interior design concept`}>
         <img src={`/media/wills/interiors/${concept.slug}-640.webp`} srcSet={`/media/wills/interiors/${concept.slug}-640.webp 640w, /media/wills/interiors/${concept.slug}.webp 1440w`} sizes="(max-width: 760px) 90vw, 45vw" width="1440" height="810" loading="lazy" decoding="async" alt={concept.alt} />
       </button><figcaption>{concept.title}<span>Design concept</span></figcaption>
     </figure>)}</div>
-    <DesignLightbox returnFocusRef={returnFocusRef} images={interiorConcepts.map((concept) => ({ src: `/media/wills/interiors/${concept.slug}.webp`, title: concept.title, alt: concept.alt, width: 1440, height: 810 }))} selectedIndex={selectedIndex} onSelectedIndexChange={setSelectedIndex} description="AI-generated interior design concept. Discuss your layout, materials and finishing requirements with Wills Group." />
+    <DesignLightbox returnFocusRef={returnFocusRef} images={interiorConcepts.map((concept) => ({ src: `/media/wills/interiors/${concept.slug}.webp`, title: concept.title, alt: concept.alt, width: 1440, height: 810 }))} selectedIndex={selectedIndex} onSelectedIndexChange={setSelectedIndex} description="Interior design concept. Discuss your layout, materials and finishing requirements with Wills Group." />
   </div>;
 }

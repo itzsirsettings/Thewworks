@@ -1,6 +1,6 @@
 import { Instagram, Facebook, Twitter } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import BrandLogo from '../components/BrandLogo';
 import { footerConfig } from '../config';
 import { buildWhatsAppUrl } from '../lib/whatsapp';
@@ -13,6 +13,7 @@ const iconMap: Record<string, React.ComponentType<{ size?: number; strokeWidth?:
 };
 
 const Footer = () => {
+  const { pathname } = useLocation();
   const shouldRenderNothing = !footerConfig.brandName;
 
   const [email, setEmail] = useState('');
@@ -93,10 +94,12 @@ const Footer = () => {
                 {group.links.map((link) => (
                   <li key={link.label}>
                     <a
-                      href={link.href}
+                      href={link.href.startsWith('#') ? `/${link.href}` : link.href}
                       onClick={(e) => {
-                        e.preventDefault();
-                        scrollToSection(link.href);
+                        if (pathname === '/' && link.href.startsWith('#')) {
+                          e.preventDefault();
+                          scrollToSection(link.href);
+                        }
                       }}
                       className="text-[var(--chevron-muted)] text-sm hover:text-black transition-colors"
                     >
@@ -151,7 +154,7 @@ const Footer = () => {
             <p className="text-xs text-[var(--chevron-muted)] font-medium">
               {footerConfig.copyrightText}
             </p>
-            <div className="flex items-center gap-6">
+            <nav aria-label="Legal and privacy information" className="footer-policy-links">
               {footerConfig.legalLinks.map((link) => (
                 link.href.startsWith('/') ? (
                   <Link
@@ -177,7 +180,8 @@ const Footer = () => {
                   </a>
                 )
               ))}
-            </div>
+              <button type="button" onClick={openCookieSettings} className="text-xs text-[var(--chevron-muted)] hover:text-black transition-colors">Cookie settings</button>
+            </nav>
           </div>
         </div>
 

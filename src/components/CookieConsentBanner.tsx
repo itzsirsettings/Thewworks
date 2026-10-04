@@ -6,18 +6,32 @@ import {
   rememberCookieConsent,
 } from '../lib/cookie-consent';
 import { Button } from './ui/button';
+import { Link } from 'react-router-dom';
 
 const CookieConsentBanner = () => {
-  const [isVisible, setIsVisible] = useState(() => !hasAcceptedCookies());
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    let noticeTimer: ReturnType<typeof window.setTimeout> | undefined;
+    const scheduleNotice = () => {
+      if (hasAcceptedCookies()) return;
+      noticeTimer = window.setTimeout(() => {
+        if (!hasAcceptedCookies()) setIsVisible(true);
+      }, 10_000);
+    };
     const handleOpenSettings = () => {
+      window.removeEventListener('load', scheduleNotice);
+      window.clearTimeout(noticeTimer);
       setIsVisible(true);
     };
 
+    if (document.readyState === 'complete') scheduleNotice();
+    else window.addEventListener('load', scheduleNotice, { once: true });
     window.addEventListener(COOKIE_SETTINGS_EVENT, handleOpenSettings);
 
     return () => {
+      window.clearTimeout(noticeTimer);
+      window.removeEventListener('load', scheduleNotice);
       window.removeEventListener(COOKIE_SETTINGS_EVENT, handleOpenSettings);
     };
   }, []);
@@ -48,8 +62,9 @@ const CookieConsentBanner = () => {
             </p>
             <p className="mt-2 flex items-center gap-2 text-xs font-medium text-[var(--market-muted)]">
               <ShieldCheck size={14} aria-hidden="true" />
-              Your choice is saved for 180 days.
+              Revisit this notice through Cookie settings.
             </p>
+            <p className="mt-2 text-xs"><Link to="/privacy-policy" className="underline underline-offset-4">Privacy Policy</Link><span aria-hidden="true"> · </span><Link to="/cookie-policy" className="underline underline-offset-4">Cookie Policy</Link></p>
           </div>
         </div>
 

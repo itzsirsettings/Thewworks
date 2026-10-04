@@ -27,6 +27,13 @@ const storeSeo = {
   ...homeSeo, title: 'Wills Group of Company | Project Quote Desk', canonicalPath: '/store',
 } satisfies Omit<RouteSeo, 'robots'>;
 
+const policyMetadata: Record<string, { title: string; description: string }> = {
+  '/privacy-policy': { title: 'Privacy Policy', description: 'How Wills handles website visits, project briefs and information you choose to share.' },
+  '/terms-of-use': { title: 'Terms of Use', description: 'Information about using the Wills website and preparing a project enquiry.' },
+  '/cookie-policy': { title: 'Cookie Policy', description: 'The browser storage used by this website and how to revisit the privacy notice.' },
+  '/security': { title: 'Security & Privacy Requests', description: 'How to contact Wills about personal information or a website security concern.' },
+};
+
 function normalizePathname(pathname: string) {
   if (!pathname || pathname === '/') {
     return '/';
@@ -100,14 +107,17 @@ export function shouldNoIndexRequest(originalUrl: string) {
     pathname === '/checkout/cancel' ||
     url.searchParams.has('reference') ||
     url.searchParams.has('trxref') ||
-    (pathname !== '/' && pathname !== '/store')
+    (pathname !== '/' && pathname !== '/store' && !Object.hasOwn(policyMetadata, pathname))
   );
 }
 
 export function getRouteSeo(originalUrl: string): RouteSeo {
   const url = parseRequestUrl(originalUrl);
   const pathname = normalizePathname(url.pathname);
-  const routeSeo = pathname === '/store' ? storeSeo : homeSeo;
+  const policy = Object.hasOwn(policyMetadata, pathname) ? policyMetadata[pathname] : undefined;
+  const routeSeo = policy
+    ? { ...homeSeo, title: `${policy.title} | Wills Group of Company`, description: policy.description, canonicalPath: pathname }
+    : pathname === '/store' ? storeSeo : homeSeo;
 
   return {
     ...routeSeo,

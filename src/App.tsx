@@ -8,8 +8,10 @@ import {
 } from 'react-router-dom';
 import BrandLogo from './components/BrandLogo';
 import CookieConsentBanner from './components/CookieConsentBanner';
+import { policyRoutes } from './lib/policies';
 
 const LandingPage = lazy(() => import('./components/LandingPage'));
+const PolicyPage = lazy(() => import('./components/PolicyPage'));
 
 const AppLoadingState = ({ message }: { message: string }) => (
   <div className="flex min-h-screen items-center justify-center bg-[var(--market-sand)] px-6">
@@ -32,7 +34,11 @@ function AppShell() {
             </Suspense>
           )}
         />
-
+        {policyRoutes.map(({ kind, path }) => <Route key={path} path={path} element={(
+          <Suspense fallback={<AppLoadingState message="Loading website information..." />}>
+            <PolicyPage kind={kind} />
+          </Suspense>
+        )} />)}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <CookieConsentBanner />

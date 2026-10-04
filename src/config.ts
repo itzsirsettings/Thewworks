@@ -50,7 +50,7 @@ export const navigationConfig: NavigationConfig = {
     },
     {
       "label": "Fabrication",
-      "href": "#beds"
+      "href": "#services"
     },
     {
       "label": "Design Gallery",
@@ -629,7 +629,7 @@ export const footerConfig: FooterConfig = {
       "links": [
         {
           "label": "Doors & gates",
-          "href": "#products"
+          "href": "#services"
         },
         {
           "label": "Grilles",
@@ -637,7 +637,7 @@ export const footerConfig: FooterConfig = {
         },
         {
           "label": "Fabrication",
-          "href": "#beds"
+          "href": "#services"
         },
         {
           "label": "Design gallery",
@@ -690,12 +690,20 @@ export const footerConfig: FooterConfig = {
   ],
   "legalLinks": [
     {
-      "label": "Privacy",
-      "href": "#privacy"
+      "label": "Privacy Policy",
+      "href": "/privacy-policy"
     },
     {
-      "label": "Cookie settings",
-      "href": "#cookies"
+      "label": "Terms of Use",
+      "href": "/terms-of-use"
+    },
+    {
+      "label": "Cookie Policy",
+      "href": "/cookie-policy"
+    },
+    {
+      "label": "Security & Privacy Requests",
+      "href": "/security"
     }
   ],
   "copyrightText": "© 2026 Wills Group of Company. All rights reserved.",

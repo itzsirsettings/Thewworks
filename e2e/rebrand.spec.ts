@@ -1,8 +1,53 @@
 import { test, expect } from '@playwright/test';
 
+test('policy links open dedicated pages and retain navigation on mobile', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Got it', exact: true }).click({ timeout: 20_000 });
+  await page.getByRole('navigation', { name: 'Legal and privacy information' }).getByRole('link', { name: 'Privacy Policy', exact: true }).click();
+  await expect(page).toHaveURL(/\/privacy-policy$/);
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 1, name: 'Privacy Policy' })).toBeVisible();
+  for (const [route, title] of [
+    ['/privacy-policy', 'Privacy Policy'],
+    ['/terms-of-use', 'Terms of Use'],
+    ['/cookie-policy', 'Cookie Policy'],
+    ['/security', 'Security & Privacy Requests'],
+  ]) {
+    await page.goto(route);
+    await expect(page.getByRole('heading', { level: 1, name: title, exact: true })).toBeVisible();
+    await expect(page).toHaveTitle(`${title} | Wills Group of Company`);
+    await expect(page.getByRole('navigation', { name: 'Policies and website information' }).getByRole('link', { name: title, exact: true })).toHaveAttribute('aria-current', 'page');
+    for (const width of [320, 390, 1280]) {
+      await page.setViewportSize({ width, height: 844 });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+    }
+  }
+  await page.getByRole('complementary').getByRole('button', { name: 'Cookie settings', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Cookie consent' })).toBeVisible();
+  await page.getByRole('button', { name: 'Got it', exact: true }).click({ timeout: 20_000 });
+  await page.getByRole('navigation', { name: 'Legal and privacy information' }).getByRole('link', { name: 'Terms of Use', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Terms of Use' })).toBeFocused();
+  await page.getByRole('link', { name: 'Contact Wills', exact: true }).click();
+  await expect(page).toHaveURL(/\/#contact$/);
+  await expect(page.getByRole('heading', { name: 'Tell us what you have in mind.' })).toBeVisible();
+});
+
+test('interior captions, descriptions and alternative text use design concept wording', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Got it', exact: true }).click({ timeout: 20_000 });
+  await expect(page.locator('#hero').getByRole('button')).toHaveCount(0);
+  await expect(page.locator('#hero').getByRole('link')).toHaveCount(0);
+  await expect(page.locator('.hero-slide-caption')).toHaveCount(0);
+  await page.getByRole('button', { name: 'View Living room interior design concept', exact: true }).click();
+  await expect(page.getByRole('dialog').getByText('Interior design concept. Discuss your layout, materials and finishing requirements with Wills Group.')).toBeVisible();
+  const publicText = await page.locator('body').innerText();
+  const imageText = await page.locator('img').evaluateAll(images => images.map(image => image.alt).join(' '));
+  expect(`${publicText} ${imageText}`).not.toMatch(/ai[ -]?generated/i);
+});
+
 test('responsive corners, gallery controls and navigation work across viewport sizes', async ({ page, browser }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Got it', exact: true }).click();
+  await page.getByRole('button', { name: 'Got it', exact: true }).click({ timeout: 20_000 });
   for (const [width, height] of [[320, 812], [375, 812], [430, 932], [768, 1024], [820, 1180], [1024, 768], [1440, 900], [1920, 1080], [844, 390]]) {
     await page.setViewportSize({ width, height });
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
@@ -38,7 +83,7 @@ test('responsive corners, gallery controls and navigation work across viewport s
   try {
     const touchPage = await touchContext.newPage();
     await touchPage.goto('/');
-    await touchPage.getByRole('button', { name: 'Got it', exact: true }).tap();
+    await touchPage.getByRole('button', { name: 'Got it', exact: true }).tap({ timeout: 20_000 });
     await touchPage.getByRole('button', { name: 'View Living room interior design concept', exact: true }).tap();
     const photo = touchPage.locator('.lightbox-photo');
     await expect(photo).toBeVisible();
@@ -57,7 +102,7 @@ test('rebranded navigation, interiors and gallery remain functional', async ({ p
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
-  await page.getByRole('button', { name: 'Got it', exact: true }).click();
+  await page.getByRole('button', { name: 'Got it', exact: true }).click({ timeout: 20_000 });
   await expect(page).toHaveTitle(/Wills Group of Company/);
   await expect(page.locator('h1')).toContainText('Considered interiors.');
   await expect(page.locator('.interior-concept-grid img')).toHaveCount(6);
@@ -96,7 +141,7 @@ test('rebranded navigation, interiors and gallery remain functional', async ({ p
 
 test('project brief validates required fields and prepares an explicit WhatsApp handoff', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Got it', exact: true }).click();
+  await page.getByRole('button', { name: 'Got it', exact: true }).click({ timeout: 20_000 });
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(page.getByText('Step 1 of 2: Your project')).toBeVisible();
   await page.getByLabel('Town / country').fill('Abuja, Nigeria');

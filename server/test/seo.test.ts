@@ -35,6 +35,18 @@ const htmlShell = `
 </html>`;
 
 describe('server SEO helpers', () => {
+  it.each([
+    ['/privacy-policy', 'Privacy Policy'],
+    ['/terms-of-use', 'Terms of Use'],
+    ['/cookie-policy', 'Cookie Policy'],
+    ['/security', 'Security & Privacy Requests'],
+  ])('serves distinct initial metadata for %s', (route, title) => {
+    const seo = getRouteSeo(`${route}/`);
+    expect(seo.title).toBe(`${title} | Wills Group of Company`);
+    expect(seo.canonicalPath).toBe(route);
+    expect(shouldNoIndexRequest(route)).toBe(false);
+    expect(injectRouteSeo(htmlShell, route)).toContain(`href="https://wills.example${route}"`);
+  });
   it('injects route-aware store metadata into the initial HTML shell', () => {
     const html = injectRouteSeo(htmlShell, '/store?reference=STK-test');
 
