@@ -14,6 +14,7 @@ import InteriorConcepts from './InteriorConcepts';
 import { brand, mediaPath } from '../lib/brand';
 import { buildWhatsAppUrl } from '../lib/whatsapp';
 import { faqConfig } from '../config';
+import { useSiteMotion } from '../lib/use-site-motion';
 
 const services = [
   { icon: DoorOpen, title: 'Doors', detail: 'Statement entrances, decorative panels and door design enquiries.', spec: 'Opening dimensions · fittings · finish' },
@@ -35,6 +36,9 @@ const nav = [['Services', '#services'], ['Interiors', '#interiors'], ['Gallery',
 export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('#hero');
+  const [headerPinned, setHeaderPinned] = useState(false);
+  const siteRef = useRef<HTMLDivElement>(null);
+  useSiteMotion(siteRef);
   const menuButton = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     let frame = 0;
@@ -47,6 +51,7 @@ export default function LandingPage() {
         if (section && section.getBoundingClientRect().top <= offset + window.innerHeight * .25) current = href;
       }
       setActiveSection(current);
+      setHeaderPinned((document.getElementById('services')?.getBoundingClientRect().bottom ?? Infinity) <= 0);
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
     const resize = () => { if (window.innerWidth > 900) setMenuOpen(false); schedule(); };
@@ -66,9 +71,9 @@ export default function LandingPage() {
   }, [menuOpen]);
   const projectWhatsAppUrl = buildWhatsAppUrl('Hello Wills Group of Company, I am viewing your website and would like to discuss a metalwork or interiors project.');
   return (
-    <div className="wills-site" lang="en">
+    <div ref={siteRef} className="wills-site" lang="en">
       <a href="#main-content" className="skip-link">Skip to main content</a>
-      <header className="wills-header">
+      <div className="landing-header-slot"><header className={`wills-header landing-header${headerPinned ? ' is-pinned' : ''}`}>
         <div className="wills-container header-inner">
           <nav className="desktop-nav" aria-label="Main navigation">{nav.map(([label, href]) => <a key={href} href={href} aria-current={activeSection === href ? 'location' : undefined}>{label}</a>)}</nav>
           <button ref={menuButton} type="button" className="menu-toggle" aria-expanded={menuOpen} aria-controls="mobile-navigation" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X /> : <Menu />}</button>
@@ -76,7 +81,7 @@ export default function LandingPage() {
           <a href="#contact" className="header-quote">Start a project</a>
         </div>
         {menuOpen && <nav id="mobile-navigation" className="mobile-nav" aria-label="Mobile navigation">{nav.map(([label, href]) => <a key={href} href={href} aria-current={activeSection === href ? 'location' : undefined} onClick={() => setMenuOpen(false)}>{label}</a>)}</nav>}
-      </header>
+      </header></div>
       <SEO title="Doors, Gates, Metalwork & Interiors" description={brand.description} keywords="Wills Group of Company, doors, gates, metal fabrication, interiors, window grilles" noIndex={!brand.siteUrl} />
       <main id="main-content">
         <Hero />

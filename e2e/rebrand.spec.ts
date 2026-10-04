@@ -1,5 +1,98 @@
 import { test, expect } from '@playwright/test';
 
+test('hero actions and ten-second slideshow work on mobile', async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-10-04T12:00:00Z') });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await expect(page.locator('.hero-current-image')).toBeVisible();
+  await page.clock.pauseAt(new Date('2026-10-04T12:01:00Z'));
+  await page.getByRole('button', { name: 'Got it', exact: true }).click();
+  const toggle = page.locator('.hero-motion-toggle');
+  await toggle.focus();
+  await page.keyboard.press('Enter');
+  await expect(toggle).toHaveAttribute('aria-label', 'Play hero slideshow');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.hero-motion-toggle')).toHaveAttribute('aria-label', 'Pause hero slideshow');
+  await page.locator('.hero-motion-toggle').evaluate(button => (button as HTMLButtonElement).blur());
+  await page.mouse.move(0, 0);
+  const initialImage = await page.locator('.hero-current-image').getAttribute('alt');
+  await page.clock.runFor(9_999);
+  await expect(page.locator('.hero-current-image')).toHaveAttribute('alt', initialImage!);
+  await page.clock.runFor(1);
+  await expect(page.locator('.hero-current-image')).not.toHaveAttribute('alt', initialImage!);
+  const nextImage = await page.locator('.hero-current-image').getAttribute('alt');
+  await page.locator('#hero').getByRole('button', { name: 'Pause hero slideshow', exact: true }).focus();
+  await page.keyboard.press('Enter');
+  await page.clock.runFor(30_000);
+  await expect(page.locator('.hero-current-image')).toHaveAttribute('alt', nextImage!);
+  await page.locator('.hero-motion-toggle').evaluate(button => (button as HTMLButtonElement).blur());
+  await expect(page.locator('.hero-controls')).toHaveCount(0);
+  for (const width of [320, 390, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+    for (const control of await page.locator('#hero a').all()) {
+      const bounds = (await control.boundingBox())!;
+      expect(bounds.width).toBeGreaterThanOrEqual(44);
+      expect(bounds.height).toBeGreaterThanOrEqual(44);
+    }
+  }
+  await page.locator('#hero').getByRole('link', { name: 'Explore the designs', exact: true }).click();
+  await expect(page).toHaveURL(/#gallery$/);
+  await page.clock.runFor(1000);
+  await expect(page.getByRole('heading', { name: 'Find your next entrance.' })).toBeVisible();
+  await page.locator('#hero').getByRole('link', { name: 'Plan your project', exact: true }).click();
+  await expect(page).toHaveURL(/#contact$/);
+  await page.clock.runFor(1000);
+  await expect(page.getByRole('heading', { name: 'Tell us what you have in mind.' })).toBeVisible();
+});
+
+test('navigation pins after services and returns to normal at the top', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  const header = page.locator('.landing-header');
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
+    await expect(header).not.toHaveClass(/is-pinned/);
+    await page.locator('#services').evaluate(section => scrollTo({ top: section.getBoundingClientRect().top + scrollY + 100, behavior: 'instant' }));
+    await expect(header).not.toHaveClass(/is-pinned/);
+    await page.locator('#services').evaluate(section => scrollTo({ top: section.getBoundingClientRect().bottom + scrollY + 1, behavior: 'instant' }));
+    await expect(header).toHaveClass(/is-pinned/);
+    expect((await header.boundingBox())!.y).toBe(0);
+    expect(await page.locator('.interiors-copy').evaluate(element => getComputedStyle(element).opacity)).toBe('1');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Open navigation' }).click();
+  await expect(page.getByRole('navigation', { name: 'Mobile navigation' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('button', { name: 'Open navigation' })).toBeFocused();
+});
+
+test('all 33 mobile gallery cards stick below the header and remain interactive', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Got it', exact: true }).click({ timeout: 20_000 });
+  const cards = page.locator('.project-tile');
+  await expect(cards).toHaveCount(33);
+  await expect(page.getByRole('button', { name: 'View all 33 designs' })).toHaveCount(0);
+  const pinTop = await page.locator('.header-inner').evaluate(element => element.getBoundingClientRect().height + 12);
+  for (const index of [0, 1, 16, 32]) {
+    await cards.nth(index).evaluate((card, pinTop) => scrollTo({ top: (card as HTMLElement).offsetTop + document.querySelector('.project-grid')!.getBoundingClientRect().top + scrollY - pinTop + (card === document.querySelector('.project-tile:last-child') ? 0 : 60), behavior: 'instant' }), pinTop);
+    await expect.poll(async () => (await cards.nth(index).boundingBox())!.y).toBeCloseTo(pinTop, 0);
+  }
+  await cards.nth(32).click();
+  await expect(page.getByRole('dialog').getByRole('heading')).toHaveText('Ornamental gate design');
+  await page.keyboard.press('Escape');
+  await expect(cards.nth(32)).toBeFocused();
+  await page.locator('.gallery-filters').getByRole('button', { name: /^Doors/ }).click();
+  await expect(cards).toHaveCount(13);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await expect(cards).toHaveCount(8);
+  expect(await cards.first().evaluate(card => getComputedStyle(card).position)).toBe('relative');
+});
+
 test('policy links open dedicated pages and retain navigation on mobile', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Got it', exact: true }).click({ timeout: 20_000 });
@@ -35,8 +128,9 @@ test('policy links open dedicated pages and retain navigation on mobile', async 
 test('interior captions, descriptions and alternative text use design concept wording', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Got it', exact: true }).click({ timeout: 20_000 });
-  await expect(page.locator('#hero').getByRole('button')).toHaveCount(0);
-  await expect(page.locator('#hero').getByRole('link')).toHaveCount(0);
+  await expect(page.locator('#hero').getByRole('link', { name: 'Explore the designs', exact: true })).toHaveAttribute('href', '#gallery');
+  await expect(page.locator('#hero').getByRole('link', { name: 'Plan your project', exact: true })).toHaveAttribute('href', '#contact');
+  await expect(page.locator('.hero-controls')).toHaveCount(0);
   await expect(page.locator('.hero-slide-caption')).toHaveCount(0);
   await page.getByRole('button', { name: 'View Living room interior design concept', exact: true }).click();
   await expect(page.getByRole('dialog').getByText('Interior design concept. Discuss your layout, materials and finishing requirements with Wills Group.')).toBeVisible();

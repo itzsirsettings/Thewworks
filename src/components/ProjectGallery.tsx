@@ -1,17 +1,27 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Play } from 'lucide-react';
 import DesignLightbox from './DesignLightbox';
 import { projectImages, projectSrc, suppliedVideos } from '../lib/welding-media';
 import { mediaDimensions } from '../lib/media-dimensions';
+
+const mobileGalleryQuery = '(max-width: 760px), (max-width: 900px) and (pointer: coarse)';
 
 export default function ProjectGallery() {
   const [category, setCategory] = useState('All');
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const returnFocusRef = useRef<HTMLButtonElement>(null);
   const [expanded, setExpanded] = useState(false);
+  const [mobileStack, setMobileStack] = useState(() => matchMedia(mobileGalleryQuery).matches);
+  useEffect(() => {
+    const viewport = matchMedia(mobileGalleryQuery);
+    const update = () => setMobileStack(viewport.matches);
+    update();
+    viewport.addEventListener('change', update);
+    return () => viewport.removeEventListener('change', update);
+  }, []);
   const [activeVideo, setActiveVideo] = useState<number | null>(null);
   const filtered = projectImages.filter((image) => category === 'All' || image.category === category);
-  const visible = expanded ? filtered : filtered.slice(0, 8);
+  const visible = mobileStack || expanded ? filtered : filtered.slice(0, 8);
 
   return (
     <section id="gallery" className="wills-section wills-gallery">
@@ -40,7 +50,7 @@ export default function ProjectGallery() {
             </button>
           ))}
         </div>
-        {!expanded && filtered.length > visible.length && <button type="button" className="wills-button button-outline gallery-more" onClick={() => setExpanded(true)}>View all {filtered.length} designs </button>}
+        {!mobileStack && !expanded && filtered.length > visible.length && <button type="button" className="wills-button button-outline gallery-more" onClick={() => setExpanded(true)}>View all {filtered.length} designs </button>}
         <div className="video-library">
           <div>
             <h3>See the details in motion.</h3>

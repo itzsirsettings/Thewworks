@@ -69,6 +69,10 @@ export default defineConfig(({ mode }) => {
               return 'motion';
             }
 
+            if (id.includes('/gsap/')) {
+              return 'animation';
+            }
+
             if (id.includes('lucide-react')) {
               return 'icons';
             }
