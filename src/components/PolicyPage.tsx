@@ -28,7 +28,6 @@ export default function PolicyPage({ kind }: { kind: PolicyKind }) {
       </header>
       <main id="policy-content" className="wills-container policy-main">
         <div className="policy-intro">
-          <p className="policy-eyebrow">Wills Group of Company · Website information</p>
           <h1 ref={heading} tabIndex={-1}>{policy.title}</h1>
           <p>{policy.description}</p>
           <p className="policy-date">Last updated <time dateTime="2026-10-04">4 October 2026</time></p>

@@ -1,4 +1,3 @@
-import { MotionConfig } from 'motion/react';
 import { Suspense, lazy } from 'react';
 import {
   BrowserRouter as Router,
@@ -8,9 +7,9 @@ import {
 } from 'react-router-dom';
 import BrandLogo from './components/BrandLogo';
 import CookieConsentBanner from './components/CookieConsentBanner';
+import LandingPage from './components/LandingPage';
 import { policyRoutes } from './lib/policies';
 
-const LandingPage = lazy(() => import('./components/LandingPage'));
 const PolicyPage = lazy(() => import('./components/PolicyPage'));
 
 const AppLoadingState = ({ message }: { message: string }) => (
@@ -28,11 +27,7 @@ function AppShell() {
       <Routes>
         <Route
           path="/"
-          element={(
-            <Suspense fallback={<AppLoadingState message="Loading landing page..." />}>
-              <LandingPage />
-            </Suspense>
-          )}
+          element={<LandingPage />}
         />
         {policyRoutes.map(({ kind, path }) => <Route key={path} path={path} element={(
           <Suspense fallback={<AppLoadingState message="Loading website information..." />}>
@@ -48,9 +43,9 @@ function AppShell() {
 
 function App() {
   return (
-    <MotionConfig reducedMotion="user"><Router>
+    <Router>
       <AppShell />
-    </Router></MotionConfig>
+    </Router>
   );
 }
 

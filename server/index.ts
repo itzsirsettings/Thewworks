@@ -881,6 +881,14 @@ app.use('/api', (_request, response) => {
   response.status(404).json({ message: 'API endpoint not found.' });
 });
 
+app.use('/assets', express.static(path.join(distDirectory, 'assets'), { index: false, dotfiles: 'deny', maxAge: '1y', immutable: true }));
+// These public clips are also embedded by the Cloudflare frontend mirror.
+app.use('/media/wills', express.static(path.join(distDirectory, 'media', 'wills'), {
+  index: false, dotfiles: 'deny', maxAge: '1h',
+  setHeaders(response, filePath) {
+    if (/^VID-20261003-WA\d{4}\.mp4$/.test(path.basename(filePath))) response.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  },
+}));
 app.use(express.static(distDirectory, { index: false, dotfiles: 'deny', maxAge: '1h' }));
 
 app.get(/^(?!\/api).*/, async (request, response) => {

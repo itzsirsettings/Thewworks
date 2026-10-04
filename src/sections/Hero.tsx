@@ -43,16 +43,25 @@ export default function Hero() {
   }, [currentBgIndex, isPaused, isInteracting, isVisible]);
 
   useEffect(() => {
-    const nextImage = new Image();
-    nextImage.src = heroAssets[(currentBgIndex + 1) % heroAssets.length].src;
+    const nextImage = document.createElement('link');
+    nextImage.rel = 'preload';
+    nextImage.as = 'image';
+    nextImage.type = 'image/avif';
+    nextImage.href = heroAssets[(currentBgIndex + 1) % heroAssets.length].src.replace(/\.webp$/, '.avif');
+    nextImage.fetchPriority = 'low';
+    const timer = window.setTimeout(() => document.head.append(nextImage), 2000);
+    return () => { window.clearTimeout(timer); nextImage.remove(); };
   }, [currentBgIndex]);
 
   if (!heroConfig.title) return null;
   return (
     <section id="hero" className="wills-hero" aria-label="Featured doors, metalwork and interiors" aria-roledescription="carousel" onFocus={() => setIsInteracting(true)} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setIsInteracting(false); }}>
       <div className="hero-photo">
+        <picture>
+        <source srcSet={heroAssets[currentBgIndex].src.replace(/\.webp$/, '.avif')} type="image/avif" />
         <img key={heroAssets[currentBgIndex].src} className={previousBgIndex === null ? 'hero-current-image' : 'hero-current-image is-changing'} onAnimationEnd={() => setPreviousBgIndex(null)} src={heroAssets[currentBgIndex].src} alt={heroAssets[currentBgIndex].alt} fetchPriority="high" loading="eager" decoding="async" width="1440" height="1080" />
-        {previousBgIndex !== null && <img className="hero-previous-image" src={heroAssets[previousBgIndex].src} alt="" aria-hidden="true" decoding="async" width="1440" height="1080" />}
+        </picture>
+        {previousBgIndex !== null && <picture><source srcSet={heroAssets[previousBgIndex].src.replace(/\.webp$/, '.avif')} type="image/avif" /><img className="hero-previous-image" src={heroAssets[previousBgIndex].src} alt="" aria-hidden="true" decoding="async" width="1440" height="1080" /></picture>}
       </div>
       <div className="hero-shade" />
       <div className="wills-container hero-content">

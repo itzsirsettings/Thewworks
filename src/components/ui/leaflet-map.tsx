@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import type { Map } from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { brand } from '@/lib/brand';
 
 export default function LeafletMap() {
@@ -14,7 +13,7 @@ export default function LeafletMap() {
   useEffect(() => {
     if (!hasLocation || !container.current) return;
     let disposed = false;
-    import('leaflet').then(({ default: L }) => {
+    Promise.all([import('leaflet'), import('leaflet/dist/leaflet.css')]).then(([{ default: L }]) => {
       if (disposed || !container.current || map.current) return;
       const instance = L.map(container.current, { center: [latitude, longitude], zoom: 16, scrollWheelZoom: false });
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(instance);

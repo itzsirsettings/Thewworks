@@ -1,7 +1,6 @@
 "use client"
 
 import { DotPattern } from "@/components/ui/dot-pattern"
-import { BlurFade } from "@/components/ui/blur-fade"
 
 interface HeroWithGreetingProps {
   greeting?: string
@@ -35,30 +34,30 @@ export function HeroWithGreeting({
       </div>
 
       <div className="relative mx-auto max-w-6xl px-6 py-16 md:py-24">
-        {greeting && <BlurFade delay={0} duration={0.3}>
+        {greeting && <div>
           <div className="mb-4">
             <span className="inline-block rounded-full bg-[var(--brand-red-tint)] px-4 py-1.5 text-sm font-medium text-[var(--brand-red)]">
               {greeting}
             </span>
           </div>
-        </BlurFade>}
+        </div>}
 
-        <BlurFade delay={0.1} duration={0.5}>
+        <div>
           <h2 className="mx-auto mb-6 text-center text-[1.575rem] font-bold tracking-tight text-[var(--brand-navy)] md:text-[2.625rem] lg:text-[3.15rem]">
             {title}
           </h2>
-        </BlurFade>
+        </div>
 
         {subtitle && (
-          <BlurFade delay={0.2} duration={0.5}>
+          <div>
             <p className="mx-auto max-w-2xl text-center text-lg leading-relaxed text-[var(--brand-muted)] md:text-xl">
               {subtitle}
             </p>
-          </BlurFade>
+          </div>
         )}
 
         {stats.length > 0 && (
-          <BlurFade delay={0.3} duration={0.5}>
+          <div>
             <div className="mt-12 flex flex-wrap justify-center gap-8 md:gap-16">
               {stats.map((stat, index) => (
                 <div key={index} className="text-center">
@@ -69,11 +68,11 @@ export function HeroWithGreeting({
                 </div>
               ))}
             </div>
-          </BlurFade>
+          </div>
         )}
 
         {images.length > 0 && (
-          <BlurFade delay={0.4} duration={0.6}>
+          <div>
             <div className="mt-16 grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
               {images.slice(0, 6).map((src, index) => (
                 <div
@@ -92,7 +91,7 @@ export function HeroWithGreeting({
                 </div>
               ))}
             </div>
-          </BlurFade>
+          </div>
         )}
       </div>
     </section>

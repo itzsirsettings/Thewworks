@@ -108,6 +108,7 @@ test('policy links open dedicated pages and retain navigation on mobile', async 
   ]) {
     await page.goto(route);
     await expect(page.getByRole('heading', { level: 1, name: title, exact: true })).toBeVisible();
+    await expect(page.locator('.policy-eyebrow')).toHaveCount(0);
     await expect(page).toHaveTitle(`${title} | Wills Group of Company`);
     await expect(page.getByRole('navigation', { name: 'Policies and website information' }).getByRole('link', { name: title, exact: true })).toHaveAttribute('aria-current', 'page');
     for (const width of [320, 390, 1280]) {

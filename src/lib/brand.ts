@@ -15,4 +15,5 @@ export const brand = {
 export const mediaPath = (number: string, small = false) =>
   `/media/wills/IMG-20261003-WA${number}${small ? '-640' : ''}.webp`;
 
-export const videoPath = (number: string) => `/media/wills/VID-20261003-WA${number}.mp4`;
+const videoOrigin = clean(import.meta.env.VITE_VIDEO_ORIGIN).replace(/\/$/, '');
+export const videoPath = (number: string) => `${videoOrigin}/media/wills/VID-20261003-WA${number}.mp4`;

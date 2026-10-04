@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { motion, type HTMLMotionProps, MotionConfig } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 interface TextStaggerHoverProps {
@@ -92,29 +91,19 @@ export const TextStaggerHover = React.forwardRef<HTMLSpanElement, React.HTMLAttr
         <span className="sr-only">{text}</span>
         {characters.map((char, i) => (
           <span key={`${char}-${i}`} aria-hidden="true" className="relative inline-block overflow-hidden">
-            <MotionConfig
-              transition={{
-                delay: i * 0.025,
-                duration: 0.3,
-                ease: [0.25, 0.46, 0.45, 0.94],
-              }}
-            >
-              <motion.span
+              <span
                 className="inline-block opacity-20"
-                initial={{ y: "0%" }}
-                animate={isActive ? { y: "-110%" } : { y: "0%" }}
+                style={{ transform: `translateY(${isActive ? '-110%' : '0%'})`, transition: `transform .3s ${i * .025}s cubic-bezier(.25,.46,.45,.94)` }}
               >
                 {char}
                 {char === " " && i < characters.length - 1 && <>&nbsp;</>}
-              </motion.span>
-              <motion.span
+              </span>
+              <span
                 className="absolute left-0 top-0 inline-block opacity-100"
-                initial={{ y: "110%" }}
-                animate={isActive ? { y: "0%" } : { y: "110%" }}
+                style={{ transform: `translateY(${isActive ? '0%' : '110%'})`, transition: `transform .3s ${i * .025}s cubic-bezier(.25,.46,.45,.94)` }}
               >
                 {char}
-              </motion.span>
-            </MotionConfig>
+              </span>
           </span>
         ))}
       </span>
@@ -122,15 +111,6 @@ export const TextStaggerHover = React.forwardRef<HTMLSpanElement, React.HTMLAttr
   }
 )
 TextStaggerHover.displayName = "TextStaggerHover"
-
-const clipPathVariants = {
-  visible: {
-    clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-  },
-  hidden: {
-    clipPath: "polygon(0% 0%, 100% 0%, 100% 0%, 0% 0px)",
-  },
-}
 
 export const HoverSliderImageWrap = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => {
@@ -148,16 +128,14 @@ export const HoverSliderImageWrap = React.forwardRef<HTMLDivElement, React.HTMLA
 )
 HoverSliderImageWrap.displayName = "HoverSliderImageWrap"
 
-export const HoverSliderImage = React.forwardRef<HTMLImageElement, HTMLMotionProps<"img"> & HoverSliderImageProps>(
-  ({ index, imageUrl, className, ...props }, ref) => {
+export const HoverSliderImage = React.forwardRef<HTMLImageElement, React.ImgHTMLAttributes<HTMLImageElement> & HoverSliderImageProps>(
+  ({ index, imageUrl, className, style, ...props }, ref) => {
     const { activeSlide } = useHoverSliderContext()
     return (
-      <motion.img
+      <img
         src={imageUrl}
         className={cn("inline-block align-middle", className)}
-        transition={{ ease: [0.33, 1, 0.68, 1], duration: 0.3 }}
-        variants={clipPathVariants}
-        animate={activeSlide === index ? "visible" : "hidden"}
+        style={{ ...style, clipPath: activeSlide === index ? 'inset(0)' : 'inset(0 0 100% 0)', transition: 'clip-path .3s cubic-bezier(.33,1,.68,1)' }}
         ref={ref}
         {...props}
       />

@@ -15,8 +15,7 @@ html { scroll-padding-top: calc(var(--wills-header-height) + 16px); }
 .policy-intro { max-width: 840px; padding-bottom: 48px; border-bottom: 1px solid var(--brand-line); }
 .policy-intro h1 { font-size: clamp(2rem, 5vw, 4rem); font-weight: 600; letter-spacing: -.055em; line-height: 1.08; margin-block: 18px 24px; }
 .policy-intro h1:focus { outline: none; }
-.policy-intro > p:not(.policy-eyebrow) { color: var(--wills-muted); max-width: 680px; }
-.policy-eyebrow { color: var(--brand-red); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+.policy-intro > p { color: var(--wills-muted); max-width: 680px; }
 .policy-intro .policy-date { margin-top: 20px; font-size: 13px; }
 .policy-layout { display: grid; grid-template-columns: 260px minmax(0, 760px); gap: clamp(32px, 6vw, 90px); padding-top: 48px; }
 .policy-sidebar { align-self: start; position: sticky; top: calc(var(--wills-header-height) + 32px); }
