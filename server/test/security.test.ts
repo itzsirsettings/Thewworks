@@ -1,13 +1,16 @@
 // @vitest-environment node
+import { randomBytes } from 'node:crypto';
 import { beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 
 process.env.ENABLE_CSRF_TEST = 'true';
 process.env.NODE_ENV = 'test';
+process.env.STORE_CHECKOUT_ENABLED = 'true';
+process.env.LEGACY_COMMERCE_ENABLED = 'true';
 process.env.SERVER_PORT = '3002';
-process.env.CSRF_SECRET = 'test-csrf-secret-32-chars-long-at-least';
-process.env.ORDER_TOKEN_SECRET = 'test-order-token-secret-32-chars-long';
-process.env.ORDER_STORE_ENCRYPTION_KEY = 'test-encryption-key-32-chars-long';
+process.env.CSRF_SECRET = randomBytes(32).toString('hex');
+process.env.ORDER_TOKEN_SECRET = randomBytes(32).toString('hex');
+process.env.ORDER_STORE_ENCRYPTION_KEY = randomBytes(32).toString('hex');
 process.env.PAYSTACK_SECRET_KEY = 'sk_test_realistic_test_key';
 process.env.PUBLIC_SITE_URL = 'http://localhost:3002';
 

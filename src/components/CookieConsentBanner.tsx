@@ -33,18 +33,18 @@ const CookieConsentBanner = () => {
       aria-live="polite"
       aria-label="Cookie consent"
     >
-      <div className="mx-auto flex max-w-5xl flex-col gap-4 rounded-lg border border-[rgba(234,220,198,0.95)] bg-[rgba(255,253,248,0.96)] p-4 shadow-[0_24px_80px_rgba(17,24,39,0.18)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:p-5">
+      <div className="brand-dot-surface mx-auto flex max-w-5xl flex-col gap-4 rounded-lg border border-[var(--brand-line)] bg-[var(--brand-white)] p-4 shadow-[0_24px_80px_rgba(17,24,39,0.18)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:p-5">
         <div className="flex gap-3">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[rgba(249,115,22,0.12)] text-[var(--market-orange)]">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--brand-red-tint)] text-[var(--market-orange)]">
             <Cookie size={22} strokeWidth={1.8} aria-hidden="true" />
           </span>
           <div>
             <p className="text-sm font-semibold text-[var(--market-ink)]">
-              Accept cookies to get the most out of Thewworks.
+              Your privacy preferences.
             </p>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-[var(--market-muted)]">
-              We use cookies to remember your preferences, keep ordering smooth,
-              and understand which printing services visitors find useful.
+              This site saves your dismissal preference in your browser.
+              No optional analytics or advertising cookies are enabled.
             </p>
             <p className="mt-2 flex items-center gap-2 text-xs font-medium text-[var(--market-muted)]">
               <ShieldCheck size={14} aria-hidden="true" />
@@ -61,7 +61,7 @@ const CookieConsentBanner = () => {
             setIsVisible(false);
           }}
         >
-          Accept cookies
+          Got it
         </Button>
       </div>
     </div>

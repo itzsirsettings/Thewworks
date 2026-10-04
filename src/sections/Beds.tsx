@@ -52,7 +52,7 @@ const Beds = () => {
           <span className="inline-block mb-4 text-sm font-medium tracking-widest uppercase opacity-90">
             {bedsConfig.tag}
           </span>
-          <h2 className="font-heading text-3xl md:text-5xl max-w-3xl leading-tight">
+          <h2 className="font-heading text-[1.3125rem] md:text-[2.1rem] max-w-3xl leading-tight">
             {bedsConfig.heading}
           </h2>
           <p className="mt-5 max-w-xl text-lg font-light opacity-90">
@@ -104,7 +104,7 @@ const Beds = () => {
                     {product.category}
                   </span>
                 </div>
-                
+
                 <button
                   onClick={scrollToContact}
                   className="absolute bottom-4 right-4 w-10 h-10 flex items-center justify-center bg-white text-black hover:bg-[var(--chevron-blue)] hover:text-white transition-all duration-300"
@@ -115,7 +115,7 @@ const Beds = () => {
               </div>
 
               <div className="p-5">
-                <h3 className="font-serif text-lg mb-2 group-hover:text-[#5a1a2a] transition-colors">
+                <h3 className="font-serif text-[0.7875rem] mb-2 group-hover:text-[var(--brand-navy)] transition-colors">
                   {product.name}
                 </h3>
                 <p className="text-sm text-gray-500 mb-3 line-clamp-2">
@@ -134,7 +134,7 @@ const Beds = () => {
               <span className="w-12 h-12 bg-amber-600 flex items-center justify-center text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9"/><path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/><path d="M3 9h18"/><path d="M7 9v13"/></svg>
               </span>
-              <h3 className="font-serif text-2xl">Standard Packaging</h3>
+              <h3 className="font-serif text-[1.05rem]">Standard Packaging</h3>
             </div>
             <p className="text-gray-600 leading-relaxed">
               Our standard packaging options cover printed boxes, sleeves, bags and inserts
@@ -146,10 +146,10 @@ const Beds = () => {
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}>
             <div className="flex items-center gap-3 mb-4">
-              <span className="w-12 h-12 bg-[#5a1a2a] flex items-center justify-center text-white">
+              <span className="w-12 h-12 bg-[var(--brand-navy)] flex items-center justify-center text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
               </span>
-              <h3 className="font-serif text-2xl">Premium Finishes</h3>
+              <h3 className="font-serif text-[1.05rem]">Premium Finishes</h3>
             </div>
             <p className="text-gray-600 leading-relaxed">
               Our premium finish collection includes foil stamping, embossing, spot UV,

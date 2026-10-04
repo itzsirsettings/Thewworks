@@ -9,18 +9,20 @@ interface HeroWithGreetingProps {
   subtitle?: React.ReactNode
   stats?: Array<{ value: string; label: string }>
   images?: string[]
+  imageAlts?: string[]
 }
 
 export function HeroWithGreeting({
-  greeting = "Welcome to Thewworks",
+  greeting = "",
   title,
   subtitle,
   stats = [],
   images = [],
+  imageAlts = [],
 }: HeroWithGreetingProps) {
 
   return (
-    <section className="relative w-full overflow-hidden bg-[#faf9f7]">
+    <section id="subhero" className="relative w-full overflow-hidden bg-[var(--brand-paper)]">
       <div className="absolute inset-0">
         <DotPattern
           className="opacity-30"
@@ -33,25 +35,25 @@ export function HeroWithGreeting({
       </div>
 
       <div className="relative mx-auto max-w-6xl px-6 py-16 md:py-24">
-        <BlurFade delay={0} duration={0.5}>
+        {greeting && <BlurFade delay={0} duration={0.3}>
           <div className="mb-4">
-            <span className="inline-block rounded-full bg-[#c9a87c]/20 px-4 py-1.5 text-sm font-medium text-[#8b6914]">
+            <span className="inline-block rounded-full bg-[var(--brand-red-tint)] px-4 py-1.5 text-sm font-medium text-[var(--brand-red)]">
               {greeting}
             </span>
           </div>
-        </BlurFade>
+        </BlurFade>}
 
         <BlurFade delay={0.1} duration={0.5}>
-          <h2 className="mb-6 text-4xl font-bold tracking-tight text-[#1a1a1a] md:text-6xl lg:text-7xl">
+          <h2 className="mx-auto mb-6 text-center text-[1.575rem] font-bold tracking-tight text-[var(--brand-navy)] md:text-[2.625rem] lg:text-[3.15rem]">
             {title}
           </h2>
         </BlurFade>
 
         {subtitle && (
           <BlurFade delay={0.2} duration={0.5}>
-            <div className="mx-auto max-w-2xl text-lg text-[#55524d] md:text-xl">
+            <p className="mx-auto max-w-2xl text-center text-lg leading-relaxed text-[var(--brand-muted)] md:text-xl">
               {subtitle}
-            </div>
+            </p>
           </BlurFade>
         )}
 
@@ -60,10 +62,10 @@ export function HeroWithGreeting({
             <div className="mt-12 flex flex-wrap justify-center gap-8 md:gap-16">
               {stats.map((stat, index) => (
                 <div key={index} className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold text-[#c9a87c]">
+                  <div className="text-3xl md:text-4xl font-bold text-[var(--brand-red)]">
                     {stat.value}
                   </div>
-                  <div className="mt-1 text-sm text-[#55524d]">{stat.label}</div>
+                  <div className="mt-1 text-sm text-[var(--brand-muted)]">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -76,14 +78,17 @@ export function HeroWithGreeting({
               {images.slice(0, 6).map((src, index) => (
                 <div
                   key={index}
-                  className="group relative aspect-[4/5] overflow-hidden rounded-xl bg-[#e8e4dc] cursor-pointer hover:shadow-xl hover:ring-2 hover:ring-[#c9a87c] transition-all duration-300"
+                  className="relative aspect-[4/5] overflow-hidden rounded-xl bg-[var(--brand-surface)]"
                 >
                   <img
                     src={src}
-                    alt={`Project ${index + 1}`}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-200"
+                    alt={imageAlts[index] || `Wills Group design reference ${index + 1}`}
+                    loading="lazy"
+                    decoding="async"
+                    width="640"
+                    height="800"
+                    className="h-full w-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 </div>
               ))}
             </div>

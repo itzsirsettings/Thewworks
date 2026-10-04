@@ -1,3 +1,4 @@
+import { MotionConfig } from 'motion/react';
 import { Suspense, lazy } from 'react';
 import {
   BrowserRouter as Router,
@@ -41,9 +42,9 @@ function AppShell() {
 
 function App() {
   return (
-    <Router>
+    <MotionConfig reducedMotion="user"><Router>
       <AppShell />
-    </Router>
+    </Router></MotionConfig>
   );
 }
 

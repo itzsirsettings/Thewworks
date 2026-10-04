@@ -13,6 +13,7 @@ function getCaptchaConfig() {
   const secretKey = process.env.TURNSTILE_SECRET_KEY?.trim();
 
   if (!siteKey && !secretKey) {
+    if (process.env.NODE_ENV === 'production') throw new Error('Turnstile is required for production checkout.');
     return null;
   }
 
@@ -85,7 +86,7 @@ export async function verifyCheckoutCaptcha(
   }
 
   // Only check hostname in production to avoid issues with local testing or preview sites
-  if (process.env.NODE_ENV === 'production' && payload.hostname) {
+  if (process.env.NODE_ENV === 'production') {
     const expectedHostname = getTrustedSiteUrl().hostname;
 
     if (payload.hostname !== expectedHostname) {

@@ -1,8 +1,9 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-interface HeroCollageProps extends React.HTMLAttributes<HTMLDivElement> {
+interface HeroCollageProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   heroTitle: React.ReactNode;
+  title?: React.ReactNode;
   subtitle: string;
   stats: { value: string; label: string }[];
   images: string[];
@@ -20,7 +21,7 @@ const animationStyle = `
 `;
 
 const HeroCollage = React.forwardRef<HTMLDivElement, HeroCollageProps>(
-  ({ className, title, subtitle, stats, images, ...props }, ref) => {
+  ({ className, heroTitle, title, subtitle, stats, images, ...props }, ref) => {
     const displayImages = images.slice(0, 7);
 
     return (
@@ -35,8 +36,8 @@ const HeroCollage = React.forwardRef<HTMLDivElement, HeroCollageProps>(
           {...props}
         >
           <div className="container relative z-10 mx-auto px-4 text-center">
-            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl tracking-tight text-black">
-              {title}
+            <h1 className="font-heading text-[1.575rem] md:text-[2.1rem] lg:text-[2.625rem] tracking-tight text-black">
+              {title || heroTitle}
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-base md:text-lg text-[var(--chevron-muted)]">
               {subtitle}

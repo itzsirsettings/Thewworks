@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight } from 'lucide-react';
+
 import { blogConfig } from '../config';
 
 const Blog = () => {
@@ -51,7 +51,7 @@ const Blog = () => {
             {blogConfig.tag}
           </span>
           <h2
-            className={`font-heading text-3xl md:text-4xl lg:text-5xl text-black transition-all duration-700 ${
+            className={`font-heading text-[1.3125rem] md:text-[1.575rem] lg:text-[2.1rem] text-black transition-all duration-700 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
             style={{ transitionDelay: '150ms' }}
@@ -89,7 +89,7 @@ const Blog = () => {
                 </span>
 
                 {/* Title */}
-                <h3 className="font-heading text-xl text-black mt-2 mb-3 leading-tight group-hover:text-[var(--chevron-blue)] transition-colors">
+                <h3 className="font-heading text-[0.875rem] text-black mt-2 mb-3 leading-tight group-hover:text-[var(--chevron-blue)] transition-colors">
                   {post.title}
                 </h3>
 
@@ -104,7 +104,7 @@ const Blog = () => {
                   className="inline-flex items-center gap-1 text-sm text-[var(--chevron-blue)] font-medium hover:gap-2 transition-all"
                 >
                   {blogConfig.readMoreText}
-                  <ArrowRight size={14} />
+
                 </a>
               </div>
             </article>
@@ -125,7 +125,7 @@ const Blog = () => {
               className="inline-flex items-center gap-2 text-[var(--chevron-blue)] font-medium hover:gap-3 transition-all"
             >
               {showAllPosts ? 'Show Fewer' : blogConfig.viewAllText}
-              <ArrowRight size={18} />
+
             </button>
           </div>
         )}

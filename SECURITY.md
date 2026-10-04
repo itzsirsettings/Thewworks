@@ -1,5 +1,10 @@
 # Security Documentation
 
+Current active scope and evidence: [security remediation](docs/SECURITY_REMEDIATION.md).
+Report issues privately through https://willsinteriors.com/#security or the published
+Wills business WhatsApp contact. Do not include credentials or other people's data.
+The remaining provider-specific notes below are historical, not current controls.
+
 ## Overview
 This document outlines the security measures implemented in the ThewworksICT e-commerce application and provides guidelines for maintaining a secure deployment.
 

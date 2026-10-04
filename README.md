@@ -1,3 +1,23 @@
+# Wills Group of Company
+
+Project name: `wills`. Production target: `https://willsinteriors.com` on Railway.
+The active runtime no longer uses Supabase. Commerce and payments are closed by
+default. Read [Railway migration](docs/RAILWAY_MIGRATION.md) and
+[security remediation](docs/SECURITY_REMEDIATION.md) for current configuration.
+Provider setup notes further below describe the historical implementation only.
+
+The active website is now a doors, gates, custom metalwork and interiors presentation for Wills Group of Company. Confirmed WhatsApp: +234 705 745 0799.
+
+- Rebrand scope, configuration, content requirements and rollback: [docs/REBRAND_DECISIONS.md](docs/REBRAND_DECISIONS.md).
+- File and interface preservation: [docs/PRESERVATION_MANIFEST.md](docs/PRESERVATION_MANIFEST.md).
+- Hosting review: [docs/HOSTING_DECISION.md](docs/HOSTING_DECISION.md).
+- Local setup: npm ci, npm run build, npm run preview. Production domain, email and workshop address are not configured yet.
+- Quote briefs use a local download or a WhatsApp handoff. This does not add a server-side quote delivery integration or an online welding checkout.
+
+## Retained pre-rebrand documentation
+
+The original project documentation below is preserved as historical context. Former printing-business contacts, prices and domains are not operational instructions for Wills Group of Company. Use the current rebrand documents for the public website.
+
 # Thewworks - Print Services Marketplace
 
 A full-stack e-commerce application for print services marketplace with React frontend and Express backend.

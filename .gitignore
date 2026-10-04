@@ -21,3 +21,5 @@ debug.log
 test-results/
 playwright-report/
 .vercel
+
+work/

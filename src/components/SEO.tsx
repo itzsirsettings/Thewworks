@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { siteConfig } from '../config';
+import { brand, mediaPath } from '../lib/brand';
 
-const SITE_ORIGIN = 'https://thewworksict.com';
-const SITE_NAME = 'Thewworks ICT & Prints';
-const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/images/thewworks-press-hero.png`;
-const DEFAULT_OG_IMAGE_ALT = 'Thewworks ICT & Prints production and branding showcase';
+const SITE_ORIGIN = brand.siteUrl || window.location.origin;
+const SITE_NAME = brand.name;
+const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}${mediaPath("0067")}`;
+const DEFAULT_OG_IMAGE_ALT = 'Wills Group of Company ornamental entrance gate';
 
 interface SEOProps {
   title?: string;
@@ -37,7 +38,7 @@ const SEO = ({
   const currentUrl = `${SITE_ORIGIN}${normalizedPath}`;
 
   useEffect(() => {
-    const finalTitle = title ? `${title} | Thewworks` : siteConfig.title;
+    const finalTitle = title ? `${title} | ${brand.name}` : siteConfig.title;
     document.title = finalTitle;
 
     const finalDescription = description || siteConfig.description;

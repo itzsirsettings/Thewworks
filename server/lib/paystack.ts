@@ -51,6 +51,7 @@ function isLocalPreviewSite() {
 }
 
 export function isPaystackDemoMode() {
+  if (process.env.NODE_ENV === 'production') return false;
   const secretKey = process.env.PAYSTACK_SECRET_KEY?.trim();
   return isLocalPreviewSite() && (!secretKey || isPlaceholderSecretKey(secretKey));
 }
@@ -183,7 +184,7 @@ export function isValidPaystackSignature(
   rawBody: Buffer,
   signatureHeader: string | undefined,
 ) {
-  if (!signatureHeader) {
+  if (!signatureHeader || !/^[a-f0-9]{128}$/i.test(signatureHeader.trim())) {
     return false;
   }
 

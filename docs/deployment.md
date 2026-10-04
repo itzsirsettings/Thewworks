@@ -1,4 +1,23 @@
+> Historical pre-rebrand document retained for preservation. The active public website is Wills Group of Company (doors, gates, metalwork and interiors). Former business details are not current. See docs/REBRAND_DECISIONS.md for current scope and configuration.
+
 # Deployment Guide
+
+Current deployment instructions: [Railway migration](RAILWAY_MIGRATION.md).
+The active runtime is Railway-only and does not use the historical provider setup
+below. Commerce is disabled by default and no customer data was transferred.
+
+## Temporary store closure
+
+The project package name is `wills`. New checkout requests are closed by default.
+Keep `STORE_CHECKOUT_ENABLED=false` (or unset) in the server environment and deploy
+the updated server to enforce the closure. Only the exact value `true` reopens
+checkout. Reopening requires approval of the payment security remediation.
+
+Closed checkout returns HTTP 503 with `STORE_TEMPORARILY_CLOSED` before body parsing,
+order creation or payment initialization. Existing payment verification and webhook
+routes remain available to reconcile previously started transactions. This does not
+cancel checkout sessions already issued by the payment provider or disable separate
+payment links configured outside this application.
 
 This guide covers deploying Thewworks to production.
 

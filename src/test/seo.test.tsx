@@ -19,7 +19,7 @@ describe('SEO Component', () => {
         <SEO title="Test Page" />
       </MemoryRouter>
     );
-    expect(document.title).toBe('Test Page | Thewworks');
+    expect(document.title).toBe('Test Page | Wills Group of Company');
   });
 
   it('updates meta description correctly', () => {
@@ -39,32 +39,32 @@ describe('SEO Component', () => {
       </MemoryRouter>
     );
     const link = document.querySelector('link[rel="canonical"]');
-    expect(link?.getAttribute('href')).toBe('https://thewworksict.com/store');
+    expect(link?.getAttribute('href')).toBe('https://wills-production-beec.up.railway.app/store');
   });
 
   it('handles keywords correctly', () => {
     render(
       <MemoryRouter>
-        <SEO keywords="print, asaba, thewworks" />
+        <SEO keywords="metalwork, interiors, wills" />
       </MemoryRouter>
     );
     const meta = document.querySelector('meta[name="keywords"]');
-    expect(meta?.getAttribute('content')).toBe('print, asaba, thewworks');
+    expect(meta?.getAttribute('content')).toBe('metalwork, interiors, wills');
   });
 
   it('sets indexable social metadata by default', () => {
     render(
       <MemoryRouter>
-        <SEO title="Home" description="Thewworks description" />
+        <SEO title="Home" description="Wills Group of Company description" />
       </MemoryRouter>
     );
 
     expect(getMetaContent('meta[name="robots"]')).toBe(
       'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
     );
-    expect(getMetaContent('meta[property="og:site_name"]')).toBe('Thewworks ICT & Prints');
+    expect(getMetaContent('meta[property="og:site_name"]')).toBe('Wills Group of Company');
     expect(getMetaContent('meta[property="og:image"]')).toBe(
-      'https://thewworksict.com/images/thewworks-press-hero.png',
+      'https://wills-production-beec.up.railway.app/media/wills/IMG-20261003-WA0067.webp',
     );
     expect(getMetaContent('meta[name="twitter:card"]')).toBe('summary_large_image');
   });
@@ -78,7 +78,7 @@ describe('SEO Component', () => {
 
     expect(getMetaContent('meta[name="robots"]')).toBe('noindex, nofollow');
     expect(document.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(
-      'https://thewworksict.com/admin',
+      'https://wills-production-beec.up.railway.app/admin',
     );
   });
 });

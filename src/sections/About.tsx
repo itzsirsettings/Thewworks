@@ -78,7 +78,7 @@ const About = () => {
           <span className="inline-block mb-4 text-sm font-medium tracking-widest uppercase opacity-70">
             {section.tag}
           </span>
-          <h2 className="font-heading text-3xl md:text-4xl leading-tight mb-6">
+          <h2 className="font-heading text-[1.3125rem] md:text-[1.575rem] leading-tight mb-6">
             {section.heading}
           </h2>
           {section.quote ? (

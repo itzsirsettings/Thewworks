@@ -1,3 +1,5 @@
+> Historical pre-rebrand document retained for preservation. The active public website is Wills Group of Company (doors, gates, metalwork and interiors). Former business details are not current. See docs/REBRAND_DECISIONS.md for current scope and configuration.
+
 # Shibumi Template
 
 A premium artisan handcrafted home goods e-commerce template with elegant animations, parallax effects, and a full shopping cart system. Features 11 configurable sections driven entirely by a single `config.ts` file.

@@ -50,7 +50,7 @@ const Features = () => {
                 className={`p-8 lg:py-16 lg:px-10 transition-all duration-700 ${
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
-                style={{ 
+                style={{
                   transitionDelay: `${index * 120}ms`,
                   borderRight: index < 3 ? '1px solid var(--chevron-border)' : 'none'
                 }}
@@ -62,7 +62,7 @@ const Features = () => {
                     className="text-[var(--chevron-blue)] mb-5"
                   />
                 )}
-                <h3 className="font-heading text-xl text-black mb-3">
+                <h3 className="font-heading text-[0.875rem] text-black mb-3">
                   {feature.title}
                 </h3>
                 <p className="text-[var(--chevron-muted)] text-base leading-relaxed">

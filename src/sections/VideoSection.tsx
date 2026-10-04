@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Play, ArrowRight } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { videoSectionConfig } from '../config';
 
 const VideoSection = () => {
@@ -40,7 +40,7 @@ const VideoSection = () => {
           style={{ backgroundImage: `url(${videoSectionConfig.backgroundImage})` }}
         />
         <div className="absolute inset-0 bg-black/30" />
-        
+
         {/* Play Button */}
         <button
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors"
@@ -62,7 +62,7 @@ const VideoSection = () => {
           </span>
 
           <h2
-            className={`font-heading text-3xl md:text-4xl text-black leading-tight mb-6 transition-all duration-700 ${
+            className={`font-heading text-[1.3125rem] md:text-[1.575rem] text-black leading-tight mb-6 transition-all duration-700 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
             style={{ transitionDelay: '150ms' }}
@@ -95,7 +95,7 @@ const VideoSection = () => {
               style={{ transitionDelay: '500ms' }}
             >
               {videoSectionConfig.ctaText}
-              <ArrowRight size={18} />
+
             </a>
           )}
         </div>

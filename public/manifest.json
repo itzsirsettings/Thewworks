@@ -1,22 +1,17 @@
 {
-  "name": "Thewworks ICT & Prints",
-  "short_name": "Thewworks",
-  "description": "Premium Printing & Design Studio in Asaba",
+  "name": "Wills Group of Company",
+  "short_name": "Wills Group",
+  "description": "Doors, gates, metalwork and interiors",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#faf6ef",
-  "theme_color": "#f97316",
+  "background_color": "#f7f7fa",
+  "theme_color": "#140640",
   "icons": [
     {
-      "src": "/images/thewworks-logo.png",
-      "sizes": "192x192",
+      "src": "/media/wills/wills-group-logo.png",
+      "sizes": "1254x1254",
       "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/images/thewworks-logo.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "purpose": "any"
     }
   ]
 }

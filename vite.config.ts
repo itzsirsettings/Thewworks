@@ -57,10 +57,6 @@ export default defineConfig(({ mode }) => {
               return 'charts';
             }
 
-            if (id.includes('@supabase')) {
-              return 'supabase';
-            }
-
             if (
               id.includes('react-hook-form') ||
               id.includes('@hookform') ||

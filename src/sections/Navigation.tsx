@@ -1,11 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import {
-  X,
-  Search,
-  Instagram,
-  Facebook,
-  Twitter,
-} from 'lucide-react';
+import { X, Search, Instagram, Facebook, Twitter,  } from 'lucide-react';
 import BrandLogo from '../components/BrandLogo';
 import { navigationConfig } from '../config';
 
@@ -52,11 +46,11 @@ const Navigation = () => {
       >
         Skip to main content
       </a>
-      
+
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          isScrolled 
-            ? 'bg-white shadow-sm border-b border-[var(--chevron-border)]' 
+          isScrolled
+            ? 'bg-white shadow-sm border-b border-[var(--chevron-border)]'
             : 'bg-transparent'
         }`}
       >

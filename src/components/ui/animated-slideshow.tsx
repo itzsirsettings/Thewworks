@@ -80,10 +80,18 @@ export const TextStaggerHover = React.forwardRef<HTMLSpanElement, React.HTMLAttr
         ref={ref}
         className={cn("relative inline-block origin-bottom overflow-hidden cursor-pointer", className)}
         onMouseEnter={handleMouse}
+        onFocus={handleMouse}
+        onClick={handleMouse}
+        onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); changeSlide(index); } }}
+        role="button"
+        tabIndex={0}
+        aria-label={text}
+        aria-pressed={isActive}
         {...props}
       >
+        <span className="sr-only">{text}</span>
         {characters.map((char, i) => (
-          <span key={`${char}-${i}`} className="relative inline-block overflow-hidden">
+          <span key={`${char}-${i}`} aria-hidden="true" className="relative inline-block overflow-hidden">
             <MotionConfig
               transition={{
                 delay: i * 0.025,
@@ -147,7 +155,7 @@ export const HoverSliderImage = React.forwardRef<HTMLImageElement, HTMLMotionPro
       <motion.img
         src={imageUrl}
         className={cn("inline-block align-middle", className)}
-        transition={{ ease: [0.33, 1, 0.68, 1], duration: 0.8 }}
+        transition={{ ease: [0.33, 1, 0.68, 1], duration: 0.3 }}
         variants={clipPathVariants}
         animate={activeSlide === index ? "visible" : "hidden"}
         ref={ref}

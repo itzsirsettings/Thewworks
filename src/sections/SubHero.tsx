@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight } from 'lucide-react';
+
 import { subHeroConfig } from '../config';
 
 const useCountUp = (end: number, duration: number = 2000, start: boolean = false) => {
@@ -113,7 +113,7 @@ const SubHero = () => {
             <span className="inline-block mb-4 text-sm font-medium tracking-widest uppercase text-[var(--chevron-blue)]">
               {subHeroConfig.tag}
             </span>
-            <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl text-black leading-tight mb-6">
+            <h2 className="font-heading text-[1.3125rem] md:text-[1.575rem] lg:text-[2.1rem] text-black leading-tight mb-6">
               {subHeroConfig.heading}
             </h2>
             {subHeroConfig.bodyParagraphs.map((paragraph, index) => (
@@ -131,7 +131,7 @@ const SubHero = () => {
                 className="inline-flex items-center gap-2 text-[var(--chevron-blue)] font-medium hover:gap-3 transition-all duration-300"
               >
                 {subHeroConfig.linkText}
-                <ArrowRight size={18} />
+
               </a>
             )}
           </div>
@@ -149,7 +149,7 @@ const SubHero = () => {
               >
                 <img
                   src={subHeroConfig.image1}
-                  alt="Thewworks team at work"
+                  alt="Wills Group supplied door design"
                   className="w-full h-full object-cover"
                 />
               </div>

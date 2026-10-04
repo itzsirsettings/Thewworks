@@ -1,10 +1,10 @@
-const SITE_ORIGIN = 'https://thewworksict.com';
-const SITE_HOST = 'thewworksict.com';
+const SITE_ORIGIN = (process.env.PUBLIC_SITE_URL?.trim() || 'http://localhost:5173').replace(/\/$/, '');
+const SITE_HOST = new URL(SITE_ORIGIN).hostname;
 const PUBLIC_ROBOTS =
   'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
 const PRIVATE_ROBOTS = 'noindex, nofollow';
-const DEFAULT_IMAGE = `${SITE_ORIGIN}/images/thewworks-press-hero.png`;
-const DEFAULT_IMAGE_ALT = 'Thewworks ICT & Prints production and branding showcase';
+const DEFAULT_IMAGE = `${SITE_ORIGIN}/media/wills/IMG-20261003-WA0067.webp`;
+const DEFAULT_IMAGE_ALT = 'Wills Group of Company ornamental entrance gate';
 
 interface RouteSeo {
   title: string;
@@ -18,27 +18,13 @@ interface RouteSeo {
 }
 
 const homeSeo = {
-  title: 'Thewworks | ICT & Prints in Asaba, Delta State',
-  description:
-    'Thewworks ICT & Prints is a printing and branding studio in Asaba, Delta State. Order business cards, packaging, labels, banners, books, apparel prints, and brand design from Thewworks.',
-  keywords:
-    'thewworks, Thewworks ICT & Prints, Thewworks Asaba, printing press Asaba, print shop Delta State, business cards Asaba, custom packaging Nigeria, branded apparel Delta State, large format printing Asaba',
-  canonicalPath: '/',
-  ogType: 'website',
-  image: DEFAULT_IMAGE,
-  imageAlt: DEFAULT_IMAGE_ALT,
+  title: 'Wills Group of Company | Doors, Gates, Metalwork & Interiors',
+  description: 'Doors, gates, custom metalwork and interiors. Explore Wills Group of Company designs and prepare your project enquiry.',
+  keywords: 'Wills Group of Company, doors, gates, metalwork, interiors, fabrication',
+  canonicalPath: '/', ogType: 'website', image: DEFAULT_IMAGE, imageAlt: DEFAULT_IMAGE_ALT,
 } satisfies Omit<RouteSeo, 'robots'>;
-
 const storeSeo = {
-  title: 'Thewworks Store & Quote Desk | Printing Services in Asaba',
-  description:
-    'Request a Thewworks print quote for business cards, packaging, labels, banners, books, apparel printing, and custom branded materials in Asaba.',
-  keywords:
-    'thewworks store, Thewworks quote desk, printing quote Asaba, business card quote Delta State, packaging quote Nigeria, custom print quote',
-  canonicalPath: '/store',
-  ogType: 'website',
-  image: DEFAULT_IMAGE,
-  imageAlt: DEFAULT_IMAGE_ALT,
+  ...homeSeo, title: 'Wills Group of Company | Project Quote Desk', canonicalPath: '/store',
 } satisfies Omit<RouteSeo, 'robots'>;
 
 function normalizePathname(pathname: string) {
@@ -63,170 +49,14 @@ function escapeHtml(value: string) {
 }
 
 function jsonLdForRoute(seo: RouteSeo) {
-  const canonicalUrl = `${SITE_ORIGIN}${seo.canonicalPath === '/' ? '/' : seo.canonicalPath}`;
-
+  const canonicalUrl = `${SITE_ORIGIN}${seo.canonicalPath}`;
   return {
     '@context': 'https://schema.org',
     '@graph': [
-      {
-        '@type': 'Organization',
-        '@id': `${SITE_ORIGIN}/#organization`,
-        name: 'Thewworks ICT & Prints',
-        url: `${SITE_ORIGIN}/`,
-        logo: {
-          '@type': 'ImageObject',
-          '@id': `${SITE_ORIGIN}/#logo`,
-          url: `${SITE_ORIGIN}/images/thewworks-logo.png`,
-          contentUrl: `${SITE_ORIGIN}/images/thewworks-logo.png`,
-          caption: 'Thewworks ICT & Prints Logo',
-          inLanguage: 'en-NG',
-          width: 1024,
-          height: 1024,
-        },
-        contactPoint: [
-          {
-            '@type': 'ContactPoint',
-            telephone: '+2348123986155',
-            contactType: 'customer service',
-            areaServed: 'NG',
-            availableLanguage: 'English',
-          },
-        ],
-        address: {
-          '@type': 'PostalAddress',
-          streetAddress: 'No. 5, Okelue Street, Opposite Wema Bank, by Nnebisi Road',
-          addressLocality: 'Asaba',
-          addressRegion: 'Delta State',
-          addressCountry: 'NG',
-          postalCode: '320211',
-        },
-      },
-      {
-        '@type': 'WebSite',
-        '@id': `${SITE_ORIGIN}/#website`,
-        url: `${SITE_ORIGIN}/`,
-        name: 'Thewworks ICT & Prints',
-        publisher: { '@id': `${SITE_ORIGIN}/#organization` },
-        alternateName: ['Thewworks', 'Thewworks ICT', 'Thewworks Prints'],
-        description:
-          "Asaba's printing and branding studio for business cards, packaging, labels, banners, books, apparel printing, and brand design.",
-        inLanguage: 'en-NG',
-      },
-      {
-        '@type': ['LocalBusiness', 'ProfessionalService'],
-        '@id': `${SITE_ORIGIN}/#business`,
-        name: 'Thewworks ICT & Prints',
-        alternateName: 'Thewworks',
-        url: `${SITE_ORIGIN}/`,
-        mainEntityOfPage: { '@id': `${SITE_ORIGIN}/#website` },
-        image: [DEFAULT_IMAGE, `${SITE_ORIGIN}/images/thewworks-logo.png`],
-        logo: { '@id': `${SITE_ORIGIN}/#logo` },
-        description:
-          'Thewworks ICT & Prints is a printing press and branding studio in Asaba, Delta State, Nigeria. The team produces business cards, brochures, custom packaging, labels, banners, books, apparel prints, corporate gifts, and brand design.',
-        telephone: '+2348123986155',
-        email: 'info@thewworks.com',
-        priceRange: '$$$',
-        address: {
-          '@type': 'PostalAddress',
-          streetAddress: 'No. 5, Okelue Street, Opposite Wema Bank, by Nnebisi Road',
-          addressLocality: 'Asaba',
-          addressRegion: 'Delta State',
-          addressCountry: 'NG',
-          postalCode: '320211',
-        },
-        geo: {
-          '@type': 'GeoCoordinates',
-          latitude: 6.209122,
-          longitude: 6.715226,
-        },
-        openingHoursSpecification: [
-          {
-            '@type': 'OpeningHoursSpecification',
-            dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-            opens: '08:00',
-            closes: '18:00',
-          },
-          {
-            '@type': 'OpeningHoursSpecification',
-            dayOfWeek: 'Saturday',
-            opens: '09:00',
-            closes: '16:00',
-          },
-        ],
-        hasMap:
-          'https://www.google.com/maps/search/?api=1&query=Thewworks%20ICT%20%26%20Prints%2C%20No.%205%2C%20Okelue%20Street%2C%20Opposite%20Wema%20Bank%2C%20by%20Nnebisi%20Road%2C%20Asaba%2C%20Delta%20State%2C%20Nigeria',
-        contactPoint: {
-          '@type': 'ContactPoint',
-          telephone: '+2348123986155',
-          contactType: 'sales',
-          areaServed: 'NG',
-          availableLanguage: ['English'],
-        },
-        knowsAbout: [
-          'Business Card Printing',
-          'Digital Printing',
-          'Offset Printing',
-          'Product Packaging Design',
-          'Custom Labels',
-          'Large Format Banners',
-          'Book Binding',
-          'Corporate Apparel Printing',
-          'Brand Identity Design',
-        ],
-        areaServed: [
-          { '@type': 'City', name: 'Asaba' },
-          { '@type': 'State', name: 'Delta State' },
-          { '@type': 'Country', name: 'Nigeria' },
-        ],
-        makesOffer: {
-          '@type': 'OfferCatalog',
-          name: 'Thewworks print and branding services',
-          itemListElement: [
-            {
-              '@type': 'Offer',
-              itemOffered: {
-                '@type': 'Service',
-                name: 'Business cards and stationery printing',
-              },
-            },
-            {
-              '@type': 'Offer',
-              itemOffered: {
-                '@type': 'Service',
-                name: 'Custom packaging and label printing',
-              },
-            },
-            {
-              '@type': 'Offer',
-              itemOffered: {
-                '@type': 'Service',
-                name: 'Large format banners and signage',
-              },
-            },
-            {
-              '@type': 'Offer',
-              itemOffered: {
-                '@type': 'Service',
-                name: 'Apparel printing and branded merchandise',
-              },
-            },
-          ],
-        },
-      },
-      {
-        '@type': 'WebPage',
-        '@id': `${canonicalUrl}#webpage`,
-        url: canonicalUrl,
-        name: seo.title,
-        description: seo.description,
-        isPartOf: { '@id': `${SITE_ORIGIN}/#website` },
-        about: { '@id': `${SITE_ORIGIN}/#business` },
-        primaryImageOfPage: {
-          '@type': 'ImageObject',
-          url: seo.image,
-        },
-        inLanguage: 'en-NG',
-      },
+      { '@type': 'Organization', '@id': `${SITE_ORIGIN}/#organization`, name: 'Wills Group of Company', url: `${SITE_ORIGIN}/`, logo: { '@type': 'ImageObject', url: `${SITE_ORIGIN}/media/wills/wills-group-logo.png` }, contactPoint: { '@type': 'ContactPoint', telephone: '+2347057450799', contactType: 'project enquiries' } },
+      { '@type': 'WebSite', '@id': `${SITE_ORIGIN}/#website`, name: 'Wills Group of Company', url: `${SITE_ORIGIN}/`, inLanguage: 'en' },
+      { '@type': ['LocalBusiness', 'HomeAndConstructionBusiness'], '@id': `${SITE_ORIGIN}/#business`, name: 'Wills Group of Company', description: seo.description, url: `${SITE_ORIGIN}/` },
+      { '@type': 'WebPage', '@id': `${canonicalUrl}#webpage`, name: seo.title, description: seo.description, url: canonicalUrl, isPartOf: { '@id': `${SITE_ORIGIN}/#website` }, primaryImageOfPage: { '@type': 'ImageObject', url: seo.image } },
     ],
   };
 }
@@ -254,6 +84,8 @@ export function shouldNoIndexRequest(originalUrl: string) {
     pathname === '/favicon.svg' ||
     pathname === '/browserconfig.xml' ||
     pathname.startsWith('/images/') ||
+    pathname.startsWith('/media/') ||
+    pathname.startsWith('/fonts/') ||
     pathname.startsWith('/assets/') ||
     pathname.endsWith('.mp4')
   ) {
@@ -279,14 +111,14 @@ export function getRouteSeo(originalUrl: string): RouteSeo {
 
   return {
     ...routeSeo,
-    robots: shouldNoIndexRequest(originalUrl) ? PRIVATE_ROBOTS : PUBLIC_ROBOTS,
+    robots: !process.env.PUBLIC_SITE_URL || shouldNoIndexRequest(originalUrl) ? PRIVATE_ROBOTS : PUBLIC_ROBOTS,
   };
 }
 
 export function getApexRedirectUrl(hostHeader: string | undefined, originalUrl: string) {
   const host = (hostHeader || '').split(':')[0].toLowerCase();
 
-  if (host !== `www.${SITE_HOST}`) {
+  if (!process.env.PUBLIC_SITE_URL || host !== `www.${SITE_HOST}`) {
     return '';
   }
 

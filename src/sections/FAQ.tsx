@@ -49,7 +49,7 @@ const FAQ = () => {
             {faqConfig.tag}
           </span>
           <h2
-            className={`font-heading text-3xl md:text-4xl text-black transition-all duration-700 ${
+            className={`font-heading text-[1.3125rem] md:text-[1.575rem] text-black transition-all duration-700 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
             style={{ transitionDelay: '150ms' }}
